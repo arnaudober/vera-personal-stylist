@@ -19,8 +19,8 @@ Snap your closet, let Vera organize your clothes, and get fresh outfit ideas —
 1. Clone the repo:
 
    ~~~bash
-   git clone https://github.com/yourusername/vera.git
-   cd vera
+   git clone https://github.com/arnaudober/vera-personal-stylist.git
+   cd vera-personal-stylist
    ~~~
 
 2. Install dependencies:
@@ -41,8 +41,8 @@ Snap your closet, let Vera organize your clothes, and get fresh outfit ideas —
 
 ## 🛠 Tech Stack
 - **Frontend:** React / Tailwind
-- **Backend:** Firebase / Firestore (MVP)
-- **AI:** Outfit suggestion logic (future expansion with CV + ML)
+- **Backend:** Firebase / Firestore
+- **AI:** Outfit suggestion logic
 
 ---
 
@@ -56,7 +56,7 @@ Snap your closet, let Vera organize your clothes, and get fresh outfit ideas —
 
 ## 🤝 Contributing
 Contributions, issues, and feature requests are welcome!
-Feel free to check the issues page: https://github.com/yourusername/vera/issues
+Feel free to check the issues page: https://github.com/arnaudober/vera-personal-stylist/issues
 
 ---
 
