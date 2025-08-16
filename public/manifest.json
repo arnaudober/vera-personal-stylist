@@ -1,0 +1,20 @@
+{
+  "short_name": "Vera",
+  "name": "Vera, your personal stylist",
+  "icons": [
+    {
+      "src": "/icon_192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon_512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f6ecd7",
+  "theme_color": "#cec9e4"
+}
