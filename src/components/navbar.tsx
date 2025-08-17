@@ -2,8 +2,8 @@ import {Link} from "react-router-dom";
 import {useState} from "react";
 import {TbHanger} from "react-icons/tb";
 import {GiSparkles} from "react-icons/gi";
-import { MdLocalLaundryService } from "react-icons/md";
-import { FaCheck } from "react-icons/fa";
+import {FaCheck} from "react-icons/fa";
+import {PiShirtFoldedFill} from "react-icons/pi";
 
 
 interface NavbarProps {
@@ -16,6 +16,26 @@ export default function Navbar({active, onLaundryDone}: NavbarProps) {
 
     return (<nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 shadow-lg">
         <div className="flex items-center justify-center max-w-sm mx-auto">
+            <Link
+                to="/closet"
+                className={`flex flex-col items-center justify-center px-6 py-2 rounded-lg transition-colors ${active === "closet" ? "text-blue-600 bg-blue-50" : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"}`}
+                aria-current={active === "closet" ? "page" : undefined}
+                aria-label="Open closet page"
+            >
+                <div className="text-xl mb-1"><PiShirtFoldedFill className="text-xl"/></div>
+                <span className="text-xs font-medium">Closet</span>
+            </Link>
+
+            <Link
+                to="/"
+                className={`flex flex-col items-center justify-center px-6 py-2 rounded-lg transition-colors ${active === "home" ? "text-blue-600 bg-blue-50" : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"}`}
+                aria-current={active === "home" ? "page" : undefined}
+                aria-label="Open home page - Today's outfit suggestions"
+            >
+                <div className="text-xl mb-1"><GiSparkles className="text-xl"/></div>
+                <span className="text-xs font-medium">Suggest</span>
+            </Link>
+
             <button
                 onClick={() => {
                     onLaundryDone();
@@ -27,27 +47,10 @@ export default function Navbar({active, onLaundryDone}: NavbarProps) {
                 title="Mark all worn items as clean"
             >
                 <div className="text-xl mb-1">
-                    {laundryJustDone ? <FaCheck className="text-xl"/> : <MdLocalLaundryService className="text-xl"/>}
+                    {laundryJustDone ? <FaCheck className="text-xl"/> : <TbHanger className="text-xl"/>}
                 </div>
+                <span className="text-xs font-medium">Laundry</span>
             </button>
-
-            <Link
-                to="/"
-                className={`flex justify-center items-center mx-6 w-14 h-14 rounded-full shadow-lg transition-all ${active === "home" ? "bg-blue-600 text-white ring-4 ring-blue-200 scale-110" : "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-xl"}`}
-                aria-current={active === "home" ? "page" : undefined}
-                aria-label="Open home page - Today's outfit suggestions"
-            >
-                <GiSparkles className="text-2xl"/>
-            </Link>
-
-            <Link
-                to="/closet"
-                className={`flex flex-col items-center justify-center px-6 py-2 rounded-lg transition-colors ${active === "closet" ? "text-blue-600 bg-blue-50" : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"}`}
-                aria-current={active === "closet" ? "page" : undefined}
-                aria-label="Open closet page"
-            >
-                <div className="text-xl mb-1"><TbHanger className="text-xl"/></div>
-            </Link>
         </div>
     </nav>);
 }

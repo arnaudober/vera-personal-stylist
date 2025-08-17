@@ -92,23 +92,27 @@ export default function Home() {
 
     return (<div className="mx-auto max-w-4xl p-4 pb-24">
         <div className="mb-3">
-            <h2 className="text-2xl font-semibold text-center">Today’s outfit</h2>
+            <h2 className="text-2xl font-semibold text-center">Vera picked this for you ✨</h2>
         </div>
 
         <div className="rounded-2xl border card p-4">
             {todayOutfit ? (<div>
-                <div className="flex flex-col gap-3">
-                    {todayOutfit.outerwear ? (<div className="flex items-center justify-center p-0 card">
-                        <div className="text-6xl sm:text-7xl">{todayOutfit.outerwear.emoji ?? "🧥"}</div>
+                <div className="flex flex-col">
+                    {todayOutfit.outerwear ? (<div className="flex items-center gap-3 p-4 card">
+                        <div className="text-4xl sm:text-5xl">{todayOutfit.outerwear.emoji ?? "🧥"}</div>
+                        <div className="text-lg font-medium">{todayOutfit.outerwear.name}</div>
                     </div>) : null}
-                    {todayOutfit.top ? (<div className="flex items-center justify-center p-0 card">
-                        <div className="text-6xl sm:text-7xl">{todayOutfit.top.emoji ?? "👚"}</div>
+                    {todayOutfit.top ? (<div className="flex items-center gap-3 p-4 card">
+                        <div className="text-4xl sm:text-5xl">{todayOutfit.top.emoji ?? "👚"}</div>
+                        <div className="text-lg font-medium">{todayOutfit.top.name}</div>
                     </div>) : null}
-                    {todayOutfit.bottom ? (<div className="flex items-center justify-center p-0 card">
-                        <div className="text-6xl sm:text-7xl">{todayOutfit.bottom.emoji ?? "👖"}</div>
+                    {todayOutfit.bottom ? (<div className="flex items-center gap-3 p-4 card">
+                        <div className="text-4xl sm:text-5xl">{todayOutfit.bottom.emoji ?? "👖"}</div>
+                        <div className="text-lg font-medium">{todayOutfit.bottom.name}</div>
                     </div>) : null}
-                    {todayOutfit.footwear ? (<div className="flex items-center justify-center p-0 card">
-                        <div className="text-6xl sm:text-7xl">{todayOutfit.footwear.emoji ?? "👟"}</div>
+                    {todayOutfit.footwear ? (<div className="flex items-center gap-3 p-4 card">
+                        <div className="text-4xl sm:text-5xl">{todayOutfit.footwear.emoji ?? "👟"}</div>
+                        <div className="text-lg font-medium">{todayOutfit.footwear.name}</div>
                     </div>) : null}
                 </div>
             </div>) : (<div className="text-muted">
@@ -120,17 +124,17 @@ export default function Home() {
 
         <div className="mt-3 flex flex-col gap-3">
             <button
+                onClick={onMarkAsWorn}
+                disabled={!todayOutfit}
+                className="w-full rounded-xl border px-4 py-3 btn-accent disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+                Mark as worn
+            </button>
+            <button
                 onClick={onSeeAnotherOption}
                 className="w-full rounded-xl border px-4 py-3 btn-ghost"
             >
                 See another option
-            </button>
-            <button
-                onClick={onMarkAsWorn}
-                disabled={!todayOutfit}
-                className="w-full rounded-xl border px-4 py-3 btn-ghost disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-                Mark as worn
             </button>
         </div>
 

@@ -17,3 +17,11 @@ export type Outfit = {
     outerwear?: ClothingItem;
     accessory?: ClothingItem;
 };
+
+export const categories: { value: Category; label: string; }[] = [
+    { value: 'top', label: 'Tops' },
+    { value: 'bottom', label: 'Bottoms' },
+    { value: 'footwear', label: 'Footwear' },
+    { value: 'outerwear', label: 'Outerwear' },
+    { value: 'accessory', label: 'Accessories' }
+];

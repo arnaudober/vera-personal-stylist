@@ -1,16 +1,14 @@
 :root {
-  --color-primary: #cec9e4;   /* primary */
-  --color-secondary: #f6ecd7; /* secondary */
-  --color-tertiary: #c8c8c8;  /* third (borders, subtle lines) */
-  --color-accent: #65aaa7;    /* accent (cta/buttons) */
+  --color-primary: #cec9e4;
+  --color-secondary: #f6ecd7;
+  --color-tertiary: #c8c8c8;
+  --color-accent: #65aaa7;
 }
 
-/* Panels / cards */
 .card {
   border-color: var(--color-tertiary);
 }
 
-/* Primary action button */
 .btn-accent {
   background-color: var(--color-accent);
   color: #ffffff;
@@ -23,29 +21,22 @@
   filter: brightness(0.9);
 }
 
-/* Secondary/ghost button */
 .btn-ghost {
   background-color: transparent;
   border-color: var(--color-tertiary);
   transition: background-color 120ms ease-in-out, color 120ms ease-in-out;
 }
-.btn-ghost:hover {
-  background-color: var(--color-secondary);
-}
 
-/* Muted text */
 .text-muted {
   color: #555555;
 }
 
-/* Pills */
 .pill {
   border-color: var(--color-tertiary);
   color: #555555;
   background: transparent;
 }
 
-/* Tailwind ring color integration for primary */
 .ring-primary {
   --tw-ring-color: var(--color-primary);
 }
