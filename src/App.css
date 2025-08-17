@@ -7,7 +7,6 @@
 
 /* Panels / cards */
 .card {
-  background-color: var(--color-secondary);
   border-color: var(--color-tertiary);
 }
 
