@@ -99,7 +99,7 @@ export default function Suggest() {
     return (<>
         <div className="bg-app min-h-screen pb-28">
             <div className="mx-auto max-w-4xl p-4 pb-2">
-                <h2 className="p-2 text-2xl font-semibold text-center">Fresh pick for today!</h2>
+                <h2 className="p-2 text-2xl font-semibold text-center">Today's outfit</h2>
             </div>
 
             <div className="px-4">
@@ -148,6 +148,10 @@ export default function Suggest() {
                     </div>)}
                 </div>
             </div>
+
+            <p className="p-4 pt-3 text-sm text-gray-500 text-center">
+                Suggestion is refreshed every day.
+            </p>
 
             <div className="px-4 pt-6 flex justify-center">
                 <button
