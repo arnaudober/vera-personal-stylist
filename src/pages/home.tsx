@@ -90,39 +90,45 @@ export default function Home() {
         markWorn(todayOutfit);
     };
 
-    return (<div className="mx-auto max-w-4xl p-4 pb-24">
-        <div className="mb-3">
-            <h2 className="text-2xl font-semibold text-center">Vera picked this for you ✨</h2>
+    return (<>
+        <div className="mx-auto max-w-4xl p-4">
+            <h2 className="p-2 text-2xl font-semibold text-center">Vera picked this for you ✨</h2>
         </div>
 
-        <div className="rounded-2xl border card p-4">
-            {todayOutfit ? (<div>
-                <div className="flex flex-col">
-                    {todayOutfit.outerwear ? (<div className="flex items-center gap-3 p-4 card">
-                        <div className="text-4xl sm:text-5xl">{todayOutfit.outerwear.emoji ?? "🧥"}</div>
-                        <div className="text-lg font-medium">{todayOutfit.outerwear.name}</div>
-                    </div>) : null}
-                    {todayOutfit.top ? (<div className="flex items-center gap-3 p-4 card">
-                        <div className="text-4xl sm:text-5xl">{todayOutfit.top.emoji ?? "👚"}</div>
-                        <div className="text-lg font-medium">{todayOutfit.top.name}</div>
-                    </div>) : null}
-                    {todayOutfit.bottom ? (<div className="flex items-center gap-3 p-4 card">
-                        <div className="text-4xl sm:text-5xl">{todayOutfit.bottom.emoji ?? "👖"}</div>
-                        <div className="text-lg font-medium">{todayOutfit.bottom.name}</div>
-                    </div>) : null}
-                    {todayOutfit.footwear ? (<div className="flex items-center gap-3 p-4 card">
-                        <div className="text-4xl sm:text-5xl">{todayOutfit.footwear.emoji ?? "👟"}</div>
-                        <div className="text-lg font-medium">{todayOutfit.footwear.name}</div>
-                    </div>) : null}
-                </div>
-            </div>) : (<div className="text-muted">
-                No outfit yet. Hit <span className="font-medium">Dress me</span> to
-                get a suggestion. If you’re out of clean options, tap{" "}
-                <span className="font-medium">Laundry done</span>.
-            </div>)}
+        <div className="pl-4 pr-4">
+            <div className="border rounded-xl card">
+                {todayOutfit ? (<div>
+                    <div className="flex flex-col">
+                        {todayOutfit.outerwear ? (<div className="flex items-center gap-3 p-4 pb-0 card">
+                            <div className="text-4xl sm:text-5xl">{todayOutfit.outerwear.emoji ?? "🧥"}</div>
+                            <div className="text-lg font-medium">{todayOutfit.outerwear.name}</div>
+                        </div>) : null}
+                        {todayOutfit.top ? (<div className="flex items-center gap-3 p-4 pb-0 card">
+                            <div className="text-4xl sm:text-5xl">{todayOutfit.top.emoji ?? "👚"}</div>
+                            <div className="text-lg font-medium">{todayOutfit.top.name}</div>
+                        </div>) : null}
+                        {todayOutfit.bottom ? (<div className="flex items-center gap-3 p-4 pb-0 card">
+                            <div className="text-4xl sm:text-5xl">{todayOutfit.bottom.emoji ?? "👖"}</div>
+                            <div className="text-lg font-medium">{todayOutfit.bottom.name}</div>
+                        </div>) : null}
+                        {todayOutfit.footwear ? (<div className="flex items-center gap-3 p-4 card">
+                            <div className="text-4xl sm:text-5xl">{todayOutfit.footwear.emoji ?? "👟"}</div>
+                            <div className="text-lg font-medium">{todayOutfit.footwear.name}</div>
+                        </div>) : null}
+                    </div>
+                </div>) : (<div className="text-muted">
+                    No outfit yet. Hit <span className="font-medium">Dress me</span> to
+                    get a suggestion. If you’re out of clean options, tap{" "}
+                    <span className="font-medium">Laundry done</span>.
+                </div>)}
+            </div>
         </div>
 
-        <div className="mt-3 flex flex-col gap-3">
+        <p className="p-4 pt-3 text-sm text-muted text-center">
+            Based on what’s clean and unworn lately.
+        </p>
+
+        <div className="p-4 pt-0 flex flex-col gap-3">
             <button
                 onClick={onMarkAsWorn}
                 disabled={!todayOutfit}
@@ -139,5 +145,5 @@ export default function Home() {
         </div>
 
         <Navbar active="home" onLaundryDone={markLaundryDone}/>
-    </div>);
+    </>);
 }
