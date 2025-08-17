@@ -1,29 +1,38 @@
+import {useState} from "react";
 import {useCloset} from "../hooks/useCloset.ts";
 import {ClothingCard} from "../components/clothing-card";
-import Header from "../components/header";
+import Navbar from "../components/navbar.tsx";
+import LaundryFab from "../components/laundry-fab.tsx";
+import CategoryFilterBar from "../components/category-filter-bar.tsx";
+import {type Category} from "../model.ts";
 
 export default function Closet() {
-    const {items, cleanCounts, toggleClean, markLaundryDone} = useCloset();
+    const {items, markLaundryDone} = useCloset();
+    const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
-    return (
-        <div className="mx-auto max-w-4xl p-4">
-            <Header active="closet" onLaundryDone={markLaundryDone} />
+    const filteredItems = selectedCategory === null ? items : items.filter(item => item.category === selectedCategory);
 
-            <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-lg font-medium">Your closet</h2>
-                <div className="text-sm text-muted">
-                    Clean — Tops: <b>{cleanCounts.top}</b> · Bottoms: <b>{cleanCounts.bottom}</b> ·
-                    Shoes: <b>{cleanCounts.footwear}</b>
-                </div>
+    return (<>
+        <div className="bg-app min-h-screen pb-28">
+            <div className="mx-auto max-w-4xl p-4 pb-2">
+                <h2 className="p-2 text-2xl font-semibold text-center">Your closet</h2>
             </div>
 
-            <div className="rounded-2xl border card p-4 shadow-sm">
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                    {items.map(item => (
-                        <ClothingCard key={item.id} item={item} onToggleClean={toggleClean}/>
-                    ))}
+            <CategoryFilterBar 
+                selectedCategory={selectedCategory}
+                onCategoryChange={setSelectedCategory}
+            />
+
+            <div className="mx-auto max-w-4xl p-4 pb-24">
+                <div className="rounded-2xl">
+                    <div className="grid gap-5 grid-cols-2">
+                        {filteredItems.map(item => (<ClothingCard key={item.id} item={item} />))}
+                    </div>
                 </div>
             </div>
         </div>
-    );
+
+        <Navbar active="closet"/>
+        <LaundryFab onLaundryDone={markLaundryDone} />
+    </>);
 }

@@ -1,46 +1,32 @@
-// src/components/ClothingCard.tsx
-import * as React from "react";
 import type {ClothingItem} from "../model";
+import * as React from "react";
 
-function Pill({children}: { children: React.ReactNode }) {
-    return (
-        <span className="inline-block rounded-full border px-2 py-0.5 text-xs pill">
-      {children}
-    </span>
-    );
-}
-
-export function ClothingCard({
-                                 item,
-                                 onToggleClean,
-                             }: {
-    item: ClothingItem;
-    onToggleClean: (id: string) => void;
+function Pill({children, style, className}: {
+    children: React.ReactNode, style?: React.CSSProperties, className?: string
 }) {
     return (
-        <div className="flex items-center justify-between rounded-xl border p-3 card">
-            <div className="flex items-center gap-3">
-                <div className="text-2xl">{item.emoji ?? "👚"}</div>
-                <div>
-                    <div className="font-medium">{item.name}</div>
-                    <div className="mt-0.5 flex items-center gap-2">
-                        <Pill>{item.category}</Pill>
-                        {item.color ? <Pill>{item.color}</Pill> : null}
-                        <Pill>{item.isClean ? "clean" : "dirty"}</Pill>
-                        {item.wornCount > 0 ? <Pill>worn {item.wornCount}×</Pill> : null}
-                    </div>
-                </div>
-            </div>
-            <button
-                onClick={() => onToggleClean(item.id)}
-                className={`rounded-lg px-3 py-1 text-sm transition ${
-                    item.isClean
-                        ? "border btn-ghost"
-                        : "btn-accent text-white"
-                }`}
+        <span className={`inline-block rounded-full border px-2 py-0.5 text-xs pill ${className ?? ""}`} style={style}>
+      {children}
+    </span>);
+}
+
+
+export function ClothingCard({item}: { item: ClothingItem }) {
+    const dotColor = item.isClean ? "var(--color-accent)" : "#374151";
+
+    return (<div className="suggest-card bg-white p-3 rounded-2xl flex flex-col items-center text-center">
+        <div className="text-7xl">{item.emoji ?? "👚"}</div>
+
+        <div className="mt-2 text-lg font-semibold">{item.name}</div>
+
+        <div className="mt-1">
+            <Pill
+                style={{
+                    backgroundColor: dotColor, color: "#fff", borderColor: "transparent"
+                }}
             >
-                {item.isClean ? "Mark dirty" : "Mark clean"}
-            </button>
+                {item.isClean ? "Clean" : "Dirty"}
+            </Pill>
         </div>
-    );
+    </div>);
 }
