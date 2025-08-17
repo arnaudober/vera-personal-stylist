@@ -3,7 +3,7 @@ import type {ClothingItem} from "../model";
 export function ClothingCard({item}: { item: ClothingItem }) {
     const dotColor = item.isClean ? "var(--color-accent)" : "#374151"; // green for clean, red for dirty
 
-    return (<div className="card flex flex-col items-center text-center">
+    return (<div className="suggest-card bg-white p-3 rounded-2xl flex flex-col items-center text-center">
         <div className="text-7xl">{item.emoji ?? "👚"}</div>
 
         <div className="mt-2 text-lg font-semibold">{item.name}</div>

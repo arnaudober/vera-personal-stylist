@@ -3,6 +3,7 @@ import type {ClothingItem, Outfit} from "../model";
 import {useCloset} from "../hooks/useCloset.ts";
 import Navbar from "../components/navbar.tsx";
 import LaundryFab from "../components/laundry-fab.tsx";
+import calculateOutfitLayout from "../utils/outfitLayout.ts";
 
 function pickRandomClean(items: ClothingItem[], category: ClothingItem["category"]) {
     const cleanItems = items.filter(i => i.category === category && i.isClean);
@@ -104,20 +105,42 @@ export default function Suggest() {
             <div className="px-4">
                 <div className="suggest-card rounded-3xl">
                     {todayOutfit ? (<div>
-                        <div className="flex flex-col">
-                            {todayOutfit.outerwear ? (<div className="flex items-center gap-3 p-4 pb-0">
-                                <div className="text-4xl sm:text-5xl">{todayOutfit.outerwear.emoji ?? "🧥"}</div>
-                            </div>) : null}
-                            {todayOutfit.top ? (<div className="flex items-center gap-3 p-4 pb-0">
-                                <div className="text-4xl sm:text-5xl">{todayOutfit.top.emoji ?? "👚"}</div>
-                            </div>) : null}
-                            {todayOutfit.bottom ? (<div className="flex items-center gap-3 p-4 pb-0">
-                                <div className="text-4xl sm:text-5xl">{todayOutfit.bottom.emoji ?? "👖"}</div>
-                            </div>) : null}
-                            {todayOutfit.footwear ? (<div className="flex items-center gap-3 p-4">
-                                <div className="text-4xl sm:text-5xl">{todayOutfit.footwear.emoji ?? "👟"}</div>
-                            </div>) : null}
-                        </div>
+                        {(() => {
+                            const layout = calculateOutfitLayout(todayOutfit);
+
+                            return (
+                                <div className="relative mx-auto aspect-square max-w-[500px] w-full p-10">
+                                    {/* Centerpiece */}
+                                    <div
+                                        className="absolute select-none"
+                                        style={{
+                                            left: `${layout.centerPosition.x}%`,
+                                            top: `${layout.centerPosition.y}%`,
+                                            transform: 'translate(-50%, -50%)',
+                                        }}
+                                        aria-label="Top item"
+                                    >
+                                        <div className="text-8xl sm:text-9xl">{layout.centerEmoji}</div>
+                                    </div>
+
+                                    {/* Surrounding items */}
+                                    {layout.others.map((o, i) => (
+                                        <div
+                                            key={o.key}
+                                            className="absolute select-none"
+                                            style={{
+                                                left: layout.positions[i].left,
+                                                top: layout.positions[i].top,
+                                                transform: `translate(-50%, -50%) ${layout.positions[i].rotate} scale(${layout.positions[i].scale})`,
+                                            }}
+                                            aria-hidden="true"
+                                        >
+                                            <div className="text-5xl sm:text-6xl">{o.emoji}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            );
+                        })()}
                     </div>) : (<div className="p-4 text-muted">
                         No outfit yet. Hit <span className="font-medium">See another option</span> to
                         get a suggestion. If you’re out of clean options, tap{" "}

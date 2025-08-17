@@ -13,24 +13,26 @@ export default function Closet() {
     const filteredItems = selectedCategory === null ? items : items.filter(item => item.category === selectedCategory);
 
     return (<>
-        <div className="mx-auto max-w-4xl p-4 pb-2">
-            <h2 className="p-2 text-2xl font-semibold text-center">Your closet</h2>
-        </div>
-
-        <CategoryFilterBar 
-            selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
-        />
-
-        <div className="mx-auto max-w-4xl p-4 pb-24">
-            <div className="rounded-2xl">
-                <div className="grid gap-5 grid-cols-2">
-                    {filteredItems.map(item => (<ClothingCard key={item.id} item={item} />))}
-                </div>
+        <div className="bg-app min-h-screen pb-28">
+            <div className="mx-auto max-w-4xl p-4 pb-2">
+                <h2 className="p-2 text-2xl font-semibold text-center">Your closet</h2>
             </div>
 
-            <Navbar active="closet"/>
-            <LaundryFab onLaundryDone={markLaundryDone} />
+            <CategoryFilterBar 
+                selectedCategory={selectedCategory}
+                onCategoryChange={setSelectedCategory}
+            />
+
+            <div className="mx-auto max-w-4xl p-4 pb-24">
+                <div className="rounded-2xl">
+                    <div className="grid gap-5 grid-cols-2">
+                        {filteredItems.map(item => (<ClothingCard key={item.id} item={item} />))}
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <Navbar active="closet"/>
+        <LaundryFab onLaundryDone={markLaundryDone} />
     </>);
 }
