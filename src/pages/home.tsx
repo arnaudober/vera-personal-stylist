@@ -2,6 +2,7 @@ import {useEffect, useMemo, useState} from "react";
 import type {ClothingItem, Outfit} from "../model";
 import {useCloset} from "../hooks/useCloset.ts";
 import Navbar from "../components/navbar.tsx";
+import LaundryFab from "../components/laundry-fab.tsx";
 
 function pickRandomClean(items: ClothingItem[], category: ClothingItem["category"]) {
     const cleanItems = items.filter(i => i.category === category && i.isClean);
@@ -152,6 +153,7 @@ export default function Home() {
             </button>
         </div>
 
-        <Navbar active="home" onLaundryDone={markLaundryDone}/>
+        <Navbar active="home"/>
+        <LaundryFab onLaundryDone={markLaundryDone} />
     </>);
 }

@@ -2,6 +2,7 @@ import {useState} from "react";
 import {useCloset} from "../hooks/useCloset.ts";
 import {ClothingCard} from "../components/clothing-card";
 import Navbar from "../components/navbar.tsx";
+import LaundryFab from "../components/laundry-fab.tsx";
 import CategoryFilterBar from "../components/category-filter-bar.tsx";
 import {type Category} from "../model.ts";
 
@@ -28,7 +29,8 @@ export default function Closet() {
                 </div>
             </div>
 
-            <Navbar active="closet" onLaundryDone={markLaundryDone}/>
+            <Navbar active="closet"/>
+            <LaundryFab onLaundryDone={markLaundryDone} />
         </div>
     </>);
 }
