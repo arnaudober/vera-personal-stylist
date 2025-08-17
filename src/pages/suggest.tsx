@@ -27,7 +27,7 @@ function suggestOutfit(items: ClothingItem[]): Outfit | null {
 
 const todayDate = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
-export default function Home() {
+export default function Suggest() {
     const {items, markLaundryDone, markWorn} = useCloset();
     const [todayOutfit, setTodayOutfit] = useState<Outfit | null>(null);
     const storageKey = useMemo(() => `todayOutfit:${todayDate}`, []);
@@ -73,7 +73,12 @@ export default function Home() {
         }
     }, [items, storageKey]);
 
-    const onSeeAnotherOption = () => {
+    const onMarkAsWorn = () => {
+        if (!todayOutfit) {
+            return;
+        }
+
+        markWorn(todayOutfit);
         const outfit = suggestOutfit(items);
         setTodayOutfit(outfit);
 
@@ -90,70 +95,49 @@ export default function Home() {
         }));
     };
 
-    const onMarkAsWorn = () => {
-        if (!todayOutfit) {
-            return;
-        }
-
-        markWorn(todayOutfit);
-        onSeeAnotherOption();
-    };
-
     return (<>
-        <div className="mx-auto max-w-4xl p-4">
-            <h2 className="p-2 text-2xl font-semibold text-center">Vera picked this for you ✨</h2>
-        </div>
+        <div className="bg-app min-h-screen pb-28">
+            <div className="mx-auto max-w-4xl p-4 pb-2">
+                <h2 className="p-2 text-2xl font-semibold text-center">Fresh pick for today!</h2>
+            </div>
 
-        <div className="pl-4 pr-4">
-            <div className="border rounded-xl card">
-                {todayOutfit ? (<div>
-                    <div className="flex flex-col">
-                        {todayOutfit.outerwear ? (<div className="flex items-center gap-3 p-4 pb-0 card">
-                            <div className="text-4xl sm:text-5xl">{todayOutfit.outerwear.emoji ?? "🧥"}</div>
-                            <div className="text-lg font-medium">{todayOutfit.outerwear.name}</div>
-                        </div>) : null}
-                        {todayOutfit.top ? (<div className="flex items-center gap-3 p-4 pb-0 card">
-                            <div className="text-4xl sm:text-5xl">{todayOutfit.top.emoji ?? "👚"}</div>
-                            <div className="text-lg font-medium">{todayOutfit.top.name}</div>
-                        </div>) : null}
-                        {todayOutfit.bottom ? (<div className="flex items-center gap-3 p-4 pb-0 card">
-                            <div className="text-4xl sm:text-5xl">{todayOutfit.bottom.emoji ?? "👖"}</div>
-                            <div className="text-lg font-medium">{todayOutfit.bottom.name}</div>
-                        </div>) : null}
-                        {todayOutfit.footwear ? (<div className="flex items-center gap-3 p-4 card">
-                            <div className="text-4xl sm:text-5xl">{todayOutfit.footwear.emoji ?? "👟"}</div>
-                            <div className="text-lg font-medium">{todayOutfit.footwear.name}</div>
-                        </div>) : null}
-                    </div>
-                </div>) : (<div className="p-4 text-muted">
-                    No outfit yet. Hit <span className="font-medium">See another option</span> to
-                    get a suggestion. If you’re out of clean options, tap{" "}
-                    <span className="font-medium">Laundry</span>.
-                </div>)}
+            <div className="px-4">
+                <div className="suggest-card rounded-3xl">
+                    {todayOutfit ? (<div>
+                        <div className="flex flex-col">
+                            {todayOutfit.outerwear ? (<div className="flex items-center gap-3 p-4 pb-0">
+                                <div className="text-4xl sm:text-5xl">{todayOutfit.outerwear.emoji ?? "🧥"}</div>
+                            </div>) : null}
+                            {todayOutfit.top ? (<div className="flex items-center gap-3 p-4 pb-0">
+                                <div className="text-4xl sm:text-5xl">{todayOutfit.top.emoji ?? "👚"}</div>
+                            </div>) : null}
+                            {todayOutfit.bottom ? (<div className="flex items-center gap-3 p-4 pb-0">
+                                <div className="text-4xl sm:text-5xl">{todayOutfit.bottom.emoji ?? "👖"}</div>
+                            </div>) : null}
+                            {todayOutfit.footwear ? (<div className="flex items-center gap-3 p-4">
+                                <div className="text-4xl sm:text-5xl">{todayOutfit.footwear.emoji ?? "👟"}</div>
+                            </div>) : null}
+                        </div>
+                    </div>) : (<div className="p-4 text-muted">
+                        No outfit yet. Hit <span className="font-medium">See another option</span> to
+                        get a suggestion. If you’re out of clean options, tap{" "}
+                        <span className="font-medium">Laundry</span>.
+                    </div>)}
+                </div>
+            </div>
+
+            <div className="px-4 pt-6 flex justify-center">
+                <button
+                    onClick={onMarkAsWorn}
+                    disabled={!todayOutfit}
+                    className="btn-cta font-medium bg-white rounded-4xl text-2xl p-3 px-16 w-auto text-accent"
+                >
+                    Mark as worn
+                </button>
             </div>
         </div>
 
-        <p className="p-4 pt-3 text-sm text-muted text-center">
-            Based on what’s clean and unworn lately.
-        </p>
-
-        <div className="p-4 pt-0 flex flex-col gap-3">
-            <button
-                onClick={onMarkAsWorn}
-                disabled={!todayOutfit}
-                className="w-full rounded-xl border px-4 py-3 btn-accent disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-                Mark as worn
-            </button>
-            <button
-                onClick={onSeeAnotherOption}
-                className="w-full rounded-xl border px-4 py-3 btn-ghost"
-            >
-                See another option
-            </button>
-        </div>
-
         <Navbar active="home"/>
-        <LaundryFab onLaundryDone={markLaundryDone} />
+        <LaundryFab onLaundryDone={markLaundryDone}/>
     </>);
 }

@@ -1,40 +1,57 @@
 :root {
-  --color-primary: #cec9e4;
-  --color-secondary: #f6ecd7;
-  --color-tertiary: #e3ebec;
-  --color-accent: #65aaa7;
+    --color-primary: #cec9e4;
+    --color-secondary: #f6ecd7;
+    --color-tertiary: #e3ebec;
+    --color-accent: #65aaa7;
 }
 
 .card {
-  border-color: var(--color-tertiary);
+    border-color: var(--color-tertiary);
 }
 
 .btn-accent {
-  background-color: var(--color-accent);
-  color: #ffffff;
-  transition: filter 120ms ease-in-out, opacity 120ms ease-in-out;
+    background-color: var(--color-accent);
+    color: #ffffff;
+    transition: filter 120ms ease-in-out, opacity 120ms ease-in-out;
 }
 
 .btn-ghost {
-  background-color: transparent;
-  border-color: var(--color-tertiary);
-  transition: background-color 120ms ease-in-out, color 120ms ease-in-out;
+    background-color: transparent;
+    border-color: var(--color-tertiary);
+    transition: background-color 120ms ease-in-out, color 120ms ease-in-out;
 }
 
 .text-muted {
-  color: #555555;
+    color: #555555;
 }
 
 .pill {
-  border-color: var(--color-tertiary);
-  color: #555555;
-  background: transparent;
+    border-color: var(--color-tertiary);
+    color: #555555;
+    background: transparent;
 }
 
 .ring-primary {
-  --tw-ring-color: var(--color-primary);
+    --tw-ring-color: var(--color-primary);
 }
 
 .text-accent {
-  color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.bg-app {
+  background: 
+    radial-gradient(ellipse at 30% 20%, #efe6ff 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 50%, #bae5ea 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 90%, #e8f8f7 0%, transparent 50%),
+    linear-gradient(135deg, #efe6ff 0%, #e8f8f7 100%);
+}
+
+.suggest-card {
+    background: rgba(255,255,255,0.7);
+    border: 1px solid var(--color-tertiary);
+}
+
+.btn-cta {
+    border: 1px solid var(--color-tertiary);
 }
