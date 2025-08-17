@@ -1,7 +1,7 @@
 :root {
   --color-primary: #cec9e4;
   --color-secondary: #f6ecd7;
-  --color-tertiary: #c8c8c8;
+  --color-tertiary: #e3ebec;
   --color-accent: #65aaa7;
 }
 
@@ -13,12 +13,6 @@
   background-color: var(--color-accent);
   color: #ffffff;
   transition: filter 120ms ease-in-out, opacity 120ms ease-in-out;
-}
-.btn-accent:hover {
-  filter: brightness(0.95);
-}
-.btn-accent:active {
-  filter: brightness(0.9);
 }
 
 .btn-ghost {
@@ -39,4 +33,8 @@
 
 .ring-primary {
   --tw-ring-color: var(--color-primary);
+}
+
+.text-accent {
+  color: var(--color-accent);
 }

@@ -3,15 +3,19 @@ import type {ClothingItem, Outfit} from "../model";
 import {useCloset} from "../hooks/useCloset.ts";
 import Navbar from "../components/navbar.tsx";
 
-function pickFirstClean(items: ClothingItem[], category: ClothingItem["category"]) {
-    return items.find(i => i.category === category && i.isClean);
+function pickRandomClean(items: ClothingItem[], category: ClothingItem["category"]) {
+    const cleanItems = items.filter(i => i.category === category && i.isClean);
+    if (cleanItems.length === 0) return undefined;
+
+    const randomIndex = Math.floor(Math.random() * cleanItems.length);
+    return cleanItems[randomIndex];
 }
 
 function suggestOutfit(items: ClothingItem[]): Outfit | null {
-    const top = pickFirstClean(items, "top");
-    const bottom = pickFirstClean(items, "bottom");
-    const footwear = pickFirstClean(items, "footwear");
-    const outerwear = pickFirstClean(items, "outerwear");
+    const top = pickRandomClean(items, "top");
+    const bottom = pickRandomClean(items, "bottom");
+    const footwear = pickRandomClean(items, "footwear");
+    const outerwear = pickRandomClean(items, "outerwear");
 
     if (!top || !bottom || !footwear) {
         return null;
@@ -72,14 +76,17 @@ export default function Home() {
         const outfit = suggestOutfit(items);
         setTodayOutfit(outfit);
 
-        if (outfit) {
-            localStorage.setItem(storageKey, JSON.stringify({
-                top: outfit.top?.id ?? null,
-                bottom: outfit.bottom?.id ?? null,
-                footwear: outfit.footwear?.id ?? null,
-                outerwear: outfit.outerwear?.id ?? null,
-            }));
+        if (!outfit) {
+            localStorage.removeItem(storageKey);
+            return;
         }
+
+        localStorage.setItem(storageKey, JSON.stringify({
+            top: outfit.top?.id ?? null,
+            bottom: outfit.bottom?.id ?? null,
+            footwear: outfit.footwear?.id ?? null,
+            outerwear: outfit.outerwear?.id ?? null,
+        }));
     };
 
     const onMarkAsWorn = () => {
@@ -88,6 +95,7 @@ export default function Home() {
         }
 
         markWorn(todayOutfit);
+        onSeeAnotherOption();
     };
 
     return (<>
@@ -116,10 +124,10 @@ export default function Home() {
                             <div className="text-lg font-medium">{todayOutfit.footwear.name}</div>
                         </div>) : null}
                     </div>
-                </div>) : (<div className="text-muted">
-                    No outfit yet. Hit <span className="font-medium">Dress me</span> to
+                </div>) : (<div className="p-4 text-muted">
+                    No outfit yet. Hit <span className="font-medium">See another option</span> to
                     get a suggestion. If you’re out of clean options, tap{" "}
-                    <span className="font-medium">Laundry done</span>.
+                    <span className="font-medium">Laundry</span>.
                 </div>)}
             </div>
         </div>

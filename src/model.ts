@@ -6,7 +6,6 @@ export type ClothingItem = {
     category: Category;
     color?: string;
     isClean: boolean;
-    wornCount: number;
     emoji?: string; // quick visual for the MVP
 };
 
@@ -21,7 +20,7 @@ export type Outfit = {
 export const categories: { value: Category; label: string; }[] = [
     { value: 'top', label: 'Tops' },
     { value: 'bottom', label: 'Bottoms' },
-    { value: 'footwear', label: 'Footwear' },
+    { value: 'footwear', label: 'Shoes' },
     { value: 'outerwear', label: 'Outerwear' },
     { value: 'accessory', label: 'Accessories' }
 ];

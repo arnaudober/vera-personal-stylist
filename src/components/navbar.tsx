@@ -1,8 +1,7 @@
 import {Link} from "react-router-dom";
 import {useState} from "react";
 import {TbHanger} from "react-icons/tb";
-import {GiSparkles} from "react-icons/gi";
-import {FaCheck} from "react-icons/fa";
+import {FaCheck, FaRegStar} from "react-icons/fa";
 import {PiShirtFoldedFill} from "react-icons/pi";
 
 
@@ -18,7 +17,7 @@ export default function Navbar({active, onLaundryDone}: NavbarProps) {
         <div className="flex items-center justify-center max-w-sm mx-auto">
             <Link
                 to="/closet"
-                className={`flex flex-col items-center justify-center px-6 py-2 rounded-lg transition-colors ${active === "closet" ? "text-blue-600 bg-blue-50" : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"}`}
+                className={`flex flex-col items-center justify-center px-6 py-2 rounded-lg transition-colors ${active === "closet" ? "text-accent" : "text-gray-700"}`}
                 aria-current={active === "closet" ? "page" : undefined}
                 aria-label="Open closet page"
             >
@@ -28,11 +27,11 @@ export default function Navbar({active, onLaundryDone}: NavbarProps) {
 
             <Link
                 to="/"
-                className={`flex flex-col items-center justify-center px-6 py-2 rounded-lg transition-colors ${active === "home" ? "text-blue-600 bg-blue-50" : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"}`}
+                className={`flex flex-col items-center justify-center px-6 py-2 rounded-lg transition-colors ${active === "home" ? "text-accent" : "text-gray-700"}`}
                 aria-current={active === "home" ? "page" : undefined}
                 aria-label="Open home page - Today's outfit suggestions"
             >
-                <div className="text-xl mb-1"><GiSparkles className="text-xl"/></div>
+                <div className="text-xl mb-1"><FaRegStar className="text-xl"/></div>
                 <span className="text-xs font-medium">Suggest</span>
             </Link>
 
