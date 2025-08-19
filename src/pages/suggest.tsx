@@ -33,6 +33,110 @@ export default function Suggest() {
     const [todayOutfit, setTodayOutfit] = useState<Outfit | null>(null);
     const storageKey = useMemo(() => `todayOutfit:${todayDate}`, []);
 
+    // Drag & drop state for the wear basket
+    const [droppedKeys, setDroppedKeys] = useState<Set<keyof Outfit>>(new Set());
+    const isBasketFull = droppedKeys.size > 0;
+
+    // Touch drag state for mobile
+    const [touchDrag, setTouchDrag] = useState<{
+        key: keyof Outfit | null;
+        isDragging: boolean;
+        startX: number;
+        startY: number;
+        currentX: number;
+        currentY: number;
+    }>({
+        key: null,
+        isDragging: false,
+        startX: 0,
+        startY: 0,
+        currentX: 0,
+        currentY: 0
+    });
+
+    const handleDragStart = (key: keyof Outfit, e: React.DragEvent<HTMLDivElement>) => {
+        e.dataTransfer.setData('text/plain', key as string);
+    };
+
+    const handleTouchStart = (key: keyof Outfit, e: React.TouchEvent<HTMLDivElement>) => {
+        const touch = e.touches[0];
+        setTouchDrag({
+            key,
+            isDragging: true,
+            startX: touch.clientX,
+            startY: touch.clientY,
+            currentX: touch.clientX,
+            currentY: touch.clientY
+        });
+        // Prevent scrolling when starting drag
+        e.preventDefault();
+    };
+
+    const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+        if (!touchDrag.isDragging) return;
+
+        const touch = e.touches[0];
+        setTouchDrag(prev => ({
+            ...prev,
+            currentX: touch.clientX,
+            currentY: touch.clientY
+        }));
+
+        // Prevent scrolling during drag
+        e.preventDefault();
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+        if (!touchDrag.isDragging || !touchDrag.key || !todayOutfit) {
+            setTouchDrag(prev => ({ ...prev, isDragging: false, key: null }));
+            return;
+        }
+
+        // Check if touch ended over the basket area
+        const touch = e.changedTouches[0];
+        const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+        const basketArea = document.querySelector('[aria-label="Wear basket"]');
+
+        if (basketArea && (basketArea.contains(elementBelow) || elementBelow === basketArea)) {
+            const key = touchDrag.key;
+            if (droppedKeys.has(key)) {
+                setTouchDrag(prev => ({ ...prev, isDragging: false, key: null }));
+                return;
+            }
+
+            const item = todayOutfit[key];
+            if (item) {
+                const partial: Partial<Outfit> = {[key]: item} as Partial<Outfit>;
+                markWorn(partial as Outfit);
+                setDroppedKeys(prev => new Set([...prev, key]));
+            }
+        }
+
+        setTouchDrag(prev => ({ ...prev, isDragging: false, key: null }));
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        // Necessary to allow dropping
+        e.preventDefault();
+    };
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        if (!todayOutfit) return;
+        const key = e.dataTransfer.getData('text/plain') as keyof Outfit;
+        if (!key) return;
+        if (droppedKeys.has(key)) return; // already processed
+
+        const item = todayOutfit[key as keyof Outfit];
+        if (!item) return; // nothing to mark for this key
+
+        // Build a partial outfit and mark only the dropped item as worn
+        const partial: Partial<Outfit> = {[key]: item} as Partial<Outfit>;
+        markWorn(partial as Outfit);
+
+        setDroppedKeys(prev => new Set([...prev, key]));
+    };
+
     useEffect(() => {
         const loadTodayOutfit = () => {
             try {
@@ -74,79 +178,98 @@ export default function Suggest() {
         }
     }, [items, storageKey]);
 
-    const onMarkAsWorn = () => {
-        if (!todayOutfit) {
-            return;
-        }
-
-        markWorn(todayOutfit);
-        const outfit = suggestOutfit(items);
-        setTodayOutfit(outfit);
-
-        if (!outfit) {
-            localStorage.removeItem(storageKey);
-            return;
-        }
-
-        localStorage.setItem(storageKey, JSON.stringify({
-            top: outfit.top?.id ?? null,
-            bottom: outfit.bottom?.id ?? null,
-            footwear: outfit.footwear?.id ?? null,
-            outerwear: outfit.outerwear?.id ?? null,
-        }));
-    };
 
     return (<>
         <div className="bg-app min-h-screen pb-28">
+            {/* Floating drag preview for mobile */}
+            {touchDrag.isDragging && touchDrag.key && todayOutfit && (
+                <div
+                    className="fixed pointer-events-none z-50 text-6xl"
+                    style={{
+                        left: touchDrag.currentX - 30,
+                        top: touchDrag.currentY - 30,
+                        transform: 'translate(-50%, -50%)',
+                    }}
+                >
+                    <div className="p-3 suggest-card rounded-2xl opacity-80 scale-110 shadow-lg">
+                        {todayOutfit[touchDrag.key]?.emoji}
+                    </div>
+                </div>
+            )}
+
             <div className="mx-auto max-w-4xl p-4 pb-2">
                 <h2 className="p-2 text-2xl font-semibold text-center">Today's outfit</h2>
             </div>
 
             <div className="px-4">
-                <div className="suggest-card rounded-3xl">
-                    {todayOutfit ? (<div>
-                        {(() => {
-                            const layout = calculateOutfitLayout(todayOutfit);
+                {todayOutfit ? (<div>
+                    {(() => {
+                        const layout = calculateOutfitLayout(todayOutfit);
 
-                            return (
-                                <div className="relative mx-auto aspect-square max-w-[500px] w-full p-10">
-                                    {/* Centerpiece */}
+                        return (<div className="relative mx-auto aspect-square max-w-[500px] w-full p-10">
+                            {/* Centerpiece */}
+                            {!droppedKeys.has('top') && (
+                                <div
+                                    className="absolute select-none"
+                                    style={{
+                                        left: `${layout.centerPosition.x}%`,
+                                        top: `${layout.centerPosition.y}%`,
+                                        transform: 'translate(-50%, -50%)',
+                                    }}
+                                    aria-label="Top item"
+                                >
                                     <div
+                                        className={`p-4 suggest-card rounded-4xl text-8xl sm:text-9xl cursor-grab ${
+                                            touchDrag.isDragging && touchDrag.key === 'top' ? 'opacity-20' : ''
+                                        }`}
+                                        draggable
+                                        onDragStart={(e) => handleDragStart('top', e)}
+                                        onTouchStart={(e) => handleTouchStart('top', e)}
+                                        onTouchMove={handleTouchMove}
+                                        onTouchEnd={handleTouchEnd}
+                                        style={{
+                                            touchAction: 'none'
+                                        }}
+                                    >{layout.centerEmoji}</div>
+                                </div>
+                            )}
+
+                            {/* Surrounding items */}
+                            {layout.others.map((o, i) => (
+                                !droppedKeys.has(o.key as keyof Outfit) && (
+                                    <div
+                                        key={o.key}
                                         className="absolute select-none"
                                         style={{
-                                            left: `${layout.centerPosition.x}%`,
-                                            top: `${layout.centerPosition.y}%`,
-                                            transform: 'translate(-50%, -50%)',
+                                            left: layout.positions[i].left,
+                                            top: layout.positions[i].top,
+                                            transform: `translate(-50%, -50%) ${layout.positions[i].rotate} scale(${layout.positions[i].scale})`,
                                         }}
-                                        aria-label="Top item"
+                                        aria-hidden="true"
                                     >
-                                        <div className="text-8xl sm:text-9xl">{layout.centerEmoji}</div>
-                                    </div>
-
-                                    {/* Surrounding items */}
-                                    {layout.others.map((o, i) => (
-                                        <div
-                                            key={o.key}
-                                            className="absolute select-none"
+                                        <div 
+                                            className={`p-2 suggest-card rounded-2xl text-5xl sm:text-6xl cursor-grab ${
+                                                touchDrag.isDragging && touchDrag.key === o.key ? 'opacity-20' : ''
+                                            }`} 
+                                            draggable
+                                            onDragStart={(e) => handleDragStart(o.key as keyof Outfit, e)}
+                                            onTouchStart={(e) => handleTouchStart(o.key as keyof Outfit, e)}
+                                            onTouchMove={handleTouchMove}
+                                            onTouchEnd={handleTouchEnd}
                                             style={{
-                                                left: layout.positions[i].left,
-                                                top: layout.positions[i].top,
-                                                transform: `translate(-50%, -50%) ${layout.positions[i].rotate} scale(${layout.positions[i].scale})`,
+                                                touchAction: 'none'
                                             }}
-                                            aria-hidden="true"
-                                        >
-                                            <div className="text-5xl sm:text-6xl">{o.emoji}</div>
-                                        </div>
-                                    ))}
-                                </div>
-                            );
-                        })()}
-                    </div>) : (<div className="p-4 text-muted">
-                        No outfit yet. Hit <span className="font-medium">See another option</span> to
-                        get a suggestion. If you’re out of clean options, tap{" "}
-                        <span className="font-medium">Laundry</span>.
-                    </div>)}
-                </div>
+                                        >{o.emoji}</div>
+                                    </div>
+                                )
+                            ))}
+                        </div>);
+                    })()}
+                </div>) : (<div className="p-4 text-muted">
+                    No outfit yet. Hit <span className="font-medium">See another option</span> to
+                    get a suggestion. If you’re out of clean options, tap{" "}
+                    <span className="font-medium">Laundry</span>.
+                </div>)}
             </div>
 
             <p className="p-4 pt-3 text-sm text-gray-500 text-center">
@@ -154,17 +277,24 @@ export default function Suggest() {
             </p>
 
             <div className="px-4 pt-6 flex justify-center">
-                <button
-                    onClick={onMarkAsWorn}
-                    disabled={!todayOutfit}
-                    className="btn-cta font-medium bg-white rounded-4xl text-2xl p-3 px-16 w-auto text-accent"
+                <div
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                    className="p-2 w-80 h-56 flex items-center justify-center"
+                    aria-label="Wear basket"
                 >
-                    Mark as worn
-                </button>
+                    <div className="text-6xl select-none pointer-events-none" aria-hidden="true">
+                        {isBasketFull ? <img src="/assets/basket_full.png" alt="Full basket" width="1024"/> :
+                            <img src="/assets/basket_empty.png" alt="Empty basket" width="1024"/>}
+                    </div>
+                </div>
             </div>
         </div>
 
         <Navbar active="home"/>
-        <LaundryFab onLaundryDone={markLaundryDone}/>
+        <LaundryFab onLaundryDone={() => {
+            markLaundryDone();
+            setDroppedKeys(new Set());
+        }}/>
     </>);
 }
