@@ -46,12 +46,7 @@ export default function Suggest() {
         currentX: number;
         currentY: number;
     }>({
-        key: null,
-        isDragging: false,
-        startX: 0,
-        startY: 0,
-        currentX: 0,
-        currentY: 0
+        key: null, isDragging: false, startX: 0, startY: 0, currentX: 0, currentY: 0
     });
 
     const handleDragStart = (key: keyof Outfit, e: React.DragEvent<HTMLDivElement>) => {
@@ -77,9 +72,7 @@ export default function Suggest() {
 
         const touch = e.touches[0];
         setTouchDrag(prev => ({
-            ...prev,
-            currentX: touch.clientX,
-            currentY: touch.clientY
+            ...prev, currentX: touch.clientX, currentY: touch.clientY
         }));
 
         // Prevent scrolling during drag
@@ -88,7 +81,7 @@ export default function Suggest() {
 
     const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
         if (!touchDrag.isDragging || !touchDrag.key || !todayOutfit) {
-            setTouchDrag(prev => ({ ...prev, isDragging: false, key: null }));
+            setTouchDrag(prev => ({...prev, isDragging: false, key: null}));
             return;
         }
 
@@ -100,7 +93,7 @@ export default function Suggest() {
         if (basketArea && (basketArea.contains(elementBelow) || elementBelow === basketArea)) {
             const key = touchDrag.key;
             if (droppedKeys.has(key)) {
-                setTouchDrag(prev => ({ ...prev, isDragging: false, key: null }));
+                setTouchDrag(prev => ({...prev, isDragging: false, key: null}));
                 return;
             }
 
@@ -112,7 +105,7 @@ export default function Suggest() {
             }
         }
 
-        setTouchDrag(prev => ({ ...prev, isDragging: false, key: null }));
+        setTouchDrag(prev => ({...prev, isDragging: false, key: null}));
     };
 
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -178,38 +171,48 @@ export default function Suggest() {
         }
     }, [items, storageKey]);
 
+    const EmptyMessage = () => (<div className="relative mx-auto aspect-square max-w-[500px] w-full py-10">
+            <div className="suggest-card rounded-4xl p-4 text-muted">
+                No outfit right now — maybe it's laundry time? Tap <span className="font-medium">Laundry</span>.
+            </div>
+        </div>);
+
 
     return (<>
         <div className="bg-app min-h-screen pb-28">
             {/* Floating drag preview for mobile */}
-            {touchDrag.isDragging && touchDrag.key && todayOutfit && (
-                <div
+            {touchDrag.isDragging && touchDrag.key && todayOutfit && (<div
                     className="fixed pointer-events-none z-50 text-6xl"
                     style={{
-                        left: touchDrag.currentX - 30,
-                        top: touchDrag.currentY - 30,
-                        transform: 'translate(-50%, -50%)',
+                        left: touchDrag.currentX - 30, top: touchDrag.currentY - 30, transform: 'translate(-50%, -50%)',
                     }}
                 >
                     <div className="p-3 suggest-card rounded-2xl opacity-80 scale-110 shadow-lg">
                         {todayOutfit[touchDrag.key]?.emoji}
                     </div>
-                </div>
-            )}
+                </div>)}
 
             <div className="mx-auto max-w-4xl p-4 pb-2">
                 <h2 className="p-2 text-2xl font-semibold text-center">Today's outfit</h2>
             </div>
 
+            <p className="p-4 text-md text-gray-900 text-center">
+                ✨ A fresh outfit is picked for you every day.
+            </p>
+
             <div className="px-4">
                 {todayOutfit ? (<div>
                     {(() => {
                         const layout = calculateOutfitLayout(todayOutfit);
+                        const hasVisibleItems = !droppedKeys.has('top') || layout.others.some(o => !droppedKeys.has(o.key as keyof Outfit));
+
+                        if (!hasVisibleItems) {
+                            return <EmptyMessage/>;
+                        }
 
                         return (<div className="relative mx-auto aspect-square max-w-[500px] w-full p-10">
                             {/* Centerpiece */}
-                            {!droppedKeys.has('top') && (
-                                <div
+                            {!droppedKeys.has('top') && (<div
                                     className="absolute select-none"
                                     style={{
                                         left: `${layout.centerPosition.x}%`,
@@ -219,9 +222,7 @@ export default function Suggest() {
                                     aria-label="Top item"
                                 >
                                     <div
-                                        className={`p-4 suggest-card rounded-4xl text-8xl sm:text-9xl cursor-grab ${
-                                            touchDrag.isDragging && touchDrag.key === 'top' ? 'opacity-20' : ''
-                                        }`}
+                                        className={`p-4 suggest-card rounded-4xl text-8xl sm:text-9xl cursor-grab ${touchDrag.isDragging && touchDrag.key === 'top' ? 'opacity-20' : ''}`}
                                         draggable
                                         onDragStart={(e) => handleDragStart('top', e)}
                                         onTouchStart={(e) => handleTouchStart('top', e)}
@@ -231,13 +232,10 @@ export default function Suggest() {
                                             touchAction: 'none'
                                         }}
                                     >{layout.centerEmoji}</div>
-                                </div>
-                            )}
+                                </div>)}
 
                             {/* Surrounding items */}
-                            {layout.others.map((o, i) => (
-                                !droppedKeys.has(o.key as keyof Outfit) && (
-                                    <div
+                            {layout.others.map((o, i) => (!droppedKeys.has(o.key as keyof Outfit) && (<div
                                         key={o.key}
                                         className="absolute select-none"
                                         style={{
@@ -247,10 +245,8 @@ export default function Suggest() {
                                         }}
                                         aria-hidden="true"
                                     >
-                                        <div 
-                                            className={`p-2 suggest-card rounded-2xl text-5xl sm:text-6xl cursor-grab ${
-                                                touchDrag.isDragging && touchDrag.key === o.key ? 'opacity-20' : ''
-                                            }`} 
+                                        <div
+                                            className={`p-2 suggest-card rounded-2xl text-5xl sm:text-6xl cursor-grab ${touchDrag.isDragging && touchDrag.key === o.key ? 'opacity-20' : ''}`}
                                             draggable
                                             onDragStart={(e) => handleDragStart(o.key as keyof Outfit, e)}
                                             onTouchStart={(e) => handleTouchStart(o.key as keyof Outfit, e)}
@@ -260,23 +256,13 @@ export default function Suggest() {
                                                 touchAction: 'none'
                                             }}
                                         >{o.emoji}</div>
-                                    </div>
-                                )
-                            ))}
+                                    </div>)))}
                         </div>);
                     })()}
-                </div>) : (<div className="p-4 text-muted">
-                    No outfit yet. Hit <span className="font-medium">See another option</span> to
-                    get a suggestion. If you’re out of clean options, tap{" "}
-                    <span className="font-medium">Laundry</span>.
-                </div>)}
+                </div>) : (<EmptyMessage/>)}
             </div>
 
-            <p className="p-4 pt-3 text-sm text-gray-500 text-center">
-                Suggestion is refreshed every day.
-            </p>
-
-            <div className="px-4 pt-6 flex justify-center">
+            <div className="px-4 flex justify-center">
                 <div
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
