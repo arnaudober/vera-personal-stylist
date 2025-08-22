@@ -1,3 +1,4 @@
+import * as React from "react";
 import {useEffect, useMemo, useState} from "react";
 import type {ClothingItem, Outfit} from "../model";
 import {useCloset} from "../hooks/useCloset.ts";
@@ -63,8 +64,6 @@ export default function Suggest() {
             currentX: touch.clientX,
             currentY: touch.clientY
         });
-        // Prevent scrolling when starting drag
-        e.preventDefault();
     };
 
     const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
@@ -74,9 +73,6 @@ export default function Suggest() {
         setTouchDrag(prev => ({
             ...prev, currentX: touch.clientX, currentY: touch.clientY
         }));
-
-        // Prevent scrolling during drag
-        e.preventDefault();
     };
 
     const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
@@ -171,36 +167,41 @@ export default function Suggest() {
         }
     }, [items, storageKey]);
 
-    const EmptyMessage = () => (<div className="relative mx-auto aspect-square max-w-[500px] w-full py-10">
-            <div className="suggest-card rounded-4xl p-4 text-muted">
+    const EmptyMessage = () => (
+        <div className="relative mx-auto w-full max-w-md h-64 md:h-80 flex items-center justify-center">
+            <div className="suggest-card rounded-4xl p-4 text-muted text-center">
                 No outfit right now — maybe it's laundry time? Tap <span className="font-medium">Laundry</span>.
             </div>
-        </div>);
-
+        </div>
+    );
 
     return (<>
-        <div className="bg-app min-h-screen pb-28">
+        <div className="bg-app min-h-screen flex flex-col">
             {/* Floating drag preview for mobile */}
-            {touchDrag.isDragging && touchDrag.key && todayOutfit && (<div
-                    className="fixed pointer-events-none z-50 text-6xl"
-                    style={{
-                        left: touchDrag.currentX - 30, top: touchDrag.currentY - 30, transform: 'translate(-50%, -50%)',
-                    }}
-                >
-                    <div className="p-3 suggest-card rounded-2xl opacity-80 scale-110 shadow-lg">
-                        {todayOutfit[touchDrag.key]?.emoji}
-                    </div>
-                </div>)}
+            {touchDrag.isDragging && touchDrag.key && todayOutfit && (            <div
+                className="fixed pointer-events-none z-50 text-6xl"
+                style={{
+                    left: touchDrag.currentX - 30, top: touchDrag.currentY - 30, transform: 'translate(-50%, -50%)',
+                }}
+            >
+                <div className="p-3 suggest-card rounded-2xl opacity-80 scale-110 shadow-lg">
+                    {todayOutfit[touchDrag.key]?.emoji}
+                </div>
+            </div>)}
 
-            <div className="mx-auto max-w-4xl p-4 pb-2">
-                <h2 className="p-2 text-2xl font-semibold text-center">Today's outfit</h2>
+            {/* Header section */}
+            <div className="flex-shrink-0 pt-4 pb-2">
+                <div className="mx-auto max-w-4xl px-4">
+                    <h2 className="p-2 text-2xl font-semibold text-center">Today's outfit</h2>
+                </div>
+
+                <p className="px-4 text-md text-gray-900 text-center">
+                    ✨ A fresh outfit is picked for you every day.
+                </p>
             </div>
 
-            <p className="p-4 text-md text-gray-900 text-center">
-                ✨ A fresh outfit is picked for you every day.
-            </p>
-
-            <div className="px-4">
+            {/* Main content area - flexible height */}
+            <div className="flex-1 flex flex-col justify-center px-4 pb-4">
                 {todayOutfit ? (<div>
                     {(() => {
                         const layout = calculateOutfitLayout(todayOutfit);
@@ -210,9 +211,10 @@ export default function Suggest() {
                             return <EmptyMessage/>;
                         }
 
-                        return (<div className="relative mx-auto aspect-square max-w-[500px] w-full p-10">
-                            {/* Centerpiece */}
-                            {!droppedKeys.has('top') && (<div
+                        return (
+                            <div className="relative mx-auto w-full max-w-lg h-64 md:h-80 lg:h-96 flex items-center justify-center">
+                                {/* Centerpiece */}
+                                {!droppedKeys.has('top') && (<div
                                     className="absolute select-none"
                                     style={{
                                         left: `${layout.centerPosition.x}%`,
@@ -234,44 +236,47 @@ export default function Suggest() {
                                     >{layout.centerEmoji}</div>
                                 </div>)}
 
-                            {/* Surrounding items */}
-                            {layout.others.map((o, i) => (!droppedKeys.has(o.key as keyof Outfit) && (<div
-                                        key={o.key}
-                                        className="absolute select-none"
+                                {/* Surrounding items */}
+                                {layout.others.map((o, i) => (!droppedKeys.has(o.key as keyof Outfit) && (<div
+                                    key={o.key}
+                                    className="absolute select-none"
+                                    style={{
+                                        left: layout.positions[i].left,
+                                        top: layout.positions[i].top,
+                                        transform: `translate(-50%, -50%) ${layout.positions[i].rotate} scale(${layout.positions[i].scale})`,
+                                    }}
+                                    aria-hidden="true"
+                                >
+                                    <div
+                                        className={`p-2 md:p-3 suggest-card rounded-2xl text-4xl md:text-5xl lg:text-6xl cursor-grab ${touchDrag.isDragging && touchDrag.key === o.key ? 'opacity-20' : ''}`}
+                                        draggable
+                                        onDragStart={(e) => handleDragStart(o.key as keyof Outfit, e)}
+                                        onTouchStart={(e) => handleTouchStart(o.key as keyof Outfit, e)}
+                                        onTouchMove={handleTouchMove}
+                                        onTouchEnd={handleTouchEnd}
                                         style={{
-                                            left: layout.positions[i].left,
-                                            top: layout.positions[i].top,
-                                            transform: `translate(-50%, -50%) ${layout.positions[i].rotate} scale(${layout.positions[i].scale})`,
+                                            touchAction: 'none'
                                         }}
-                                        aria-hidden="true"
-                                    >
-                                        <div
-                                            className={`p-2 suggest-card rounded-2xl text-5xl sm:text-6xl cursor-grab ${touchDrag.isDragging && touchDrag.key === o.key ? 'opacity-20' : ''}`}
-                                            draggable
-                                            onDragStart={(e) => handleDragStart(o.key as keyof Outfit, e)}
-                                            onTouchStart={(e) => handleTouchStart(o.key as keyof Outfit, e)}
-                                            onTouchMove={handleTouchMove}
-                                            onTouchEnd={handleTouchEnd}
-                                            style={{
-                                                touchAction: 'none'
-                                            }}
-                                        >{o.emoji}</div>
-                                    </div>)))}
-                        </div>);
+                                    >{o.emoji}</div>
+                                </div>)))}
+                            </div>);
                     })()}
                 </div>) : (<EmptyMessage/>)}
             </div>
 
-            <div className="px-4 flex justify-center">
-                <div
-                    onDragOver={handleDragOver}
-                    onDrop={handleDrop}
-                    className="p-2 w-80 h-56 flex items-center justify-center"
-                    aria-label="Wear basket"
-                >
-                    <div className="text-6xl select-none pointer-events-none" aria-hidden="true">
-                        {isBasketFull ? <img src="/assets/basket_full.png" alt="Full basket" width="1024"/> :
-                            <img src="/assets/basket_empty.png" alt="Empty basket" width="1024"/>}
+            {/* Basket section - fixed at bottom */}
+            <div className="flex-shrink-0 px-4 pb-20">
+                <div className="flex justify-center">
+                    <div
+                        onDragOver={handleDragOver}
+                        onDrop={handleDrop}
+                        className="p-2 w-64 md:w-80 h-44 md:h-56 flex items-center justify-center"
+                        aria-label="Wear basket"
+                    >
+                        <div className="text-5xl md:text-6xl select-none pointer-events-none" aria-hidden="true">
+                            {isBasketFull ? <img src="/assets/basket_full.png" alt="Full basket" width="1024"/> :
+                                <img src="/assets/basket_empty.png" alt="Empty basket" width="1024"/>}
+                        </div>
                     </div>
                 </div>
             </div>

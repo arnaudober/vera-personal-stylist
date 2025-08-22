@@ -23,7 +23,7 @@ export default function Closet() {
                 onCategoryChange={setSelectedCategory}
             />
 
-            <div className="mx-auto max-w-4xl p-4 pb-24">
+            <div className="mx-auto max-w-4xl p-4">
                 <div className="rounded-2xl">
                     <div className="grid gap-5 grid-cols-2">
                         {filteredItems.map(item => (<ClothingCard key={item.id} item={item} />))}
