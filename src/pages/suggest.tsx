@@ -51,6 +51,7 @@ export default function Suggest() {
     const {items, markLaundryDone, markWorn} = useCloset();
     const [todayOutfit, setTodayOutfit] = useState<Outfit | null>(null);
     const storageKey = useMemo(() => `todayOutfit:${todayDate}`, []);
+    const droppedKeysStorageKey = useMemo(() => `droppedKeys:${todayDate}`, []);
 
     // Drag & drop state for the wear basket
     const [droppedKeys, setDroppedKeys] = useState<Set<keyof Outfit>>(new Set());
@@ -126,7 +127,11 @@ export default function Suggest() {
             if (item) {
                 const partial: Partial<Outfit> = {[key]: item} as Partial<Outfit>;
                 markWorn(partial as Outfit);
-                setDroppedKeys(prev => new Set([...prev, key]));
+                const newDroppedKeys = new Set([...droppedKeys, key]);
+                setDroppedKeys(newDroppedKeys);
+
+                // Persist dropped keys to localStorage
+                localStorage.setItem(droppedKeysStorageKey, JSON.stringify([...newDroppedKeys]));
             }
         }
 
@@ -152,7 +157,11 @@ export default function Suggest() {
         const partial: Partial<Outfit> = {[key]: item} as Partial<Outfit>;
         markWorn(partial as Outfit);
 
-        setDroppedKeys(prev => new Set([...prev, key]));
+        const newDroppedKeys = new Set([...droppedKeys, key]);
+        setDroppedKeys(newDroppedKeys);
+
+        // Persist dropped keys to localStorage
+        localStorage.setItem(droppedKeysStorageKey, JSON.stringify([...newDroppedKeys]));
     };
 
     useEffect(() => {
@@ -178,7 +187,24 @@ export default function Suggest() {
             }
         };
 
+        const loadDroppedKeys = () => {
+            try {
+                const raw = localStorage.getItem(droppedKeysStorageKey);
+                if (!raw) {
+                    return new Set<keyof Outfit>();
+                }
+                const keysArray = JSON.parse(raw);
+                return new Set<keyof Outfit>(keysArray);
+            } catch {
+                return new Set<keyof Outfit>();
+            }
+        };
+
         const storedOutfit = loadTodayOutfit();
+        const storedDroppedKeys = loadDroppedKeys();
+
+        setDroppedKeys(storedDroppedKeys);
+
         if (storedOutfit) {
             setTodayOutfit(storedOutfit);
         } else {
@@ -194,7 +220,7 @@ export default function Suggest() {
                 }));
             }
         }
-    }, [items, storageKey]);
+    }, [items, storageKey, droppedKeysStorageKey]);
 
     const EmptyMessage = () => (
         <div className="relative mx-auto w-full max-w-md h-64 md:h-80 flex items-center justify-center">
@@ -317,6 +343,8 @@ export default function Suggest() {
         <LaundryFab onLaundryDone={() => {
             markLaundryDone();
             setDroppedKeys(new Set());
+            // Clear dropped keys from localStorage when laundry is done
+            localStorage.removeItem(droppedKeysStorageKey);
         }}/>
     </>);
 }
