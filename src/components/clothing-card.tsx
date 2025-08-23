@@ -1,5 +1,6 @@
 import type {ClothingItem} from "../model";
 import * as React from "react";
+import GarmentGlyph from "./garment-glyph.tsx";
 
 function Pill({children, style, className}: {
     children: React.ReactNode, style?: React.CSSProperties, className?: string
@@ -10,12 +11,18 @@ function Pill({children, style, className}: {
     </span>);
 }
 
-
 export function ClothingCard({item}: { item: ClothingItem }) {
     const dotColor = item.isClean ? "var(--color-accent)" : "#374151";
 
+    const renderGlyph = () => {
+        return (<GarmentGlyph
+            kind={item.type}
+            alt={item.name}
+        />);
+    };
+
     return (<div className="suggest-card bg-white p-3 rounded-2xl flex flex-col items-center text-center">
-        <div className="text-7xl">{item.emoji ?? "👚"}</div>
+        <div className="text-7xl flex items-center justify-center">{renderGlyph()}</div>
 
         <div className="mt-2 text-lg font-semibold">{item.name}</div>
 

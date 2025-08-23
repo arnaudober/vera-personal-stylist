@@ -3,19 +3,27 @@ import type {ClothingItem, Outfit} from "../model";
 
 const LS_KEY = "closet_items_v1";
 
+
 const DEFAULT_ITEMS: ClothingItem[] = [{
-    id: "t1", name: "Lavender tee", category: "top", color: "lavender", isClean: true, emoji: "👕"
+    id: "t1", name: "Red t-shirt", category: "top", type: "tshirt", color: "red", isClean: true
 }, {
-    id: "t2", name: "White Oxford", category: "top", color: "white", isClean: true, emoji: "👔"
+    id: "t2", name: "Tan blazer", category: "outerwear", type: "blazer", color: "tan", isClean: true
 }, {
-    id: "b1", name: "Dark jeans", category: "bottom", color: "navy", isClean: true, emoji: "👖"
+    id: "b1", name: "Navy chino", category: "bottom", type: "pants", color: "navy", isClean: true
 }, {
-    id: "b2", name: "Teal dress", category: "bottom", color: "teal", isClean: true, emoji: "👗"
+    id: "b2", name: "Green dress", category: "bottom", type: "dress", color: "green", isClean: true
 }, {
-    id: "f1", name: "White sneakers", category: "footwear", color: "white", isClean: true, emoji: "👟"
+    id: "b3", name: "Pink skirt", category: "bottom", type: "skirt", color: "pink", isClean: true
 }, {
-    id: "f2", name: "Black boots", category: "footwear", color: "black", isClean: true, emoji: "🥾"
-}, {id: "o1", name: "Light jacket", category: "outerwear", color: "gray", isClean: true, emoji: "🧥"},];
+    id: "b4", name: "Teal shorts", category: "bottom", type: "shorts", color: "teal", isClean: true
+}, {
+    id: "b5", name: "Blue jeans", category: "bottom", type: "jeans", color: "blue", isClean: true
+}, {
+    id: "f1", name: "Beige sneakers", category: "footwear", type: "sneaker", color: "beige", isClean: true
+}, {
+    id: "o1", name: "Navy hoodie", category: "outerwear", type: "hoodie", color: "navy", isClean: true
+}];
+
 
 function loadCloset(): ClothingItem[] {
     try {

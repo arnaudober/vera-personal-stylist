@@ -1,12 +1,9 @@
-export type Category = 'top' | 'bottom' | 'footwear' | 'outerwear' | 'accessory';
+import type {GarmentKind} from "./components/garment-glyph.tsx";
+
+export type Category = 'top' | 'bottom' | 'footwear' | 'outerwear';
 
 export type ClothingItem = {
-    id: string;
-    name: string;
-    category: Category;
-    color?: string;
-    isClean: boolean;
-    emoji?: string; // quick visual for the MVP
+    id: string; name: string; category: Category; type: GarmentKind; color?: string; isClean: boolean;
 };
 
 export type Outfit = {
@@ -17,10 +14,6 @@ export type Outfit = {
     accessory?: ClothingItem;
 };
 
-export const categories: { value: Category; label: string; }[] = [
-    { value: 'top', label: 'Tops' },
-    { value: 'bottom', label: 'Bottoms' },
-    { value: 'footwear', label: 'Shoes' },
-    { value: 'outerwear', label: 'Outerwear' },
-    { value: 'accessory', label: 'Accessories' }
-];
+export const categories: { value: Category; label: string; }[] = [{value: 'top', label: 'Tops'}, {
+    value: 'bottom', label: 'Bottoms'
+}, {value: 'footwear', label: 'Shoes'}, {value: 'outerwear', label: 'Outerwear'}];
