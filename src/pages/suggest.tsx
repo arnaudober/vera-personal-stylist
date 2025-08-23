@@ -231,7 +231,7 @@ export default function Suggest() {
 
             {/* Main content area - flexible height */}
             <div className="flex-1 flex flex-col justify-center px-4 pb-4">
-                {todayOutfit ? (<div>
+                {todayOutfit ? (<>
                     {(() => {
                         const layout = calculateOutfitLayout(todayOutfit);
                         const hasVisibleItems = !droppedKeys.has('top') || layout.others.some(o => !droppedKeys.has(o.key as keyof Outfit));
@@ -290,22 +290,25 @@ export default function Suggest() {
                             </div>)))}
                         </div>);
                     })()}
-                </div>) : (<EmptyMessage/>)}
-            </div>
+                </>) : (<EmptyMessage/>)}
 
-            {/* Basket section - fixed at bottom */}
-            <div className="flex-shrink-0 px-4 pb-20" style={{zIndex: 0}}>
-                <div className="flex justify-center">
-                    <div
-                        onDragOver={handleDragOver}
-                        onDrop={handleDrop}
-                        className="p-2 w-64 md:w-80 h-44 md:h-56 flex items-center justify-center relative"
-                        aria-label="Wear basket"
-                    >
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                             style={{zIndex: 1}}>
-                            <BasketSprite isEmpty={droppedKeys.size === 0}/>
-                        </div>
+                {/* Basket section - fixed at bottom */}
+                <div
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                    className="p-2 w-64 md:w-80 h-44 md:h-56 flex items-center justify-center relative"
+                    style={{
+                        marginLeft: "auto",
+                        marginRight: "auto",
+                        position: "relative",
+                        bottom: "-40px",
+                        zIndex: 0,
+                    }}
+                    aria-label="Wear basket"
+                >
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                         style={{zIndex: 1}}>
+                        <BasketSprite isEmpty={droppedKeys.size === 0}/>
                     </div>
                 </div>
             </div>

@@ -156,9 +156,7 @@ export default function calculateOutfitLayout(outfit: Outfit): OutfitLayout {
             }
         }
     }
-
-    // ---- fit within safe bounds (uniform scale + recenter)
-    const all = [{x: 50, y: 50, r: 8 * centerScale}, ...nodes.map(n => ({x: n.x, y: n.y, r: 6 * n.scale}))];
+    
     let minX = 50 - 8 * centerScale, maxX = 50 + 8 * centerScale;
     let minY = 50 - 8 * centerScale, maxY = 50 + 8 * centerScale;
     for (const p of nodes) {
