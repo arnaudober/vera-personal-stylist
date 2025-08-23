@@ -67,7 +67,7 @@ export default function Suggest() {
         key: null, isDragging: false, startX: 0, startY: 0, currentX: 0, currentY: 0
     });
 
-    const renderGlyph = (key: keyof Outfit, size: number) => {
+    const renderGlyph = (key: keyof Outfit) => {
         const item = todayOutfit?.[key];
         if (!item) {
             return null;
@@ -75,7 +75,6 @@ export default function Suggest() {
 
         return (<GarmentGlyph
             kind={item.type}
-            size={size}
             alt={item.name}
         />);
     };
@@ -214,7 +213,7 @@ export default function Suggest() {
                 }}
             >
                 <div className="p-2 suggest-card rounded-2xl opacity-80 scale-110 shadow-lg">
-                    {renderGlyph(touchDrag.key as keyof Outfit, 84)}
+                    {renderGlyph(touchDrag.key as keyof Outfit)}
                 </div>
             </div>)}
 
@@ -262,7 +261,7 @@ export default function Suggest() {
                                     style={{
                                         touchAction: 'none'
                                     }}
-                                >{renderGlyph('top', 128)}</div>
+                                >{renderGlyph('top')}</div>
                             </div>)}
 
                             {/* Surrounding items */}
@@ -286,7 +285,7 @@ export default function Suggest() {
                                     style={{
                                         touchAction: 'none'
                                     }}
-                                >{renderGlyph(o.key as keyof Outfit, 84)}</div>
+                                >{renderGlyph(o.key as keyof Outfit)}</div>
                             </div>)))}
                         </div>);
                     })()}
