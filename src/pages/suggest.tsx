@@ -7,43 +7,7 @@ import LaundryFab from "../components/laundry-fab.tsx";
 import calculateOutfitLayout from "../utils/outfitLayout.ts";
 import GarmentGlyph from "../components/garment-glyph.tsx";
 import {BasketSprite} from "../components/basket-sprite.tsx";
-
-function suggestOutfit(items: ClothingItem[]): Outfit | null {
-    const cleanItems = items.filter(i => i.isClean);
-
-    // First, pick a bottom piece
-    const bottoms = cleanItems.filter(i => i.category === "bottom");
-    if (bottoms.length === 0) return null;
-
-    const bottom = bottoms[Math.floor(Math.random() * bottoms.length)];
-
-    // Determine if we need a top based on the bottom type
-    let top: ClothingItem | undefined;
-    const needsTop = !['dress'].includes(bottom.type); // dresses don't need tops
-
-    if (needsTop) {
-        const tops = cleanItems.filter(i => i.category === "top");
-        if (tops.length === 0) return null;
-        top = tops[Math.floor(Math.random() * tops.length)];
-    }
-
-    // Pick footwear
-    const footwearItems = cleanItems.filter(i => i.category === "footwear");
-    if (footwearItems.length === 0) return null;
-    const footwear = footwearItems[Math.floor(Math.random() * footwearItems.length)];
-
-    // Pick outerwear (optional)
-    const outerwearItems = cleanItems.filter(i => i.category === "outerwear");
-    const outerwear = outerwearItems.length > 0 ? outerwearItems[Math.floor(Math.random() * outerwearItems.length)] : undefined;
-
-    // Validate minimum requirements
-    if (!footwear || (needsTop && !top)) {
-        return null;
-    }
-
-    return {top, bottom, footwear, outerwear};
-}
-
+import {suggestOutfit} from "../utils/suggestOutfit.ts";
 
 const todayDate = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
@@ -53,8 +17,8 @@ export default function Suggest() {
     const storageKey = useMemo(() => `todayOutfit:${todayDate}`, []);
     const droppedKeysStorageKey = useMemo(() => `droppedKeys:${todayDate}`, []);
 
-    // Drag & drop state for the wear basket
-    const [droppedKeys, setDroppedKeys] = useState<Set<keyof Outfit>>(new Set());
+    // Drag & drop state for the wear basket - now tracking item IDs instead of outfit keys
+    const [droppedKeys, setDroppedKeys] = useState<Set<string>>(new Set());
 
     // Touch drag state for mobile
     const [touchDrag, setTouchDrag] = useState<{
@@ -75,6 +39,8 @@ export default function Suggest() {
         }
 
         return (<GarmentGlyph
+            id={item.id}
+            color={item.color}
             kind={item.type}
             alt={item.name}
         />);
@@ -118,16 +84,12 @@ export default function Suggest() {
 
         if (basketArea && (basketArea.contains(elementBelow) || elementBelow === basketArea)) {
             const key = touchDrag.key;
-            if (droppedKeys.has(key)) {
-                setTouchDrag(prev => ({...prev, isDragging: false, key: null}));
-                return;
-            }
-
             const item = todayOutfit[key];
-            if (item) {
+
+            if (item && !droppedKeys.has(item.id)) {
                 const partial: Partial<Outfit> = {[key]: item} as Partial<Outfit>;
                 markWorn(partial as Outfit);
-                const newDroppedKeys = new Set([...droppedKeys, key]);
+                const newDroppedKeys = new Set([...droppedKeys, item.id]);
                 setDroppedKeys(newDroppedKeys);
 
                 // Persist dropped keys to localStorage
@@ -148,16 +110,15 @@ export default function Suggest() {
         if (!todayOutfit) return;
         const key = e.dataTransfer.getData('text/plain') as keyof Outfit;
         if (!key) return;
-        if (droppedKeys.has(key)) return; // already processed
 
         const item = todayOutfit[key as keyof Outfit];
-        if (!item) return; // nothing to mark for this key
+        if (!item || droppedKeys.has(item.id)) return; // Check if item ID already processed
 
         // Build a partial outfit and mark only the dropped item as worn
         const partial: Partial<Outfit> = {[key]: item} as Partial<Outfit>;
         markWorn(partial as Outfit);
 
-        const newDroppedKeys = new Set([...droppedKeys, key]);
+        const newDroppedKeys = new Set([...droppedKeys, item.id]);
         setDroppedKeys(newDroppedKeys);
 
         // Persist dropped keys to localStorage
@@ -172,16 +133,32 @@ export default function Suggest() {
                     return null;
                 }
 
-                const outfitIds = JSON.parse(raw);
+                const outfitIds: string[] = JSON.parse(raw);
                 const byId = new Map(items.map(i => [i.id, i] as const));
-                const pieces = {
-                    top: outfitIds.top ? byId.get(outfitIds.top) : undefined,
-                    bottom: outfitIds.bottom ? byId.get(outfitIds.bottom) : undefined,
-                    footwear: outfitIds.footwear ? byId.get(outfitIds.footwear) : undefined,
-                    outerwear: outfitIds.outerwear ? byId.get(outfitIds.outerwear) : undefined
-                };
 
-                return pieces.top && pieces.bottom && pieces.footwear ? pieces : null;
+                // Get all items from the stored IDs
+                const outfitItems = outfitIds
+                    .map(id => byId.get(id))
+                    .filter(Boolean) as ClothingItem[];
+
+                // Check if all items are still clean
+                const allClean = outfitItems.every(item => item.isClean);
+                if (!allClean) {
+                    localStorage.removeItem(storageKey);
+                    return null;
+                }
+
+                // Build the outfit object from the items
+                const outfit: Outfit = {};
+                for (const item of outfitItems) {
+                    if (item.category === 'top') {
+                        outfit.top = item;
+                    } else if (item.category === 'bottom') {
+                        outfit.bottom = item;
+                    }
+                }
+
+                return outfit.top && outfit.bottom ? outfit : null;
             } catch {
                 return null;
             }
@@ -191,12 +168,12 @@ export default function Suggest() {
             try {
                 const raw = localStorage.getItem(droppedKeysStorageKey);
                 if (!raw) {
-                    return new Set<keyof Outfit>();
+                    return new Set<string>();
                 }
                 const keysArray = JSON.parse(raw);
-                return new Set<keyof Outfit>(keysArray);
+                return new Set<string>(keysArray);
             } catch {
-                return new Set<keyof Outfit>();
+                return new Set<string>();
             }
         };
 
@@ -212,12 +189,11 @@ export default function Suggest() {
             setTodayOutfit(outfit);
 
             if (outfit) {
-                localStorage.setItem(storageKey, JSON.stringify({
-                    top: outfit.top?.id ?? null,
-                    bottom: outfit.bottom?.id ?? null,
-                    footwear: outfit.footwear?.id ?? null,
-                    outerwear: outfit.outerwear?.id ?? null,
-                }));
+                // Save as simple array of item IDs
+                const outfitIds = Object.values(outfit)
+                    .filter(Boolean)
+                    .map(item => item.id);
+                localStorage.setItem(storageKey, JSON.stringify(outfitIds));
             }
         }
     }, [items, storageKey, droppedKeysStorageKey]);
@@ -259,7 +235,11 @@ export default function Suggest() {
                 {todayOutfit ? (<>
                     {(() => {
                         const layout = calculateOutfitLayout(todayOutfit);
-                        const hasVisibleItems = !droppedKeys.has('top') || layout.others.some(o => !droppedKeys.has(o.key as keyof Outfit));
+                        const topItem = todayOutfit.top;
+                        const hasVisibleItems = (topItem && !droppedKeys.has(topItem.id)) || layout.others.some(o => {
+                            const item = todayOutfit[o.key as keyof Outfit];
+                            return item && !droppedKeys.has(item.id);
+                        });
 
                         if (!hasVisibleItems) {
                             return <EmptyMessage/>;
@@ -268,7 +248,7 @@ export default function Suggest() {
                         return (<div
                             className="relative mx-auto w-full max-w-lg h-64 md:h-80 lg:h-96 flex items-center justify-center">
                             {/* Centerpiece */}
-                            {!droppedKeys.has('top') && (<div
+                            {topItem && !droppedKeys.has(topItem.id) && (<div
                                 className="absolute select-none"
                                 style={{
                                     left: `${layout.centerPosition.x}%`,
@@ -291,28 +271,31 @@ export default function Suggest() {
                             </div>)}
 
                             {/* Surrounding items */}
-                            {layout.others.map((o, i) => (!droppedKeys.has(o.key as keyof Outfit) && (<div
-                                key={o.key}
-                                className="absolute select-none"
-                                style={{
-                                    left: layout.positions[i].left,
-                                    top: layout.positions[i].top,
-                                    transform: `translate(-50%, -50%) ${layout.positions[i].rotate} scale(${layout.positions[i].scale})`,
-                                }}
-                                aria-hidden="true"
-                            >
-                                <div
-                                    className={`p-2 md:p-3 suggest-card rounded-2xl text-4xl md:text-5xl lg:text-6xl cursor-grab ${touchDrag.isDragging && touchDrag.key === o.key ? 'opacity-20' : ''}`}
-                                    draggable
-                                    onDragStart={(e) => handleDragStart(o.key as keyof Outfit, e)}
-                                    onTouchStart={(e) => handleTouchStart(o.key as keyof Outfit, e)}
-                                    onTouchMove={handleTouchMove}
-                                    onTouchEnd={handleTouchEnd}
+                            {layout.others.map((o, i) => {
+                                const item = todayOutfit[o.key as keyof Outfit];
+                                return item && !droppedKeys.has(item.id) && (<div
+                                    key={o.key}
+                                    className="absolute select-none"
                                     style={{
-                                        touchAction: 'none'
+                                        left: layout.positions[i].left,
+                                        top: layout.positions[i].top,
+                                        transform: `translate(-50%, -50%) ${layout.positions[i].rotate} scale(${layout.positions[i].scale})`,
                                     }}
-                                >{renderGlyph(o.key as keyof Outfit)}</div>
-                            </div>)))}
+                                    aria-hidden="true"
+                                >
+                                    <div
+                                        className={`p-2 md:p-3 suggest-card rounded-2xl text-4xl md:text-5xl lg:text-6xl cursor-grab ${touchDrag.isDragging && touchDrag.key === o.key ? 'opacity-20' : ''}`}
+                                        draggable
+                                        onDragStart={(e) => handleDragStart(o.key as keyof Outfit, e)}
+                                        onTouchStart={(e) => handleTouchStart(o.key as keyof Outfit, e)}
+                                        onTouchMove={handleTouchMove}
+                                        onTouchEnd={handleTouchEnd}
+                                        style={{
+                                            touchAction: 'none'
+                                        }}
+                                    >{renderGlyph(o.key as keyof Outfit)}</div>
+                                </div>)
+                            })}
                         </div>);
                     })()}
                 </>) : (<EmptyMessage/>)}
@@ -323,11 +306,7 @@ export default function Suggest() {
                     onDrop={handleDrop}
                     className="p-2 w-64 md:w-80 h-44 md:h-56 flex items-center justify-center relative"
                     style={{
-                        marginLeft: "auto",
-                        marginRight: "auto",
-                        position: "relative",
-                        bottom: "-40px",
-                        zIndex: 0,
+                        marginLeft: "auto", marginRight: "auto", position: "relative", bottom: "-40px", zIndex: 0,
                     }}
                     aria-label="Wear basket"
                 >
@@ -343,7 +322,7 @@ export default function Suggest() {
         <LaundryFab onLaundryDone={() => {
             markLaundryDone();
             setDroppedKeys(new Set());
-            // Clear dropped keys from localStorage when laundry is done
+            // Remove dropped keys from localStorage when laundry is done
             localStorage.removeItem(droppedKeysStorageKey);
         }}/>
     </>);

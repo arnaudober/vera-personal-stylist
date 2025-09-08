@@ -16,8 +16,10 @@ export function ClothingCard({item}: { item: ClothingItem }) {
 
     const renderGlyph = () => {
         return (<GarmentGlyph
+            id={item.id}
             kind={item.type}
             alt={item.name}
+            color={item.color}
         />);
     };
 
