@@ -5,7 +5,6 @@ import {useCloset} from "../hooks/useCloset.ts";
 import Navbar from "../components/navbar.tsx";
 import LaundryFab from "../components/laundry-fab.tsx";
 import calculateOutfitLayout from "../utils/outfitLayout.ts";
-import GarmentGlyph from "../components/garment-glyph.tsx";
 import {BasketSprite} from "../components/basket-sprite.tsx";
 import {suggestOutfit} from "../utils/suggestOutfit.ts";
 
@@ -38,11 +37,11 @@ export default function Suggest() {
             return null;
         }
 
-        return (<GarmentGlyph
-            id={item.id}
-            color={item.color}
-            kind={item.type}
+        return (<img
+            src={item.imageData}
             alt={item.name}
+            className="w-24 h-24 object-cover rounded-xl shadow-sm"
+            loading="lazy"
         />);
     };
 

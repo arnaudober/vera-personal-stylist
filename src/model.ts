@@ -1,4 +1,14 @@
-import type {GarmentKind} from "./components/garment-glyph.tsx";
+export type GarmentKind =
+    | "tshirt"
+    | "blazer"
+    | "shirt"
+    | "polo"
+    | "hoodie"
+    | "sweater"
+    | "jeans"
+    | "chinos"
+    | "shorts"
+    | "skirt";
 
 export type Category = 'top' | 'bottom';
 
@@ -9,6 +19,8 @@ export type ClothingItem = {
     type: GarmentKind;
     color: `#${string}`;
     isClean: boolean;
+    imageData?: string; // data URL of resized/compressed image
+    dateAdded?: string; // ISO timestamp
 };
 
 export type Outfit = {
@@ -16,6 +28,7 @@ export type Outfit = {
     bottom?: ClothingItem;
 };
 
-export const categories: { value: Category; label: string; }[] = [{value: 'top', label: 'Tops'}, {
-    value: 'bottom', label: 'Bottoms'
-}];
+export const categories: { value: Category; label: string; }[] = [
+    { value: 'top', label: 'Tops' },
+    { value: 'bottom', label: 'Bottoms' }
+];
