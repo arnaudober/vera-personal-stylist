@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useCloset } from "../hooks/useCloset.ts";
-import { ClothingCard } from "../components/clothing-card";
+import { ClothingItemCard } from "../components/clothing-item-card.tsx";
 import NavigationBar from "../components/navigation-bar.tsx";
 import LaundryButton from "../components/laundry-button.tsx";
 import CategoryFilterBar from "../components/category-filter-bar.tsx";
@@ -45,7 +45,7 @@ export default function Closet() {
           <div className="rounded-2xl">
             <div className="grid gap-5 grid-cols-2">
               {filteredClothingItems.map((item) => (
-                <ClothingCard key={item.id} item={item} />
+                <ClothingItemCard key={item.id} item={item} />
               ))}
             </div>
           </div>
