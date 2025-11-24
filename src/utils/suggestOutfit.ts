@@ -2,6 +2,7 @@ import {prepareColor, scoreOutfitColor} from "./colorScore.ts";
 import type { ClothingItem } from "../models/clothing-item.ts";
 import type { Outfit } from "../models/outfit.ts";
 
+// TODO: Move to `suggest.tsx` directly as private and clean logic.
 export function suggestOutfit(items: ClothingItem[]): Outfit | null {
     const cleanItems = items.filter(i => i.isClean);
     if (cleanItems.length === 0) return null;

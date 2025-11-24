@@ -4,7 +4,6 @@ import { useCloset } from "../hooks/useCloset.ts";
 import NavigationBar from "../components/navigation-bar.tsx";
 import LaundryButton from "../components/laundry-button.tsx";
 import calculateOutfitLayout from "../utils/outfitLayout.ts";
-import { BasketSprite } from "../components/basket-sprite.tsx";
 import { suggestOutfit } from "../utils/suggestOutfit.ts";
 import type { Outfit } from "../models/outfit.ts";
 import type { ClothingItem } from "../models/clothing-item.ts";
@@ -376,7 +375,20 @@ export default function Suggest() {
               className="absolute inset-0 flex items-center justify-center pointer-events-none"
               style={{ zIndex: 1 }}
             >
-              <BasketSprite isEmpty={droppedKeys.size === 0} />
+              <div
+                style={{
+                  width: "100%",
+                  aspectRatio: "1/2",
+                  backgroundImage: "url(/assets/basket-grid.png)",
+                  backgroundRepeat: "no-repeat",
+                  backgroundSize: "200% 100%",
+                  backgroundPosition: droppedKeys.size === 0 ? "0 0" : "94% 0",
+                  imageRendering: "auto",
+                }}
+                aria-label={
+                  droppedKeys.size === 0 ? "Empty basket" : "Full basket"
+                }
+              />
             </div>
           </div>
         </div>

@@ -38,7 +38,7 @@ export default function Closet() {
 
         <CategoryFilterBar
           selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
+          onCategorySelected={setSelectedCategory}
         />
 
         <div className="mx-auto max-w-4xl p-4">
