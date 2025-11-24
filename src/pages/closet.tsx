@@ -5,7 +5,7 @@ import NavigationBar from "../components/navigation-bar.tsx";
 import LaundryButton from "../components/laundry-button.tsx";
 import CategoryFilterBar from "../components/category-filter-bar.tsx";
 import type { ClothingItemCategory } from "../models/clothing-item.ts";
-import UploadClothingItemModal from "../components/upload-clothing-item-modal.tsx";
+import UploadClothingItemModal from "../modals/upload-clothing-item-modal.tsx";
 
 export default function Closet() {
   const { items, addItem } = useCloset();
