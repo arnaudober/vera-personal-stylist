@@ -5,6 +5,7 @@ import type {
 } from "../models/clothing-item.ts";
 import type { Outfit } from "../models/outfit.ts";
 
+// TODO: Latest file to refactor. Instead of a hook, could we use a redux store?
 const LS_KEY = "closet_items";
 
 export const DEFAULT_ITEMS: ClothingItem[] = [];
