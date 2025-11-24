@@ -1,14 +1,14 @@
 import { useMemo, useState } from "react";
 import { useCloset } from "../hooks/useCloset.ts";
 import { ClothingCard } from "../components/clothing-card";
-import Navbar from "../components/navbar.tsx";
-import LaundryFab from "../components/laundry-fab.tsx";
+import NavigationBar from "../components/navigation-bar.tsx";
+import LaundryButton from "../components/laundry-button.tsx";
 import CategoryFilterBar from "../components/category-filter-bar.tsx";
 import type { ClothingItemCategory } from "../models/clothing-item.ts";
 import UploadClothingItemModal from "../components/upload-clothing-item-modal.tsx";
 
 export default function Closet() {
-  const { items, markLaundryDone, addItem } = useCloset();
+  const { items, addItem } = useCloset();
   const [selectedCategory, setSelectedCategory] =
     useState<ClothingItemCategory | null>(null);
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
@@ -52,8 +52,8 @@ export default function Closet() {
         </div>
       </div>
 
-      <Navbar active="closet" />
-      <LaundryFab onLaundryDone={markLaundryDone} />
+      <NavigationBar activePage="closet" />
+      <LaundryButton />
 
       {showUploadModal && (
         <UploadClothingItemModal

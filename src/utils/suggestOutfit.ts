@@ -1,5 +1,6 @@
-import type {ClothingItem, Outfit} from "../model.ts";
 import {prepareColor, scoreOutfitColor} from "./colorScore.ts";
+import type { ClothingItem } from "../models/clothing-item.ts";
+import type { Outfit } from "../models/outfit.ts";
 
 export function suggestOutfit(items: ClothingItem[]): Outfit | null {
     const cleanItems = items.filter(i => i.isClean);
