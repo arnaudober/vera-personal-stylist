@@ -1,3 +1,5 @@
+import type { Color } from "./color.ts";
+
 export type ClothingCategoryOption = {
   value: ClothingItemCategory;
   label: string;
@@ -37,13 +39,12 @@ export const typesOptions: TypeOption[] = [
   { value: "skirt", label: "Skirt", category: "bottom" },
 ];
 
-export type HexadecimalString = `#${string}`;
 export type ClothingItem = {
   id: string;
   name: string;
   category: ClothingItemCategory;
   type: ClothingItemType;
-  color: HexadecimalString;
+  color: Color;
   isClean: boolean;
   imageData: string;
 };

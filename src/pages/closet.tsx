@@ -7,6 +7,8 @@ import CategoryFilterBar from "../components/category-filter-bar.tsx";
 import type { ClothingItemCategory } from "../models/clothing-item.ts";
 import UploadClothingItemModal from "../modals/upload-clothing-item-modal.tsx";
 
+// TODO: Refactor this page.
+
 export default function Closet() {
   const { items, addItem } = useCloset();
   const [selectedCategory, setSelectedCategory] =

@@ -4,7 +4,7 @@ import {
   type ClothingItemCategory,
   type ClothingItemType,
   type CreateClothingItem,
-  type HexadecimalString,
+  type Color,
   typesOptions,
 } from "../models/clothing-item.ts";
 
@@ -20,7 +20,7 @@ const componentToHexadecimal = (c: number): string =>
   c.toString(16).padStart(2, "0");
 const extractDominantColor = async (
   dataUrl: string,
-): Promise<HexadecimalString> => {
+): Promise<Color> => {
   const image: HTMLImageElement = await new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);

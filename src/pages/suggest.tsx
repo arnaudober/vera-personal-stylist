@@ -4,9 +4,11 @@ import { useCloset } from "../hooks/useCloset.ts";
 import NavigationBar from "../components/navigation-bar.tsx";
 import LaundryButton from "../components/laundry-button.tsx";
 import calculateOutfitLayout from "../utils/outfitLayout.ts";
-import { suggestOutfit } from "../utils/suggestOutfit.ts";
+import { calculateBestOutfit } from "../utils/calculate-best-outfit.ts";
 import type { Outfit } from "../models/outfit.ts";
 import type { ClothingItem } from "../models/clothing-item.ts";
+
+// TODO: Refactor this page.
 
 const todayDate = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
@@ -175,7 +177,7 @@ export default function Suggest() {
         }
 
         // Build the outfit object from the items
-        const outfit: Outfit = {};
+        const outfit: Partial<Outfit> = {};
         for (const item of outfitItems) {
           if (item.category === "top") {
             outfit.top = item;
@@ -184,7 +186,7 @@ export default function Suggest() {
           }
         }
 
-        return outfit.top && outfit.bottom ? outfit : null;
+        return outfit.top && outfit.bottom ? (outfit as Outfit) : null;
       } catch {
         return null;
       }
@@ -211,7 +213,7 @@ export default function Suggest() {
     if (storedOutfit) {
       setTodayOutfit(storedOutfit);
     } else {
-      const outfit = suggestOutfit(items);
+      const outfit = calculateBestOutfit(items);
       setTodayOutfit(outfit);
 
       if (outfit) {
