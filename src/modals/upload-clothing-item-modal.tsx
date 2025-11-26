@@ -4,9 +4,9 @@ import {
   type ClothingItemCategory,
   type ClothingItemType,
   type CreateClothingItem,
-  type Color,
   typesOptions,
 } from "../models/clothing-item.ts";
+import type { Color } from "../models/color.ts";
 
 const MAX_IMAGE_SIZE = 1024;
 const COMPRESSION_QUALITY = 0.7;
@@ -18,9 +18,7 @@ interface ModalData {
 
 const componentToHexadecimal = (c: number): string =>
   c.toString(16).padStart(2, "0");
-const extractDominantColor = async (
-  dataUrl: string,
-): Promise<Color> => {
+const extractDominantColor = async (dataUrl: string): Promise<Color> => {
   const image: HTMLImageElement = await new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
@@ -183,7 +181,7 @@ export default function UploadClothingItemModal({
         isClean: true,
         imageData,
       };
-      await onSave(item);
+      onSave(item);
       onClose();
     } finally {
       setIsSaving(false);
