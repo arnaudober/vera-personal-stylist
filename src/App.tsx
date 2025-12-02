@@ -1,17 +1,20 @@
-import './App.css'
-import './firebase.ts'
-import Suggest from "./pages/suggest.tsx";
-import {BrowserRouter, Route, Routes} from "react-router";
-import Closet from "./pages/closet.tsx";
+import "./App.css";
+import "./firebase.ts";
+import { SuggestPage } from "./pages/suggest-page.tsx";
+import { BrowserRouter, Route, Routes } from "react-router";
+import { ClosetPage } from "./pages/closet-page.tsx";
 
 function App() {
-    return (<><BrowserRouter>
+  return (
+    <>
+      <BrowserRouter>
         <Routes>
-            <Route path="/" element={<Suggest/>}/>
-            <Route path="/closet" element={<Closet/>}/>
+          <Route path="/" element={<SuggestPage />} />
+          <Route path="/closet" element={<ClosetPage />} />
         </Routes>
-    </BrowserRouter>
-    </>)
+      </BrowserRouter>
+    </>
+  );
 }
 
-export default App
+export default App;

@@ -1,18 +1,17 @@
 import { MdLocalLaundryService } from "react-icons/md";
-import { useCloset } from "../hooks/useCloset.ts";
+import { useCloset } from "../hooks/closet.ts";
+import { useOutfit } from "../hooks/outfit.ts";
 
-interface LaundryButtonData {
-  onLaundryDone?: () => void;
-}
-
-export default function LaundryButton({ onLaundryDone }: LaundryButtonData) {
+export default function LaundryButton() {
   const { markLaundryDone } = useCloset();
+  const { resetOutfit, outfit } = useOutfit();
 
   function onDoLaundry(): void {
     markLaundryDone();
 
-    if (onLaundryDone && typeof onLaundryDone === "function") {
-      onLaundryDone();
+    // If we didn't have an outfit available, we reset the outfit so the `suggest page` regenerates it.
+    if (!outfit) {
+      resetOutfit();
     }
   }
 
