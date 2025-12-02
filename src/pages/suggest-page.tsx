@@ -31,13 +31,13 @@ const OutfitTemplate = ({
   touchDrag: TouchDragState;
 }): React.JSX.Element => {
   const { isItemClean, areAllItemsClean, markWorn } = useCloset();
-  const { outfit, generate, resetOutfit } = useOutfit();
+  const { outfit, generateOutfit, resetOutfit } = useOutfit();
 
   useEffect(() => {
     if (!outfit) {
-      generate();
+      generateOutfit();
     }
-  }, [resetOutfit, generate, outfit]);
+  }, [resetOutfit]);
 
   // Drag is used for desktop
   const handleDragStart = (

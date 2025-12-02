@@ -9,7 +9,6 @@ export default function LaundryButton() {
   function onDoLaundry(): void {
     markLaundryDone();
 
-    // If we didn't have an outfit available, we reset the outfit so the `suggest page` regenerates it.
     if (!outfit) {
       resetOutfit();
     }

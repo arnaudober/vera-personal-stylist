@@ -80,5 +80,13 @@ export function useCloset() {
     localStorage.setItem(ITEMS_LOCAL_STORAGE_KEY, JSON.stringify(newItems));
   }
 
-  return { items, add, remove, markLaundryDone, markWorn, isItemClean, areAllItemsClean };
+  return {
+    items,
+    add,
+    remove,
+    markLaundryDone,
+    markWorn,
+    isItemClean,
+    areAllItemsClean,
+  };
 }

@@ -80,10 +80,6 @@ export const useOutfit = () => {
   const { items } = useCloset();
 
   useEffect(() => {
-    if (!outfit) {
-      generate();
-    }
-
     const listener = (s: Outfit | null) => setOutfit(s);
     listeners.add(listener);
     return () => {
@@ -91,7 +87,7 @@ export const useOutfit = () => {
     };
   }, []);
 
-  const generate = (): Outfit | null => {
+  const generateOutfit = (): Outfit | null => {
     const cleanItems = items.filter((i) => i.isClean);
     if (!cleanItems || cleanItems.length === 0) {
       return null;
@@ -153,5 +149,5 @@ export const useOutfit = () => {
     localStorage.setItem(OUTFIT_LOCAL_STORAGE_KEY, JSON.stringify(newOutfit));
   }
 
-  return { outfit, generate, resetOutfit };
+  return { outfit, generateOutfit, resetOutfit };
 };
