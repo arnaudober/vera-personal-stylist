@@ -37,7 +37,7 @@ const OutfitTemplate = ({
     if (!outfit) {
       generateOutfit();
     }
-  }, [resetOutfit]);
+  }, [resetOutfit, outfit, generateOutfit]);
 
   // Drag is used for desktop
   const handleDragStart = (

@@ -147,6 +147,7 @@ export const useOutfit = () => {
   function emitChange(newOutfit: Outfit | null): void {
     listeners.forEach((listener) => listener(newOutfit));
     localStorage.setItem(OUTFIT_LOCAL_STORAGE_KEY, JSON.stringify(newOutfit));
+    state = newOutfit;
   }
 
   return { outfit, generateOutfit, resetOutfit };

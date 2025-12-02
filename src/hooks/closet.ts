@@ -78,6 +78,7 @@ export function useCloset() {
   function emitChange(newItems: ClothingItem[]): void {
     listeners.forEach((listener) => listener(newItems));
     localStorage.setItem(ITEMS_LOCAL_STORAGE_KEY, JSON.stringify(newItems));
+    state = newItems;
   }
 
   return {
