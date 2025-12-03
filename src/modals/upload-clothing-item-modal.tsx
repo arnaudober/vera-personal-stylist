@@ -1,10 +1,8 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   categoryOptions,
   type ClothingItemCategory,
-  type ClothingItemType,
   type CreateClothingItem,
-  typesOptions,
 } from "../models/clothing-item.ts";
 import type { Color } from "../models/color.ts";
 
@@ -114,16 +112,8 @@ export default function UploadClothingItemModal({
   const [preview, setPreview] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [category, setCategory] = useState<ClothingItemCategory | "">("");
-  const [type, setType] = useState<ClothingItemType | "">("");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const types = useMemo(() => typesOptions, []);
-  const filteredTypes = useMemo(
-    () =>
-      types.filter((type) => (category && type.category === category) ?? true),
-    [category, types],
-  );
 
   function fileDragged(file: File | undefined) {
     if (!file) {
@@ -166,17 +156,11 @@ export default function UploadClothingItemModal({
         setIsSaving(false);
         return;
       }
-      if (!type) {
-        setError("Please select a type.");
-        setIsSaving(false);
-        return;
-      }
 
       const imageData = await processFile(file);
       const item: CreateClothingItem = {
         name: name.trim(),
         category,
-        type,
         color: await extractDominantColor(imageData),
         isClean: true,
         imageData,
@@ -252,7 +236,6 @@ export default function UploadClothingItemModal({
                 value={category}
                 onChange={(e) => {
                   setCategory(e.target.value as ClothingItemCategory);
-                  setType("");
                 }}
                 disabled={isSaving}
               >
@@ -260,25 +243,6 @@ export default function UploadClothingItemModal({
                 {categoryOptions.map((c) => (
                   <option key={c.value} value={c.value}>
                     {c.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Type</label>
-              <select
-                className="w-full rounded-lg border px-3 py-2 text-base"
-                value={type}
-                onChange={(e) => setType(e.target.value as ClothingItemType)}
-                disabled={isSaving || !category}
-              >
-                <option value="">
-                  {category ? "Select…" : "Choose category first"}
-                </option>
-                {filteredTypes.map((t) => (
-                  <option key={t.value} value={t.value}>
-                    {t.label}
                   </option>
                 ))}
               </select>
