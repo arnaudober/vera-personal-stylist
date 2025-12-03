@@ -101,7 +101,7 @@ const processFile = async (file: File): Promise<string> => {
   canvas.height = processedHeight;
   ctx.drawImage(imageElement, 0, 0, processedWidth, processedHeight);
 
-  return canvas.toDataURL("image/jpeg", COMPRESSION_QUALITY);
+  return canvas.toDataURL("image/png", COMPRESSION_QUALITY);
 };
 
 export default function UploadClothingItemModal({

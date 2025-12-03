@@ -55,7 +55,7 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
         <img
           src={item.imageData}
           alt={item.name}
-          className="w-24 h-24 object-cover rounded-xl shadow-sm"
+          className="w-24 h-24 object-cover rounded-xl"
           loading="lazy"
         />
       </div>

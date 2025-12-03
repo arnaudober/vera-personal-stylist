@@ -4,19 +4,19 @@ import { useOutfit } from "../hooks/outfit.ts";
 
 export default function LaundryButton() {
   const { areAllItemsClean, markLaundryDone } = useCloset();
-  const { resetOutfit, outfit } = useOutfit();
+  const { generateOutfit, outfit } = useOutfit();
 
   function onDoLaundry(): void {
     markLaundryDone();
 
     if (!outfit) {
-      resetOutfit();
+      generateOutfit();
     }
   }
 
   return (
     <button
-      onClick={onDoLaundry}
+      onClick={() => onDoLaundry()}
       aria-label="Mark all worn items as clean"
       title="Mark all worn items as clean"
       className={`fixed bottom-12 right-5 z-50 rounded-full shadow-lg transition-colors border btn-accent border-gray-200 disabled:cursor-not-allowed  disabled:border-gray-300`}

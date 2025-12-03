@@ -139,10 +139,7 @@ export const useOutfit = () => {
     return bestOutfit;
   };
 
-  const resetOutfit = (): null => {
-    emitChange(null);
-    return null;
-  };
+  const clearOutfit = (): void => emitChange(null);
 
   function emitChange(newOutfit: Outfit | null): void {
     listeners.forEach((listener) => listener(newOutfit));
@@ -150,5 +147,5 @@ export const useOutfit = () => {
     state = newOutfit;
   }
 
-  return { outfit, generateOutfit, resetOutfit };
+  return { outfit, generateOutfit, clearOutfit };
 };
