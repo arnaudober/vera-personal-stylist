@@ -16,7 +16,8 @@ export type ClothingItem = {
   category: ClothingItemCategory;
   color: Color;
   isClean: boolean;
-  imageData: string;
 };
 
-export type CreateClothingItem = Omit<ClothingItem, "id">;
+export interface CreateClothingItem extends Omit<ClothingItem, "id"> {
+  imageData: string;
+}

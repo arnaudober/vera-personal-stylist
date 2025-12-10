@@ -5,6 +5,7 @@ import LaundryButton from "../components/laundry-button.tsx";
 import type { Outfit } from "../models/outfit.ts";
 import { useOutfit } from "../hooks/outfit.ts";
 import { useCloset } from "../hooks/closet.ts";
+import { useImage } from "../hooks/image.ts";
 
 interface TouchDragState {
   key: keyof Outfit | null;
@@ -30,6 +31,7 @@ const OutfitTemplate = ({
   setTouchDrag: React.Dispatch<React.SetStateAction<TouchDragState>>;
   touchDrag: TouchDragState;
 }): React.JSX.Element => {
+  const { getImage } = useImage();
   const { isItemClean, areAllItemsClean, markWorn } = useCloset();
   const { outfit, clearOutfit, generateOutfit } = useOutfit();
 
@@ -125,7 +127,7 @@ const OutfitTemplate = ({
             }
 
             return (
-              <div className="relative mx-auto w-full flex flex-col items-center justify-center">
+              <div className="relative mx-auto w-full flex flex-col items-center justify-center gap-2.5">
                 {/* Top item */}
                 {outfit.top && isItemClean(outfit.top.id) && (
                   <div className="select-none" aria-label="Top item">
@@ -141,9 +143,9 @@ const OutfitTemplate = ({
                       }}
                     >
                       <img
-                        src={outfit["top"].imageData}
+                        src={getImage(outfit.top.id)}
                         alt={outfit["top"].name}
-                        className="w-48 h-48 object-cover rounded-xl shadow-sm"
+                        className="w-48 h-48 object-cover rounded-xl"
                         loading="lazy"
                       />
                     </div>
@@ -153,7 +155,7 @@ const OutfitTemplate = ({
                 {outfit.bottom && isItemClean(outfit.bottom.id) && (
                   <div className="select-none" aria-hidden="true">
                     <div
-                      className={`p-2 md:p-3 suggest-card rounded-2xl text-4xl md:text-5xl lg:text-6xl cursor-grab ${touchDrag.isDragging && touchDrag.key === "bottom" ? "opacity-20" : ""}`}
+                      className={`p-2 suggest-card rounded-4xl text-8xl sm:text-9xl cursor-grab ${touchDrag.isDragging && touchDrag.key === "bottom" ? "opacity-20" : ""}`}
                       draggable
                       onDragStart={(e) => handleDragStart("bottom", e)}
                       onTouchStart={(e) => handleTouchStart("bottom", e)}
@@ -164,9 +166,9 @@ const OutfitTemplate = ({
                       }}
                     >
                       <img
-                        src={outfit["bottom"].imageData}
+                        src={getImage(outfit.bottom.id)}
                         alt={outfit["bottom"].name}
-                        className="w-48 h-48 object-cover rounded-xl shadow-sm"
+                        className="w-48 h-48 object-cover rounded-xl"
                         loading="lazy"
                       />
                     </div>
@@ -216,6 +218,7 @@ const OutfitTemplate = ({
 };
 
 export const SuggestPage = (): React.JSX.Element => {
+  const { getImage } = useImage();
   const { outfit } = useOutfit();
   const [touchDrag, setTouchDrag] = useState<TouchDragState>({
     key: null,
@@ -241,7 +244,7 @@ export const SuggestPage = (): React.JSX.Element => {
           >
             <div className="p-2 suggest-card rounded-2xl opacity-80 scale-110 shadow-lg">
               <img
-                src={outfit[touchDrag.key].imageData}
+                src={getImage(outfit[touchDrag.key].id)}
                 alt={outfit[touchDrag.key].name}
                 className="w-48 h-48 object-cover rounded-xl shadow-sm"
                 loading="lazy"

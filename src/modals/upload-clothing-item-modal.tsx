@@ -6,12 +6,12 @@ import {
 } from "../models/clothing-item.ts";
 import type { Color } from "../models/color.ts";
 
-const MAX_IMAGE_SIZE = 1024;
-const COMPRESSION_QUALITY = 0.7;
+const MAX_IMAGE_SIZE = 256;
+const COMPRESSION_QUALITY = 0.5;
 
 interface ModalData {
   onClose: () => void;
-  onSave: (item: CreateClothingItem) => void;
+  onSave: (item: CreateClothingItem) => Promise<void>;
 }
 
 const componentToHexadecimal = (c: number): string =>
@@ -165,7 +165,7 @@ export default function UploadClothingItemModal({
         isClean: true,
         imageData,
       };
-      onSave(item);
+      await onSave(item);
       onClose();
     } finally {
       setIsSaving(false);

@@ -6,9 +6,11 @@ import {
   categoryOptions,
   type ClothingItem,
   type ClothingItemCategory,
+  type CreateClothingItem,
 } from "../models/clothing-item.ts";
 import UploadClothingItemModal from "../modals/upload-clothing-item-modal.tsx";
 import * as React from "react";
+import { useImage } from "../hooks/image.ts";
 
 const CLEAN_ITEM_COLOR = "#65aaa7";
 const DIRTY_ITEM_COLOR = "#374151";
@@ -49,11 +51,13 @@ const FilterBar = ({
   );
 };
 const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
+  const { getImage } = useImage();
+
   return (
     <div className="suggest-card bg-white p-3 rounded-2xl flex flex-col items-center text-center">
       <div className="text-7xl flex items-center justify-center">
         <img
-          src={item.imageData}
+          src={getImage(item.id)}
           alt={item.name}
           className="w-24 h-24 object-cover rounded-xl"
           loading="lazy"
@@ -80,6 +84,7 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
 
 export const ClosetPage = (): React.JSX.Element => {
   const { items, add } = useCloset();
+  const { saveImage } = useImage();
   const [selectedCategory, setSelectedCategory] =
     useState<ClothingItemCategory | null>(null);
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
@@ -91,6 +96,14 @@ export const ClosetPage = (): React.JSX.Element => {
         : items,
     [selectedCategory, items],
   );
+
+  async function addItem(item: CreateClothingItem): Promise<void> {
+    const newItem = add(item);
+
+    if (item.imageData) {
+      await saveImage({ id: newItem.id, imageData: item.imageData });
+    }
+  }
 
   return (
     <>
@@ -129,9 +142,7 @@ export const ClosetPage = (): React.JSX.Element => {
       {showUploadModal && (
         <UploadClothingItemModal
           onClose={() => setShowUploadModal(false)}
-          onSave={(item) => {
-            add(item);
-          }}
+          onSave={addItem}
         />
       )}
     </>
