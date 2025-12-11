@@ -141,11 +141,19 @@ export const useOutfit = () => {
 
   const clearOutfit = (): void => emitChange(null);
 
+  const canGenerateOutfit = (): boolean => {
+    const cleanItems = items.filter((i) => i.isClean);
+    const availableTops = cleanItems.filter((i) => i.category === "top");
+    const availableBottoms = cleanItems.filter((i) => i.category === "bottom");
+
+    return availableTops.length > 0 && availableBottoms.length > 0;
+  };
+
   function emitChange(newOutfit: Outfit | null): void {
     listeners.forEach((listener) => listener(newOutfit));
     localStorage.setItem(OUTFIT_LOCAL_STORAGE_KEY, JSON.stringify(newOutfit));
     state = newOutfit;
   }
 
-  return { outfit, generateOutfit, clearOutfit };
+  return { outfit, generateOutfit, clearOutfit, canGenerateOutfit };
 };
