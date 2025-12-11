@@ -1,11 +1,11 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import NavigationBar from "../components/navigation-bar.tsx";
-import LaundryButton from "../components/laundry-button.tsx";
 import type { Outfit } from "../models/outfit.ts";
 import { useOutfit } from "../hooks/outfit.ts";
 import { useCloset } from "../hooks/closet.ts";
 import { useImage } from "../hooks/image.ts";
+import RegenerateOutfitButton from "../components/regenerate-outfit-button.tsx";
 
 interface TouchDragState {
   key: keyof Outfit | null;
@@ -19,8 +19,7 @@ interface TouchDragState {
 const EmptyMessageTemplate = () => (
   <div className="relative mx-auto w-full max-w-md h-64 md:h-80 flex items-center justify-center">
     <div className="suggest-card rounded-4xl p-4 text-muted text-center">
-      No outfit right now — maybe it's laundry time? Tap{" "}
-      <span className="font-medium">Laundry</span>.
+      No outfit right now — maybe it's laundry time?
     </div>
   </div>
 );
@@ -270,7 +269,7 @@ export const SuggestPage = (): React.JSX.Element => {
       </div>
 
       <NavigationBar activePage="suggest" />
-      <LaundryButton />
+      <RegenerateOutfitButton />
     </>
   );
 };
