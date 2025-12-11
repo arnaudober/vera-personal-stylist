@@ -113,7 +113,7 @@ const OutfitTemplate = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col justify-between px-4 py-4">
+    <div className="flex-1 flex flex-col justify-between px-4 py-4 overflow-hidden">
       {outfit ? (
         <>
           {(() => {
