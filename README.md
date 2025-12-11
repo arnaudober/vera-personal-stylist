@@ -15,48 +15,11 @@ Snap your closet, let Vera organize your clothes, and get fresh outfit ideas —
 
 ---
 
-## 🚀 Getting Started
-1. Clone the repo:
-
-   ~~~bash
-   git clone https://github.com/arnaudober/vera-personal-stylist.git
-   cd vera-personal-stylist
-   ~~~
-
-2. Install dependencies:
-
-   ~~~bash
-   npm install
-   ~~~
-
-3. Run the app locally:
-
-   ~~~bash
-   npm start
-   ~~~
-
-4. Open http://localhost:3000 to view it in your browser.
-
----
-
-## 🛠 Tech Stack
-- **Frontend:** React / Tailwind
-- **Backend:** Firebase / Firestore
-- **AI:** Outfit suggestion logic
-
----
-
 ## 📌 Roadmap
-- [ ] Closet image recognition (auto-detect clothing items)
-- [ ] Advanced AI outfit matching
-- [ ] Multi-user profiles
-- [ ] Seasonal & weather-based suggestions
-
----
-
-## 🤝 Contributing
-Contributions, issues, and feature requests are welcome!
-Feel free to check the issues page: https://github.com/arnaudober/vera-personal-stylist/issues
+- [ ] Make available the MVP for private testing
+- [ ] Improve suggestion algorithm with weather, occasions, etc.
+- [ ] Add notification for suggestion once a day, reminders for laundry to be done after a few days
+- [ ] Release a first version to the public
 
 ---
 
