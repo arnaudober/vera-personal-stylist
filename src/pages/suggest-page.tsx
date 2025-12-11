@@ -5,6 +5,7 @@ import LaundryButton from "../components/laundry-button.tsx";
 import type { Outfit } from "../models/outfit.ts";
 import { useOutfit } from "../hooks/outfit.ts";
 import { useCloset } from "../hooks/closet.ts";
+import { useImage } from "../hooks/image.ts";
 
 interface TouchDragState {
   key: keyof Outfit | null;
@@ -30,14 +31,15 @@ const OutfitTemplate = ({
   setTouchDrag: React.Dispatch<React.SetStateAction<TouchDragState>>;
   touchDrag: TouchDragState;
 }): React.JSX.Element => {
+  const { getImage } = useImage();
   const { isItemClean, areAllItemsClean, markWorn } = useCloset();
-  const { outfit, generateOutfit, resetOutfit } = useOutfit();
+  const { outfit, clearOutfit, generateOutfit } = useOutfit();
 
   useEffect(() => {
     if (!outfit) {
       generateOutfit();
     }
-  }, [resetOutfit, outfit, generateOutfit]);
+  }, [generateOutfit, outfit]);
 
   // Drag is used for desktop
   const handleDragStart = (
@@ -47,20 +49,14 @@ const OutfitTemplate = ({
     e.dataTransfer.setData("text/plain", key as string);
   };
   const handleDrop = (e: React.DragEvent<HTMLDivElement>): void => {
-    e.preventDefault();
-
-    if (!outfit) {
-      return;
-    }
-
     const key = e.dataTransfer.getData("text/plain") as keyof Outfit;
     if (!key) {
       return;
     }
 
-    const item = outfit[key];
+    const item = outfit![key];
     markWorn(item);
-    resetOutfit();
+    clearOutfit();
   };
 
   // Touch is used for mobile/tablet
@@ -110,14 +106,14 @@ const OutfitTemplate = ({
     ) {
       const item = outfit[touchDrag.key];
       markWorn(item);
-      resetOutfit();
+      clearOutfit();
     }
 
     setTouchDrag((prev) => ({ ...prev, isDragging: false, key: null }));
   };
 
   return (
-    <div className="flex-1 flex flex-col justify-evenly px-4 pb-4">
+    <div className="flex-1 flex flex-col justify-between px-4 py-4">
       {outfit ? (
         <>
           {(() => {
@@ -131,7 +127,7 @@ const OutfitTemplate = ({
             }
 
             return (
-              <div className="relative mx-auto w-full flex flex-col items-center justify-center">
+              <div className="relative mx-auto w-full flex flex-col items-center justify-center gap-2.5">
                 {/* Top item */}
                 {outfit.top && isItemClean(outfit.top.id) && (
                   <div className="select-none" aria-label="Top item">
@@ -147,9 +143,9 @@ const OutfitTemplate = ({
                       }}
                     >
                       <img
-                        src={outfit["top"].imageData}
+                        src={getImage(outfit.top.id)}
                         alt={outfit["top"].name}
-                        className="w-48 h-48 object-cover rounded-xl shadow-sm"
+                        className="w-48 h-48 object-cover rounded-xl"
                         loading="lazy"
                       />
                     </div>
@@ -159,7 +155,7 @@ const OutfitTemplate = ({
                 {outfit.bottom && isItemClean(outfit.bottom.id) && (
                   <div className="select-none" aria-hidden="true">
                     <div
-                      className={`p-2 md:p-3 suggest-card rounded-2xl text-4xl md:text-5xl lg:text-6xl cursor-grab ${touchDrag.isDragging && touchDrag.key === "bottom" ? "opacity-20" : ""}`}
+                      className={`p-2 suggest-card rounded-4xl text-8xl sm:text-9xl cursor-grab ${touchDrag.isDragging && touchDrag.key === "bottom" ? "opacity-20" : ""}`}
                       draggable
                       onDragStart={(e) => handleDragStart("bottom", e)}
                       onTouchStart={(e) => handleTouchStart("bottom", e)}
@@ -170,9 +166,9 @@ const OutfitTemplate = ({
                       }}
                     >
                       <img
-                        src={outfit["bottom"].imageData}
+                        src={getImage(outfit.bottom.id)}
                         alt={outfit["bottom"].name}
-                        className="w-48 h-48 object-cover rounded-xl shadow-sm"
+                        className="w-48 h-48 object-cover rounded-xl"
                         loading="lazy"
                       />
                     </div>
@@ -189,19 +185,19 @@ const OutfitTemplate = ({
       {/* region Basket template */}
       <div
         onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => handleDrop(e)}
+        onDrop={(e) => {
+          e.preventDefault();
+          handleDrop(e);
+        }}
         className="p-2 w-64 md:w-80 h-44 md:h-56 flex items-center justify-center relative"
         style={{
           marginLeft: "auto",
           marginRight: "auto",
-          bottom: 40,
+          bottom: 110,
         }}
         aria-label="Wear basket"
       >
-        <div
-          className="absolute inset-0 flex items-center justify-center pointer-events-none"
-          style={{ zIndex: 1 }}
-        >
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div
             style={{
               width: "100%",
@@ -222,6 +218,7 @@ const OutfitTemplate = ({
 };
 
 export const SuggestPage = (): React.JSX.Element => {
+  const { getImage } = useImage();
   const { outfit } = useOutfit();
   const [touchDrag, setTouchDrag] = useState<TouchDragState>({
     key: null,
@@ -247,7 +244,7 @@ export const SuggestPage = (): React.JSX.Element => {
           >
             <div className="p-2 suggest-card rounded-2xl opacity-80 scale-110 shadow-lg">
               <img
-                src={outfit[touchDrag.key].imageData}
+                src={getImage(outfit[touchDrag.key].id)}
                 alt={outfit[touchDrag.key].name}
                 className="w-48 h-48 object-cover rounded-xl shadow-sm"
                 loading="lazy"

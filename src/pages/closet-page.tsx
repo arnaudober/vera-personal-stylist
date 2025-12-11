@@ -6,9 +6,13 @@ import {
   categoryOptions,
   type ClothingItem,
   type ClothingItemCategory,
+  type CreateClothingItem,
 } from "../models/clothing-item.ts";
 import UploadClothingItemModal from "../modals/upload-clothing-item-modal.tsx";
 import * as React from "react";
+import { useImage } from "../hooks/image.ts";
+import { IoClose } from "react-icons/io5";
+import { useOutfit } from "../hooks/outfit.ts";
 
 const CLEAN_ITEM_COLOR = "#65aaa7";
 const DIRTY_ITEM_COLOR = "#374151";
@@ -49,37 +53,66 @@ const FilterBar = ({
   );
 };
 const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
+  const { getImage } = useImage();
+  const { removeClothingItem } = useCloset();
+  const { outfit, clearOutfit } = useOutfit();
+
+  function remove(id: string): void {
+    if (window.confirm(`Are you sure you want to delete this item?`)) {
+      removeClothingItem(id);
+
+      if (item.id === outfit?.top.id || item.id === outfit?.bottom.id) {
+        clearOutfit();
+      }
+    }
+  }
+
   return (
-    <div className="suggest-card bg-white p-3 rounded-2xl flex flex-col items-center text-center">
-      <div className="text-7xl flex items-center justify-center">
-        <img
-          src={item.imageData}
-          alt={item.name}
-          className="w-24 h-24 object-cover rounded-xl shadow-sm"
-          loading="lazy"
-        />
-      </div>
-
-      <div className="mt-2 text-lg font-semibold">{item.name}</div>
-
-      <div className="mt-1">
-        <span
-          className={`inline-block rounded-full border px-2 py-0.5 text-xs pill`}
-          style={{
-            backgroundColor: item.isClean ? CLEAN_ITEM_COLOR : DIRTY_ITEM_COLOR,
-            color: "#fff",
-            borderColor: "transparent",
-          }}
+    <div className="flex flex-col gap-2 p-2 ">
+      <div className="suggest-card bg-white p-3 rounded-2xl flex flex-col items-center text-center relative">
+        <button
+          onClick={() => remove(item.id)}
+          className="opacity-80 absolute top-2 right-2 w-4 h-4 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-all cursor-pointer text-sm font-bold"
+          aria-label="Delete item"
         >
-          {item.isClean ? "Clean" : "Dirty"}
-        </span>
+          <IoClose size={14} />
+        </button>
+
+        <div className="text-7xl flex items-center justify-center">
+          <img
+            src={getImage(item.id)}
+            alt={item.name}
+            className="w-24 h-24 object-cover rounded-xl"
+            loading="lazy"
+          />
+        </div>
+
+        <div className="mt-2 text-lg font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden">
+          {item.name}
+        </div>
+
+        <div className="mt-1">
+          <span
+            className={`inline-block rounded-full border px-2 py-0.5 text-xs pill`}
+            style={{
+              backgroundColor: item.isClean
+                ? CLEAN_ITEM_COLOR
+                : DIRTY_ITEM_COLOR,
+              color: "#fff",
+              borderColor: "transparent",
+            }}
+          >
+            {item.isClean ? "Clean" : "Dirty"}
+          </span>
+        </div>
       </div>
     </div>
   );
 };
 
 export const ClosetPage = (): React.JSX.Element => {
-  const { items, add } = useCloset();
+  const { items, addClothingItem } = useCloset();
+  const { saveImage } = useImage();
   const [selectedCategory, setSelectedCategory] =
     useState<ClothingItemCategory | null>(null);
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
@@ -91,6 +124,14 @@ export const ClosetPage = (): React.JSX.Element => {
         : items,
     [selectedCategory, items],
   );
+
+  async function addItem(item: CreateClothingItem): Promise<void> {
+    const newItem = addClothingItem(item);
+
+    if (item.imageData) {
+      await saveImage({ id: newItem.id, imageData: item.imageData });
+    }
+  }
 
   return (
     <>
@@ -129,9 +170,7 @@ export const ClosetPage = (): React.JSX.Element => {
       {showUploadModal && (
         <UploadClothingItemModal
           onClose={() => setShowUploadModal(false)}
-          onSave={(item) => {
-            add(item);
-          }}
+          onSave={addItem}
         />
       )}
     </>

@@ -44,16 +44,19 @@ export function useCloset() {
     };
   }, []);
 
-  const add = (item: CreateClothingItem): ClothingItem => {
+  const addClothingItem = (item: CreateClothingItem): ClothingItem => {
     const newItem: ClothingItem = {
-      ...item,
       id: `user-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      name: item.name,
+      category: item.category,
+      color: item.color,
+      isClean: true,
     };
     emitChange([newItem, ...state]);
 
     return newItem;
   };
-  const remove = (id: string): string => {
+  const removeClothingItem = (id: string): string => {
     emitChange(state.filter((i) => i.id !== id));
     return id;
   };
@@ -83,8 +86,8 @@ export function useCloset() {
 
   return {
     items,
-    add,
-    remove,
+    addClothingItem,
+    removeClothingItem,
     markLaundryDone,
     markWorn,
     isItemClean,

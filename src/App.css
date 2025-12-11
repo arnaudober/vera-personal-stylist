@@ -8,6 +8,10 @@
   transition:
     filter 120ms ease-in-out,
     opacity 120ms ease-in-out;
+
+    &:disabled {
+        background-color: #d1d5dc;
+    }
 }
 
 .text-muted {
