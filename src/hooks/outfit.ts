@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import type { Outfit } from "../models/outfit.ts";
 import { useCloset } from "./closet.ts";
-import type { ClothingItem } from "../models/clothing-item.ts";
 import type { Color } from "../models/color.ts";
 import { differenceCiede2000 } from "culori";
 
@@ -28,30 +27,13 @@ const scoreColors = ({ a, b }: { a: Color; b: Color }): number | null => {
   // Convert distance to score (0-1, where 1 is closest). Delta E of 100 is quite different, 0 is identical
   return 1 - Math.min(distance / 100, 1);
 };
-const findBestMatch = ({
-  candidates,
-  anchor,
-}: {
-  candidates: ClothingItem[];
-  anchor: ClothingItem;
-}): ClothingItem => {
-  let bestItem: Partial<ClothingItem> = {};
-  let bestScore = -1;
 
-  for (const candidate of candidates) {
-    const score = scoreColors({
-      a: anchor.color,
-      b: candidate.color,
-    });
-
-    if (score && score > bestScore) {
-      bestScore = score;
-      bestItem = candidate;
-    }
+const isSameOutfit = (a: Outfit | null, b: Outfit | null): boolean => {
+  if (!a || !b) {
+    return false;
   }
 
-  // bestItem is now fully defined so we can cast it safely
-  return bestItem as ClothingItem;
+  return a.top.id === b.top.id && a.bottom.id === b.bottom.id;
 };
 
 const initialize = () => {
@@ -99,40 +81,29 @@ export const useOutfit = () => {
       return null;
     }
 
-    const maxAttempts = cleanItems.length;
-    let bestOutfit = {} as Outfit;
+    // Prefer the best-scoring outfit among all valid combinations,
+    // but never return the exact same (top+bottom) as the current one.
+    let bestOutfit: Outfit | null = null;
     let highestScore = -1;
 
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const item = cleanItems[Math.floor(Math.random() * cleanItems.length)];
-      const currentOutfit: Partial<Outfit> = {
-        top: item.category === "top" ? item : undefined,
-        bottom: item.category === "bottom" ? item : undefined,
-      };
+    for (const top of availableTops) {
+      for (const bottom of availableBottoms) {
+        const candidate: Outfit = { top, bottom };
+        if (isSameOutfit(candidate, outfit)) {
+          continue;
+        }
 
-      if (!currentOutfit.bottom) {
-        currentOutfit.bottom = findBestMatch({
-          candidates: availableBottoms,
-          anchor: currentOutfit.top!,
-        });
+        const score = scoreColors({ a: top.color, b: bottom.color });
+        if (score && score > highestScore) {
+          highestScore = score;
+          bestOutfit = candidate;
+        }
       }
+    }
 
-      if (!currentOutfit.top) {
-        currentOutfit.top = findBestMatch({
-          candidates: availableTops,
-          anchor: currentOutfit.bottom!,
-        });
-      }
-
-      const score = scoreColors({
-        a: currentOutfit.top.color,
-        b: currentOutfit.bottom.color,
-      });
-
-      if (score && score > highestScore) {
-        highestScore = score;
-        bestOutfit = currentOutfit as Outfit; // Outfit is now fully defined so we can cast it safely
-      }
+    // If there is no alternative outfit, don't change the current one.
+    if (!bestOutfit) {
+      return null;
     }
 
     emitChange(bestOutfit);
@@ -141,11 +112,33 @@ export const useOutfit = () => {
 
   const clearOutfit = (): void => emitChange(null);
 
+  const canGenerateOutfit = (): boolean => {
+    const cleanItems = items.filter((i) => i.isClean);
+    const availableTops = cleanItems.filter((i) => i.category === "top");
+    const availableBottoms = cleanItems.filter((i) => i.category === "bottom");
+
+    if (availableTops.length === 0 || availableBottoms.length === 0) {
+      return false;
+    }
+    if (!outfit) {
+      // If there is no current outfit yet, regenerating/generating is possible.
+      return true;
+    }
+
+    // Only if there is another available outfit.
+    return availableTops.some((topItem) =>
+      availableBottoms.some(
+        (bottomItem) =>
+          topItem.id !== outfit.top.id || bottomItem.id !== outfit.bottom.id,
+      ),
+    );
+  };
+
   function emitChange(newOutfit: Outfit | null): void {
     listeners.forEach((listener) => listener(newOutfit));
     localStorage.setItem(OUTFIT_LOCAL_STORAGE_KEY, JSON.stringify(newOutfit));
     state = newOutfit;
   }
 
-  return { outfit, generateOutfit, clearOutfit };
+  return { outfit, generateOutfit, clearOutfit, canGenerateOutfit };
 };
