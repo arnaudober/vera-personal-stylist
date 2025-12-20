@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { useCloset } from "../hooks/closet.ts";
 import NavigationBar from "../components/navigation-bar.tsx";
-import LaundryButton from "../components/laundry-button.tsx";
 import {
   categoryOptions,
   type ClothingItem,
@@ -13,6 +12,7 @@ import * as React from "react";
 import { useImage } from "../hooks/image.ts";
 import { IoClose } from "react-icons/io5";
 import { useOutfit } from "../hooks/outfit.ts";
+import { FaPlus } from "react-icons/fa6";
 
 const CLEAN_ITEM_COLOR = "#65aaa7";
 const DIRTY_ITEM_COLOR = "#374151";
@@ -25,12 +25,12 @@ const FilterBar = ({
   onCategorySelected: (category: ClothingItemCategory | null) => void;
 }): React.JSX.Element => {
   return (
-    <div className={`pr-0 pt-0 pb-2 pt-2 pl-4`}>
+    <div className={`pr-0 pb-2 pt-2 pl-4`}>
       <div className="flex justify-center" style={{ minWidth: "max-content" }}>
         <button
           onClick={() => onCategorySelected(null)}
           className={`
-                            px-4 py-1 mr-2 rounded-xl text-md font-medium transition-all whitespace-nowrap
+                            px-4 py-1 mr-2 cursor-pointer rounded-xl text-md font-medium transition-all whitespace-nowrap
                             ${selectedCategory === null ? "bg-gray-100 text-gray-700" : "text-gray-700"}
                         `}
         >
@@ -41,7 +41,7 @@ const FilterBar = ({
             key={value}
             onClick={() => onCategorySelected(value)}
             className={`
-                                px-4 py-1 mr-2 rounded-xl text-md font-medium transition-all whitespace-nowrap
+                                px-4 py-1 mr-2 cursor-pointer rounded-xl text-md font-medium transition-all whitespace-nowrap
                                 ${selectedCategory === value ? "bg-gray-100  text-gray-700" : "text-gray-700"}
                             `}
           >
@@ -109,6 +109,51 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
     </div>
   );
 };
+const AddItemButton = ({
+  onClick,
+}: {
+  onClick: () => void;
+}): React.JSX.Element => {
+  return (
+    <div className="flex justify-center">
+      <button
+        onClick={onClick}
+        aria-label="Add a new item to your closet"
+        title="Add a new item to your closet"
+        className={`fixed bottom-12 right-5 z-50 cursor-pointer rounded-full shadow-lg transition-colors border btn-accent border-gray-200 disabled:cursor-not-allowed  disabled:border-gray-300`}
+        style={{ width: 56, height: 56 }}
+      >
+        <div className="flex items-center justify-center text-3xl">
+          <FaPlus />
+        </div>
+      </button>
+    </div>
+  );
+};
+const LaundryButton = (): React.JSX.Element => {
+  const { areAllItemsClean, markLaundryDone } = useCloset();
+  const { generateOutfit, outfit } = useOutfit();
+
+  function onDoLaundry(): void {
+    markLaundryDone();
+
+    if (!outfit) {
+      generateOutfit();
+    }
+  }
+
+  return (
+    <button
+      className="mt-5 w-full rounded-xl bg-white opacity-70 text-black px-4 py-2 text-base text-md font-medium transition-all cursor-pointer hover:opacity-100 "
+      aria-label="Mark all worn items as clean"
+      title="Mark all worn items as clean"
+      onClick={() => onDoLaundry()}
+      disabled={areAllItemsClean()}
+    >
+      Wash all items
+    </button>
+  );
+};
 
 export const ClosetPage = (): React.JSX.Element => {
   const { items, addClothingItem } = useCloset();
@@ -137,15 +182,9 @@ export const ClosetPage = (): React.JSX.Element => {
     <>
       <div className="bg-app min-h-screen pb-28">
         <div className="mx-auto max-w-4xl p-4 pb-2">
-          <div className="flex items-center justify-center gap-3">
-            <h2 className="p-2 text-2xl font-semibold">Your closet</h2>
-            <button
-              className="rounded-xl bg-black text-white px-4 py-2 text-base"
-              onClick={() => setShowUploadModal(true)}
-            >
-              Add item
-            </button>
-          </div>
+          <h2 className="p-2 text-2xl font-semibold text-center">
+            Your closet
+          </h2>
         </div>
 
         <FilterBar
@@ -161,11 +200,13 @@ export const ClosetPage = (): React.JSX.Element => {
               ))}
             </div>
           </div>
+
+          <LaundryButton />
         </div>
       </div>
 
       <NavigationBar activePage="closet" />
-      <LaundryButton />
+      <AddItemButton onClick={() => setShowUploadModal(true)} />
 
       {showUploadModal && (
         <UploadClothingItemModal

@@ -5,7 +5,7 @@ import type { Outfit } from "../models/outfit.ts";
 import { useOutfit } from "../hooks/outfit.ts";
 import { useCloset } from "../hooks/closet.ts";
 import { useImage } from "../hooks/image.ts";
-import RegenerateOutfitButton from "../components/regenerate-outfit-button.tsx";
+import { RiAiGenerate } from "react-icons/ri";
 
 interface TouchDragState {
   key: keyof Outfit | null;
@@ -23,6 +23,28 @@ const EmptyMessageTemplate = () => (
     </div>
   </div>
 );
+const RegenerateOutfitButton = () => {
+  const { generateOutfit, canGenerateOutfit } = useOutfit();
+
+  function onRegenerate(): void {
+    generateOutfit();
+  }
+
+  return (
+    <button
+      onClick={() => onRegenerate()}
+      aria-label="Regenerate the outfit"
+      title="Regenerate the outfit"
+      className={`fixed bottom-12 right-5 z-50 rounded-full cursor-pointer shadow-lg transition-colors border btn-accent border-gray-200 disabled:cursor-not-allowed  disabled:border-gray-300`}
+      style={{ width: 56, height: 56 }}
+      disabled={!canGenerateOutfit()}
+    >
+      <div className="flex items-center justify-center text-3xl">
+        <RiAiGenerate />
+      </div>
+    </button>
+  );
+};
 const OutfitTemplate = ({
   setTouchDrag,
   touchDrag,
