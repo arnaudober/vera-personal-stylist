@@ -25,8 +25,8 @@ const FilterBar = ({
   onCategorySelected: (category: ClothingItemCategory | null) => void;
 }): React.JSX.Element => {
   return (
-    <div className={`pr-0 pt-0 pb-2 pl-4`}>
-      <div className="flex" style={{ minWidth: "max-content" }}>
+    <div className={`pr-0 pt-0 pb-2 pt-2 pl-4`}>
+      <div className="flex justify-center" style={{ minWidth: "max-content" }}>
         <button
           onClick={() => onCategorySelected(null)}
           className={`
@@ -137,7 +137,7 @@ export const ClosetPage = (): React.JSX.Element => {
     <>
       <div className="bg-app min-h-screen pb-28">
         <div className="mx-auto max-w-4xl p-4 pb-2">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-center gap-3">
             <h2 className="p-2 text-2xl font-semibold">Your closet</h2>
             <button
               className="rounded-xl bg-black text-white px-4 py-2 text-base"
@@ -155,7 +155,7 @@ export const ClosetPage = (): React.JSX.Element => {
 
         <div className="mx-auto max-w-4xl p-4">
           <div className="rounded-2xl">
-            <div className="grid gap-5 grid-cols-2">
+            <div className="grid gap-5 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {filteredItems.map((item) => (
                 <ItemCard key={item.id} item={item} />
               ))}
