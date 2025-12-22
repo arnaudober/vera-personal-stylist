@@ -132,7 +132,7 @@ const OutfitTemplate = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col justify-between px-4 py-4 overflow-hidden">
+    <div className="flex-1 flex flex-col px-4 pt-4 overflow-y-auto pb-64">
       {outfit ? (
         <>
           {(() => {
@@ -164,7 +164,7 @@ const OutfitTemplate = ({
                       <img
                         src={getImage(outfit.top.id)}
                         alt={outfit["top"].name}
-                        className="w-48 h-48 object-cover rounded-xl"
+                        className="lg:w-44 lg:h-44 w-48 h-48 object-cover rounded-xl"
                         loading="lazy"
                       />
                     </div>
@@ -187,7 +187,7 @@ const OutfitTemplate = ({
                       <img
                         src={getImage(outfit.bottom.id)}
                         alt={outfit["bottom"].name}
-                        className="w-48 h-48 object-cover rounded-xl"
+                        className="lg:w-44 lg:h-44 w-48 h-48 object-cover rounded-xl"
                         loading="lazy"
                       />
                     </div>
@@ -208,12 +208,7 @@ const OutfitTemplate = ({
           e.preventDefault();
           handleDrop(e);
         }}
-        className="p-2 w-64 md:w-80 h-44 md:h-56 flex items-center justify-center relative"
-        style={{
-          marginLeft: "auto",
-          marginRight: "auto",
-          bottom: 110,
-        }}
+        className="fixed bottom-16 left-1/2 -translate-x-1/2 p-2 w-64 md:w-80 h-44 md:h-56 flex items-center justify-center"
         aria-label="Wear basket"
       >
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
