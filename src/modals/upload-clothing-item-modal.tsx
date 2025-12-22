@@ -193,13 +193,19 @@ export default function UploadClothingItemModal({
 
         <div className="mt-3 space-y-3">
           <div>
-            <label className="block text-sm font-medium mb-1">Photo</label>
+            <label
+              className="block text-sm font-medium mb-1"
+              htmlFor="photo-input"
+            >
+              Photo
+            </label>
             <div className="flex items-center gap-3">
               <input
+                id="photo-input"
                 type="file"
                 accept="image/*"
                 onChange={(e) => fileDragged(e.target.files?.[0])}
-                className="block w-full text-sm"
+                className="input border block w-full text-sm text-gray-400"
                 aria-label="Choose image"
                 disabled={isSaving}
               />
@@ -209,7 +215,7 @@ export default function UploadClothingItemModal({
                 <img
                   src={preview}
                   alt="Preview"
-                  className="w-full max-h-60 object-contain rounded-lg border"
+                  className="w-full max-h-40 object-contain rounded-lg border border-gray-200"
                 />
               </div>
             )}
@@ -228,35 +234,33 @@ export default function UploadClothingItemModal({
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label
-                className="block text-sm font-medium mb-1"
-                htmlFor="category-input"
-              >
-                Category
-              </label>
-              <select
-                id="category-input"
-                className={`input select w-full border text-base ${
-                  !category ? "placeholder" : null
-                }`}
-                value={category}
-                onChange={(e) => {
-                  setCategory(e.target.value as ClothingItemCategory);
-                }}
-                disabled={isSaving}
-              >
-                <option disabled value="">
-                  Select…
+          <div>
+            <label
+              className="block text-sm font-medium mb-1"
+              htmlFor="category-input"
+            >
+              Category
+            </label>
+            <select
+              id="category-input"
+              className={`input select w-full border text-base ${
+                !category ? "placeholder" : null
+              }`}
+              value={category}
+              onChange={(e) => {
+                setCategory(e.target.value as ClothingItemCategory);
+              }}
+              disabled={isSaving}
+            >
+              <option disabled value="">
+                Select…
+              </option>
+              {categoryOptions.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
                 </option>
-                {categoryOptions.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+              ))}
+            </select>
           </div>
 
           {error && <div className="text-sm text-red-600">{error}</div>}
@@ -273,7 +277,7 @@ export default function UploadClothingItemModal({
           <button
             className="primary-button flex-1 text-base disabled:opacity-60"
             onClick={save}
-            disabled={!file || isSaving}
+            disabled={!file || !name || !category || isSaving}
           >
             {isSaving ? "Saving…" : "Save"}
           </button>
