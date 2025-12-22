@@ -13,9 +13,7 @@ import { useImage } from "../hooks/image.ts";
 import { IoClose } from "react-icons/io5";
 import { useOutfit } from "../hooks/outfit.ts";
 import { FaPlus } from "react-icons/fa6";
-
-const CLEAN_ITEM_COLOR = "#65aaa7";
-const DIRTY_ITEM_COLOR = "#374151";
+import "./closet-page.css";
 
 const FilterBar = ({
   selectedCategory,
@@ -29,9 +27,8 @@ const FilterBar = ({
       <div className="flex justify-center" style={{ minWidth: "max-content" }}>
         <button
           onClick={() => onCategorySelected(null)}
-          className={`
-                            px-4 py-1 mr-2 cursor-pointer rounded-xl text-md font-medium transition-all whitespace-nowrap
-                            ${selectedCategory === null ? "bg-gray-100 text-gray-700" : "text-gray-700"}
+          className={`filter-bar-item font-medium transition-all 
+                            ${selectedCategory === null ? "active" : null}
                         `}
         >
           All
@@ -40,9 +37,8 @@ const FilterBar = ({
           <button
             key={value}
             onClick={() => onCategorySelected(value)}
-            className={`
-                                px-4 py-1 mr-2 cursor-pointer rounded-xl text-md font-medium transition-all whitespace-nowrap
-                                ${selectedCategory === value ? "bg-gray-100  text-gray-700" : "text-gray-700"}
+            className={`filter-bar-item  font-medium transition-all
+                                ${selectedCategory === value ? "active" : null}
                             `}
           >
             {label}
@@ -69,10 +65,10 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
 
   return (
     <div className="flex flex-col gap-2 p-2 ">
-      <div className="suggest-card bg-white p-3 rounded-2xl flex flex-col items-center text-center relative">
+      <div className="card flex flex-col items-center relative">
         <button
           onClick={() => remove(item.id)}
-          className="opacity-80 absolute top-2 right-2 w-4 h-4 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-all cursor-pointer text-sm font-bold"
+          className="delete-button absolute top-2 right-2 flex items-center justify-center transition-all text-sm font-bold"
           aria-label="Delete item"
         >
           <IoClose size={14} />
@@ -87,20 +83,13 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
           />
         </div>
 
-        <div className="mt-2 text-lg font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden">
+        <div className="mt-2 text-lg text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden">
           {item.name}
         </div>
 
         <div className="mt-1">
           <span
-            className={`inline-block rounded-full border px-2 py-0.5 text-xs pill`}
-            style={{
-              backgroundColor: item.isClean
-                ? CLEAN_ITEM_COLOR
-                : DIRTY_ITEM_COLOR,
-              color: "#fff",
-              borderColor: "transparent",
-            }}
+            className={`badge inline-block border text-xs ${item.isClean ? "clean" : "dirty"}`}
           >
             {item.isClean ? "Clean" : "Dirty"}
           </span>
@@ -120,7 +109,7 @@ const AddItemButton = ({
         onClick={onClick}
         aria-label="Add a new item to your closet"
         title="Add a new item to your closet"
-        className={`fixed bottom-12 right-5 z-50 cursor-pointer rounded-full shadow-lg transition-colors border btn-accent border-gray-200 disabled:cursor-not-allowed  disabled:border-gray-300`}
+        className={`fixed bottom-12 right-5 z-50 shadow-lg primary-button transition-all`}
         style={{ width: 56, height: 56 }}
       >
         <div className="flex items-center justify-center text-3xl">
@@ -144,7 +133,7 @@ const LaundryButton = (): React.JSX.Element => {
 
   return (
     <button
-      className="mt-5 w-full rounded-xl bg-white opacity-70 text-black px-4 py-2 text-base text-md font-medium transition-all cursor-pointer hover:opacity-100 "
+      className="secondary-button mt-5 w-full text-base font-medium transition-all "
       aria-label="Mark all worn items as clean"
       title="Mark all worn items as clean"
       onClick={() => onDoLaundry()}
@@ -180,29 +169,25 @@ export const ClosetPage = (): React.JSX.Element => {
 
   return (
     <>
-      <div className="bg-app min-h-screen pb-28">
-        <div className="mx-auto max-w-4xl p-4 pb-2">
-          <h2 className="p-2 text-2xl font-semibold text-center">
-            Your closet
-          </h2>
-        </div>
+      <div className="mx-auto max-w-4xl p-4 pb-2">
+        <h2 className="page-title">Your closet</h2>
+      </div>
 
-        <FilterBar
-          selectedCategory={selectedCategory}
-          onCategorySelected={setSelectedCategory}
-        />
+      <FilterBar
+        selectedCategory={selectedCategory}
+        onCategorySelected={setSelectedCategory}
+      />
 
-        <div className="mx-auto max-w-4xl p-4">
-          <div className="rounded-2xl">
-            <div className="grid gap-5 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {filteredItems.map((item) => (
-                <ItemCard key={item.id} item={item} />
-              ))}
-            </div>
+      <div className="mx-auto max-w-4xl p-4">
+        <div className="rounded-2xl">
+          <div className="grid gap-5 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {filteredItems.map((item) => (
+              <ItemCard key={item.id} item={item} />
+            ))}
           </div>
-
-          <LaundryButton />
         </div>
+
+        <LaundryButton />
       </div>
 
       <NavigationBar activePage="closet" />

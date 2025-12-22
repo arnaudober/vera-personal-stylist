@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import { FaRegStar } from "react-icons/fa";
 import { PiShirtFoldedFill } from "react-icons/pi";
+import "./navigation-bar.css";
 
 type Page = "suggest" | "closet";
+
 interface NavigationBarData {
   activePage: Page;
 }
@@ -13,7 +15,7 @@ export default function NavigationBar({ activePage }: NavigationBarData) {
       <div className="flex items-center justify-center max-w-sm mx-auto">
         <Link
           to="/closet"
-          className={`flex flex-col items-center justify-center px-6 py-2 rounded-lg transition-colors ${activePage === "closet" ? "text-accent" : "text-gray-700"}`}
+          className={`link transition-colors ${activePage === "closet" ? "active" : null}`}
           aria-current={activePage === "closet" ? "page" : undefined}
           aria-label="Open closet page"
         >
@@ -25,7 +27,7 @@ export default function NavigationBar({ activePage }: NavigationBarData) {
 
         <Link
           to="/"
-          className={`flex flex-col items-center justify-center px-6 py-2 rounded-lg transition-colors ${activePage === "suggest" ? "text-accent" : "text-gray-700"}`}
+          className={`link transition-colors ${activePage === "suggest" ? "active" : null}`}
           aria-current={activePage === "suggest" ? "page" : undefined}
           aria-label="Open home page - Today's outfit suggestions"
         >
