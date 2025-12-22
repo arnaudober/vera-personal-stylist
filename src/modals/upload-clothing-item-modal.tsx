@@ -222,7 +222,7 @@ export default function UploadClothingItemModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Navy tee"
-              className="w-full rounded-lg border px-3 py-2 text-base"
+              className="input w-full border text-base"
               aria-required
               disabled={isSaving}
             />
@@ -230,16 +230,26 @@ export default function UploadClothingItemModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium mb-1">Category</label>
+              <label
+                className="block text-sm font-medium mb-1"
+                htmlFor="category-input"
+              >
+                Category
+              </label>
               <select
-                className="w-full rounded-lg border px-3 py-2 text-base"
+                id="category-input"
+                className={`input select w-full border text-base ${
+                  !category ? "placeholder" : null
+                }`}
                 value={category}
                 onChange={(e) => {
                   setCategory(e.target.value as ClothingItemCategory);
                 }}
                 disabled={isSaving}
               >
-                <option value="">Select…</option>
+                <option disabled value="">
+                  Select…
+                </option>
                 {categoryOptions.map((c) => (
                   <option key={c.value} value={c.value}>
                     {c.label}
@@ -254,16 +264,16 @@ export default function UploadClothingItemModal({
 
         <div className="mt-5 flex gap-3">
           <button
-            className="flex-1 rounded-xl border px-4 py-2 text-base"
+            className="secondary-button flex-1 text-base"
             onClick={onClose}
             disabled={isSaving}
           >
             Cancel
           </button>
           <button
-            className="flex-1 rounded-xl bg-black text-white px-4 py-2 text-base disabled:opacity-60"
+            className="primary-button flex-1 text-base disabled:opacity-60"
             onClick={save}
-            disabled={isSaving}
+            disabled={!file || isSaving}
           >
             {isSaving ? "Saving…" : "Save"}
           </button>
