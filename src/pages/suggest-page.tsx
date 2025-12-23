@@ -6,6 +6,7 @@ import type { Outfit } from "../models/outfit.ts";
 import { useOutfit } from "../hooks/outfit.ts";
 import { useCloset } from "../hooks/closet.ts";
 import { useImage } from "../hooks/image.ts";
+import { RiAiGenerate } from "react-icons/ri";
 
 interface TouchDragState {
   key: keyof Outfit | null;
@@ -18,12 +19,31 @@ interface TouchDragState {
 
 const EmptyMessageTemplate = () => (
   <div className="relative mx-auto w-full max-w-md h-64 md:h-80 flex items-center justify-center">
-    <div className="suggest-card rounded-4xl p-4 text-muted text-center">
-      No outfit right now — maybe it's laundry time? Tap{" "}
-      <span className="font-medium">Laundry</span>.
-    </div>
+    <div className="card">No outfit right now — maybe it's laundry time?</div>
   </div>
 );
+const RegenerateOutfitButton = () => {
+  const { generateOutfit, canGenerateOutfit } = useOutfit();
+
+  function onRegenerate(): void {
+    generateOutfit();
+  }
+
+  return (
+    <button
+      onClick={() => onRegenerate()}
+      aria-label="Regenerate the outfit"
+      title="Regenerate the outfit"
+      className={`fixed bottom-12 right-5 z-50 shadow-lg border primary-button transition-all`}
+      style={{ width: 56, height: 56 }}
+      disabled={!canGenerateOutfit()}
+    >
+      <div className="flex items-center justify-center text-3xl">
+        <RiAiGenerate />
+      </div>
+    </button>
+  );
+};
 const OutfitTemplate = ({
   setTouchDrag,
   touchDrag,
@@ -113,7 +133,7 @@ const OutfitTemplate = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col justify-between px-4 py-4 overflow-hidden">
+    <div className="flex-1 flex flex-col px-4 pt-4 overflow-y-auto pb-64">
       {outfit ? (
         <>
           {(() => {
@@ -132,7 +152,7 @@ const OutfitTemplate = ({
                 {outfit.top && isItemClean(outfit.top.id) && (
                   <div className="select-none" aria-label="Top item">
                     <div
-                      className={`p-2 suggest-card rounded-4xl text-8xl sm:text-9xl cursor-grab ${touchDrag.isDragging && touchDrag.key === "top" ? "opacity-20" : ""}`}
+                      className={`card text-8xl sm:text-9xl cursor-grab ${touchDrag.isDragging && touchDrag.key === "top" ? "opacity-20" : ""}`}
                       draggable
                       onDragStart={(e) => handleDragStart("top", e)}
                       onTouchStart={(e) => handleTouchStart("top", e)}
@@ -145,7 +165,7 @@ const OutfitTemplate = ({
                       <img
                         src={getImage(outfit.top.id)}
                         alt={outfit["top"].name}
-                        className="w-48 h-48 object-cover rounded-xl"
+                        className="lg:w-44 lg:h-44 w-48 h-48 object-cover rounded-xl"
                         loading="lazy"
                       />
                     </div>
@@ -155,7 +175,7 @@ const OutfitTemplate = ({
                 {outfit.bottom && isItemClean(outfit.bottom.id) && (
                   <div className="select-none" aria-hidden="true">
                     <div
-                      className={`p-2 suggest-card rounded-4xl text-8xl sm:text-9xl cursor-grab ${touchDrag.isDragging && touchDrag.key === "bottom" ? "opacity-20" : ""}`}
+                      className={`card text-8xl sm:text-9xl cursor-grab ${touchDrag.isDragging && touchDrag.key === "bottom" ? "opacity-20" : ""}`}
                       draggable
                       onDragStart={(e) => handleDragStart("bottom", e)}
                       onTouchStart={(e) => handleTouchStart("bottom", e)}
@@ -168,7 +188,7 @@ const OutfitTemplate = ({
                       <img
                         src={getImage(outfit.bottom.id)}
                         alt={outfit["bottom"].name}
-                        className="w-48 h-48 object-cover rounded-xl"
+                        className="lg:w-44 lg:h-44 w-48 h-48 object-cover rounded-xl"
                         loading="lazy"
                       />
                     </div>
@@ -189,12 +209,7 @@ const OutfitTemplate = ({
           e.preventDefault();
           handleDrop(e);
         }}
-        className="p-2 w-64 md:w-80 h-44 md:h-56 flex items-center justify-center relative"
-        style={{
-          marginLeft: "auto",
-          marginRight: "auto",
-          bottom: 110,
-        }}
+        className="fixed bottom-16 left-1/2 -translate-x-1/2 p-2 w-64 md:w-80 h-44 md:h-56 flex items-center justify-center"
         aria-label="Wear basket"
       >
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -231,43 +246,39 @@ export const SuggestPage = (): React.JSX.Element => {
 
   return (
     <>
-      <div className="bg-app min-h-screen flex flex-col">
-        {/* Floating preview while dragging an item */}
-        {touchDrag.isDragging && touchDrag.key && outfit && (
-          <div
-            className="fixed pointer-events-none z-50 text-6xl"
-            style={{
-              left: touchDrag.currentX - 30,
-              top: touchDrag.currentY - 30,
-              transform: "translate(-50%, -50%)",
-            }}
-          >
-            <div className="p-2 suggest-card rounded-2xl opacity-80 scale-110 shadow-lg">
-              <img
-                src={getImage(outfit[touchDrag.key].id)}
-                alt={outfit[touchDrag.key].name}
-                className="w-48 h-48 object-cover rounded-xl shadow-sm"
-                loading="lazy"
-              />
-            </div>
+      {/* Floating preview while dragging an item */}
+      {touchDrag.isDragging && touchDrag.key && outfit && (
+        <div
+          className="fixed pointer-events-none z-50 text-6xl"
+          style={{
+            left: touchDrag.currentX - 30,
+            top: touchDrag.currentY - 30,
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <div className="card opacity-80 scale-110 shadow-lg">
+            <img
+              src={getImage(outfit[touchDrag.key].id)}
+              alt={outfit[touchDrag.key].name}
+              className="w-48 h-48 object-cover rounded-xl shadow-sm"
+              loading="lazy"
+            />
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Header */}
-        <div className="flex-shrink-0 pt-4 pb-2">
-          <div className="mx-auto max-w-4xl px-4">
-            <h2 className="p-2 text-2xl font-semibold text-center">
-              Today's outfit
-            </h2>
-          </div>
-
-          <p className="px-4 text-md text-gray-900 text-center">
-            ✨ A fresh outfit is picked for you every day.
-          </p>
+      {/* Header */}
+      <div className="flex-shrink-0 pt-4 pb-2">
+        <div className="mx-auto max-w-4xl px-4">
+          <h2 className="page-title">Today's outfit</h2>
         </div>
 
-        <OutfitTemplate setTouchDrag={setTouchDrag} touchDrag={touchDrag} />
+        <p className="px-4 text-md text-gray-900 text-center">
+          ✨ A fresh outfit is picked for you every day.
+        </p>
       </div>
+
+      <OutfitTemplate setTouchDrag={setTouchDrag} touchDrag={touchDrag} />
 
       <NavigationBar activePage="suggest" />
       <LaundryButton />

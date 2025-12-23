@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { useCloset } from "../hooks/closet.ts";
 import NavigationBar from "../components/navigation-bar.tsx";
-import LaundryButton from "../components/laundry-button.tsx";
 import {
   categoryOptions,
   type ClothingItem,
@@ -13,9 +12,8 @@ import * as React from "react";
 import { useImage } from "../hooks/image.ts";
 import { IoClose } from "react-icons/io5";
 import { useOutfit } from "../hooks/outfit.ts";
-
-const CLEAN_ITEM_COLOR = "#65aaa7";
-const DIRTY_ITEM_COLOR = "#374151";
+import { FaPlus } from "react-icons/fa6";
+import "./closet-page.css";
 
 const FilterBar = ({
   selectedCategory,
@@ -25,13 +23,12 @@ const FilterBar = ({
   onCategorySelected: (category: ClothingItemCategory | null) => void;
 }): React.JSX.Element => {
   return (
-    <div className={`pr-0 pt-0 pb-2 pl-4`}>
-      <div className="flex" style={{ minWidth: "max-content" }}>
+    <div className={`pr-0 pb-2 pt-2 pl-4`}>
+      <div className="flex justify-center" style={{ minWidth: "max-content" }}>
         <button
           onClick={() => onCategorySelected(null)}
-          className={`
-                            px-4 py-1 mr-2 rounded-xl text-md font-medium transition-all whitespace-nowrap
-                            ${selectedCategory === null ? "bg-gray-100 text-gray-700" : "text-gray-700"}
+          className={`filter-bar-item font-medium transition-all 
+                            ${selectedCategory === null ? "active" : null}
                         `}
         >
           All
@@ -40,9 +37,8 @@ const FilterBar = ({
           <button
             key={value}
             onClick={() => onCategorySelected(value)}
-            className={`
-                                px-4 py-1 mr-2 rounded-xl text-md font-medium transition-all whitespace-nowrap
-                                ${selectedCategory === value ? "bg-gray-100  text-gray-700" : "text-gray-700"}
+            className={`filter-bar-item  font-medium transition-all
+                                ${selectedCategory === value ? "active" : null}
                             `}
           >
             {label}
@@ -69,10 +65,10 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
 
   return (
     <div className="flex flex-col gap-2 p-2 ">
-      <div className="suggest-card bg-white p-3 rounded-2xl flex flex-col items-center text-center relative">
+      <div className="card flex flex-col items-center relative">
         <button
           onClick={() => remove(item.id)}
-          className="opacity-80 absolute top-2 right-2 w-4 h-4 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-all cursor-pointer text-sm font-bold"
+          className="delete-button absolute top-2 right-2 flex items-center justify-center transition-all text-sm font-bold"
           aria-label="Delete item"
         >
           <IoClose size={14} />
@@ -87,20 +83,13 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
           />
         </div>
 
-        <div className="mt-2 text-lg font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden">
+        <div className="mt-2 text-lg text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden">
           {item.name}
         </div>
 
         <div className="mt-1">
           <span
-            className={`inline-block rounded-full border px-2 py-0.5 text-xs pill`}
-            style={{
-              backgroundColor: item.isClean
-                ? CLEAN_ITEM_COLOR
-                : DIRTY_ITEM_COLOR,
-              color: "#fff",
-              borderColor: "transparent",
-            }}
+            className={`badge inline-block border text-xs ${item.isClean ? "clean" : "dirty"}`}
           >
             {item.isClean ? "Clean" : "Dirty"}
           </span>
@@ -109,9 +98,61 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
     </div>
   );
 };
+const AddItemButton = ({
+  onClick,
+  disabled,
+}: {
+  onClick: () => void;
+  disabled: boolean;
+}): React.JSX.Element => {
+  return (
+    <div className="flex justify-center">
+      <button
+        onClick={onClick}
+        disabled={disabled}
+        aria-label="Add a new item to your closet"
+        title={
+          disabled
+            ? "The limit of uploaded items has been reached"
+            : "Add a new item to your closet"
+        }
+        className={`fixed bottom-12 right-5 z-50 shadow-lg primary-button transition-all ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+        style={{ width: 56, height: 56 }}
+      >
+        <div className="flex items-center justify-center text-3xl">
+          <FaPlus />
+        </div>
+      </button>
+    </div>
+  );
+};
+const LaundryButton = (): React.JSX.Element => {
+  const { areAllItemsClean, markLaundryDone } = useCloset();
+  const { generateOutfit, outfit } = useOutfit();
+
+  function onDoLaundry(): void {
+    markLaundryDone();
+
+    if (!outfit) {
+      generateOutfit();
+    }
+  }
+
+  return (
+    <button
+      className="secondary-button mt-5 w-full text-base font-medium transition-all "
+      aria-label="Mark all worn items as clean"
+      title="Mark all worn items as clean"
+      onClick={() => onDoLaundry()}
+      disabled={areAllItemsClean()}
+    >
+      Wash all items
+    </button>
+  );
+};
 
 export const ClosetPage = (): React.JSX.Element => {
-  const { items, addClothingItem } = useCloset();
+  const { items, addClothingItem, isUploadLimitReached } = useCloset();
   const { saveImage } = useImage();
   const [selectedCategory, setSelectedCategory] =
     useState<ClothingItemCategory | null>(null);
@@ -135,37 +176,32 @@ export const ClosetPage = (): React.JSX.Element => {
 
   return (
     <>
-      <div className="bg-app min-h-screen pb-28">
-        <div className="mx-auto max-w-4xl p-4 pb-2">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="p-2 text-2xl font-semibold">Your closet</h2>
-            <button
-              className="rounded-xl bg-black text-white px-4 py-2 text-base"
-              onClick={() => setShowUploadModal(true)}
-            >
-              Add item
-            </button>
+      <div className="mx-auto max-w-4xl p-4 pb-2">
+        <h2 className="page-title">Your closet</h2>
+      </div>
+
+      <FilterBar
+        selectedCategory={selectedCategory}
+        onCategorySelected={setSelectedCategory}
+      />
+
+      <div className="mx-auto max-w-4xl p-4">
+        <div className="rounded-2xl">
+          <div className="grid gap-5 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {filteredItems.map((item) => (
+              <ItemCard key={item.id} item={item} />
+            ))}
           </div>
         </div>
 
-        <FilterBar
-          selectedCategory={selectedCategory}
-          onCategorySelected={setSelectedCategory}
-        />
-
-        <div className="mx-auto max-w-4xl p-4">
-          <div className="rounded-2xl">
-            <div className="grid gap-5 grid-cols-2">
-              {filteredItems.map((item) => (
-                <ItemCard key={item.id} item={item} />
-              ))}
-            </div>
-          </div>
-        </div>
+        <LaundryButton />
       </div>
 
       <NavigationBar activePage="closet" />
-      <LaundryButton />
+      <AddItemButton
+        onClick={() => setShowUploadModal(true)}
+        disabled={isUploadLimitReached()}
+      />
 
       {showUploadModal && (
         <UploadClothingItemModal

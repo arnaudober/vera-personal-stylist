@@ -5,6 +5,7 @@ import {
   type CreateClothingItem,
 } from "../models/clothing-item.ts";
 import type { Color } from "../models/color.ts";
+import { useCloset } from "../hooks/closet.ts";
 
 const MAX_IMAGE_SIZE = 256;
 const COMPRESSION_QUALITY = 0.5;
@@ -108,6 +109,7 @@ export default function UploadClothingItemModal({
   onClose,
   onSave,
 }: ModalData) {
+  const { isUploadLimitReached } = useCloset();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -140,6 +142,14 @@ export default function UploadClothingItemModal({
     try {
       setIsSaving(true);
       setError(null);
+
+      if (isUploadLimitReached()) {
+        setError(
+          "You've hit our current MVP limit of 10 items. We're working on expanding this soon!",
+        );
+        setIsSaving(false);
+        return;
+      }
 
       if (!file) {
         setError("Please choose an image.");
@@ -193,13 +203,19 @@ export default function UploadClothingItemModal({
 
         <div className="mt-3 space-y-3">
           <div>
-            <label className="block text-sm font-medium mb-1">Photo</label>
+            <label
+              className="block text-sm font-medium mb-1"
+              htmlFor="photo-input"
+            >
+              Photo
+            </label>
             <div className="flex items-center gap-3">
               <input
+                id="photo-input"
                 type="file"
                 accept="image/*"
                 onChange={(e) => fileDragged(e.target.files?.[0])}
-                className="block w-full text-sm"
+                className="input border block w-full text-sm text-gray-400"
                 aria-label="Choose image"
                 disabled={isSaving}
               />
@@ -209,7 +225,7 @@ export default function UploadClothingItemModal({
                 <img
                   src={preview}
                   alt="Preview"
-                  className="w-full max-h-60 object-contain rounded-lg border"
+                  className="w-full max-h-40 object-contain rounded-lg border border-gray-200"
                 />
               </div>
             )}
@@ -222,31 +238,39 @@ export default function UploadClothingItemModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Navy tee"
-              className="w-full rounded-lg border px-3 py-2 text-base"
+              className="input w-full border text-base"
               aria-required
               disabled={isSaving}
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium mb-1">Category</label>
-              <select
-                className="w-full rounded-lg border px-3 py-2 text-base"
-                value={category}
-                onChange={(e) => {
-                  setCategory(e.target.value as ClothingItemCategory);
-                }}
-                disabled={isSaving}
-              >
-                <option value="">Select…</option>
-                {categoryOptions.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div>
+            <label
+              className="block text-sm font-medium mb-1"
+              htmlFor="category-input"
+            >
+              Category
+            </label>
+            <select
+              id="category-input"
+              className={`input select w-full border text-base ${
+                !category ? "placeholder" : null
+              }`}
+              value={category}
+              onChange={(e) => {
+                setCategory(e.target.value as ClothingItemCategory);
+              }}
+              disabled={isSaving}
+            >
+              <option disabled value="">
+                Select…
+              </option>
+              {categoryOptions.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           {error && <div className="text-sm text-red-600">{error}</div>}
@@ -254,16 +278,16 @@ export default function UploadClothingItemModal({
 
         <div className="mt-5 flex gap-3">
           <button
-            className="flex-1 rounded-xl border px-4 py-2 text-base"
+            className="secondary-button flex-1 text-base"
             onClick={onClose}
             disabled={isSaving}
           >
             Cancel
           </button>
           <button
-            className="flex-1 rounded-xl bg-black text-white px-4 py-2 text-base disabled:opacity-60"
+            className="primary-button flex-1 text-base disabled:opacity-60"
             onClick={save}
-            disabled={isSaving}
+            disabled={!file || !name || !category || isSaving}
           >
             {isSaving ? "Saving…" : "Save"}
           </button>

@@ -6,14 +6,14 @@ import { ClosetPage } from "./pages/closet-page.tsx";
 
 function App() {
   return (
-    <>
+    <div className="bg-app min-h-screen flex flex-col">
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<SuggestPage />} />
           <Route path="/closet" element={<ClosetPage />} />
         </Routes>
       </BrowserRouter>
-    </>
+    </div>
   );
 }
 
