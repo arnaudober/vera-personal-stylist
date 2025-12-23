@@ -100,16 +100,23 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
 };
 const AddItemButton = ({
   onClick,
+  disabled,
 }: {
   onClick: () => void;
+  disabled: boolean;
 }): React.JSX.Element => {
   return (
     <div className="flex justify-center">
       <button
         onClick={onClick}
+        disabled={disabled}
         aria-label="Add a new item to your closet"
-        title="Add a new item to your closet"
-        className={`fixed bottom-12 right-5 z-50 shadow-lg primary-button transition-all`}
+        title={
+          disabled
+            ? "The limit of uploaded items has been reached"
+            : "Add a new item to your closet"
+        }
+        className={`fixed bottom-12 right-5 z-50 shadow-lg primary-button transition-all ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
         style={{ width: 56, height: 56 }}
       >
         <div className="flex items-center justify-center text-3xl">
@@ -145,7 +152,7 @@ const LaundryButton = (): React.JSX.Element => {
 };
 
 export const ClosetPage = (): React.JSX.Element => {
-  const { items, addClothingItem } = useCloset();
+  const { items, addClothingItem, isUploadLimitReached } = useCloset();
   const { saveImage } = useImage();
   const [selectedCategory, setSelectedCategory] =
     useState<ClothingItemCategory | null>(null);
@@ -191,7 +198,10 @@ export const ClosetPage = (): React.JSX.Element => {
       </div>
 
       <NavigationBar activePage="closet" />
-      <AddItemButton onClick={() => setShowUploadModal(true)} />
+      <AddItemButton
+        onClick={() => setShowUploadModal(true)}
+        disabled={isUploadLimitReached()}
+      />
 
       {showUploadModal && (
         <UploadClothingItemModal

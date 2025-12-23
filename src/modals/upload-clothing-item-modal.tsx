@@ -5,6 +5,7 @@ import {
   type CreateClothingItem,
 } from "../models/clothing-item.ts";
 import type { Color } from "../models/color.ts";
+import { useCloset } from "../hooks/closet.ts";
 
 const MAX_IMAGE_SIZE = 256;
 const COMPRESSION_QUALITY = 0.5;
@@ -108,6 +109,7 @@ export default function UploadClothingItemModal({
   onClose,
   onSave,
 }: ModalData) {
+  const { isUploadLimitReached } = useCloset();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -140,6 +142,14 @@ export default function UploadClothingItemModal({
     try {
       setIsSaving(true);
       setError(null);
+
+      if (isUploadLimitReached()) {
+        setError(
+          "You've hit our current MVP limit of 10 items. We're working on expanding this soon!",
+        );
+        setIsSaving(false);
+        return;
+      }
 
       if (!file) {
         setError("Please choose an image.");
