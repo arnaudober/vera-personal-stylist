@@ -141,11 +141,33 @@ export const useOutfit = () => {
 
   const clearOutfit = (): void => emitChange(null);
 
+  const canGenerateOutfit = (): boolean => {
+    const cleanItems = items.filter((i) => i.isClean);
+    const availableTops = cleanItems.filter((i) => i.category === "top");
+    const availableBottoms = cleanItems.filter((i) => i.category === "bottom");
+
+    if (availableTops.length === 0 || availableBottoms.length === 0) {
+      return false;
+    }
+    if (!outfit) {
+      // If there is no current outfit yet, regenerating/generating is possible.
+      return true;
+    }
+
+    // Only if there is another available outfit.
+    return availableTops.some((topItem) =>
+      availableBottoms.some(
+        (bottomItem) =>
+          topItem.id !== outfit.top.id || bottomItem.id !== outfit.bottom.id,
+      ),
+    );
+  };
+
   function emitChange(newOutfit: Outfit | null): void {
     listeners.forEach((listener) => listener(newOutfit));
     localStorage.setItem(OUTFIT_LOCAL_STORAGE_KEY, JSON.stringify(newOutfit));
     state = newOutfit;
   }
 
-  return { outfit, generateOutfit, clearOutfit };
+  return { outfit, generateOutfit, clearOutfit, canGenerateOutfit };
 };
