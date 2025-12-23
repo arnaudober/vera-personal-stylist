@@ -1,6 +1,7 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import NavigationBar from "../components/navigation-bar.tsx";
+import LaundryButton from "../components/laundry-button.tsx";
 import type { Outfit } from "../models/outfit.ts";
 import { useOutfit } from "../hooks/outfit.ts";
 import { useCloset } from "../hooks/closet.ts";
@@ -280,7 +281,7 @@ export const SuggestPage = (): React.JSX.Element => {
       <OutfitTemplate setTouchDrag={setTouchDrag} touchDrag={touchDrag} />
 
       <NavigationBar activePage="suggest" />
-      <RegenerateOutfitButton />
+      <LaundryButton />
     </>
   );
 };
