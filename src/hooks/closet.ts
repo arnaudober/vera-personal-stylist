@@ -5,6 +5,7 @@ import {
 } from "../models/clothing-item";
 
 const ITEMS_LOCAL_STORAGE_KEY = "closet";
+const ITEMS_UPLOAD_LIMIT = 10;
 
 // Private singleton state reused through the app
 let state: ClothingItem[] = [];
@@ -77,6 +78,9 @@ export function useCloset() {
   const areAllItemsClean = (): boolean => {
     return state.every((i) => i.isClean);
   };
+  const isUploadLimitReached = (): boolean => {
+    return state.length >= ITEMS_UPLOAD_LIMIT;
+  };
 
   function emitChange(newItems: ClothingItem[]): void {
     listeners.forEach((listener) => listener(newItems));
@@ -92,5 +96,6 @@ export function useCloset() {
     markWorn,
     isItemClean,
     areAllItemsClean,
+    isUploadLimitReached,
   };
 }
