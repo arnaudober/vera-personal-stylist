@@ -100,9 +100,10 @@ export const useOutfit = () => {
     }
 
     const maxAttempts = cleanItems.length;
-    let bestOutfit = {} as Outfit;
+    let bestOutfit: Outfit | null = null;
     let highestScore = -1;
 
+    // Try to find the best scoring outfit, but ensure it's different if possible
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const item = cleanItems[Math.floor(Math.random() * cleanItems.length)];
       const currentOutfit: Partial<Outfit> = {
@@ -124,19 +125,29 @@ export const useOutfit = () => {
         });
       }
 
+      // If we have an existing outfit, skip this candidate if it's the exact same
+      if (
+        outfit &&
+        currentOutfit.top?.id === outfit.top.id &&
+        currentOutfit.bottom?.id === outfit.bottom.id
+      ) {
+        continue;
+      }
+
       const score = scoreColors({
-        a: currentOutfit.top.color,
-        b: currentOutfit.bottom.color,
+        a: currentOutfit.top!.color,
+        b: currentOutfit.bottom!.color,
       });
 
-      if (score && score > highestScore) {
+      if (score !== null && score > highestScore) {
         highestScore = score;
-        bestOutfit = currentOutfit as Outfit; // Outfit is now fully defined so we can cast it safely
+        bestOutfit = currentOutfit as Outfit;
       }
     }
 
-    emitChange(bestOutfit);
-    return bestOutfit;
+    const finalOutfit = bestOutfit ?? state;
+    emitChange(finalOutfit);
+    return finalOutfit;
   };
 
   const clearOutfit = (): void => emitChange(null);
