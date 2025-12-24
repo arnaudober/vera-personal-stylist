@@ -140,7 +140,7 @@ const LaundryButton = (): React.JSX.Element => {
 
   return (
     <button
-      className="secondary-button mt-5 w-full text-base font-medium transition-all "
+      className="secondary-button mb-5 w-full text-base font-medium transition-all "
       aria-label="Mark all worn items as clean"
       title="Mark all worn items as clean"
       onClick={() => onDoLaundry()}
@@ -185,7 +185,9 @@ export const ClosetPage = (): React.JSX.Element => {
         onCategorySelected={setSelectedCategory}
       />
 
-      <div className="mx-auto max-w-4xl p-4">
+      <div className="mx-auto max-w-4xl p-4 pb-24">
+        <LaundryButton />
+
         <div className="rounded-2xl">
           {filteredItems.length > 0 ? (
             <div className="grid gap-5 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -204,8 +206,6 @@ export const ClosetPage = (): React.JSX.Element => {
             </div>
           )}
         </div>
-
-        <LaundryButton />
       </div>
 
       <NavigationBar activePage="closet" />
