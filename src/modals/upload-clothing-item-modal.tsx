@@ -18,6 +18,60 @@ interface ModalData {
 
 const componentToHexadecimal = (c: number): string =>
   c.toString(16).padStart(2, "0");
+const trimCanvas = (canvas: HTMLCanvasElement): HTMLCanvasElement => {
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return canvas;
+
+  const width = canvas.width;
+  const height = canvas.height;
+  const pixels = ctx.getImageData(0, 0, width, height);
+  const data = pixels.data;
+
+  let minX = width,
+    minY = height,
+    maxX = 0,
+    maxY = 0;
+  let found = false;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const alpha = data[(y * width + x) * 4 + 3];
+      if (alpha > 0) {
+        // If pixel is not fully transparent
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
+        found = true;
+      }
+    }
+  }
+
+  if (!found) return canvas;
+
+  const trimmedWidth = maxX - minX + 1;
+  const trimmedHeight = maxY - minY + 1;
+
+  const trimmedCanvas = document.createElement("canvas");
+  trimmedCanvas.width = trimmedWidth;
+  trimmedCanvas.height = trimmedHeight;
+
+  trimmedCanvas
+    .getContext("2d")
+    ?.drawImage(
+      canvas,
+      minX,
+      minY,
+      trimmedWidth,
+      trimmedHeight,
+      0,
+      0,
+      trimmedWidth,
+      trimmedHeight,
+    );
+
+  return trimmedCanvas;
+};
 const extractDominantColor = async (dataUrl: string): Promise<Color> => {
   const image: HTMLImageElement = await new Promise((resolve, reject) => {
     const img = new Image();
@@ -100,7 +154,10 @@ const processImageToBase64 = async (file: File): Promise<string> => {
   canvas.height = processedHeight;
   ctx.drawImage(imageElement, 0, 0, processedWidth, processedHeight);
 
-  return canvas.toDataURL("image/png", COMPRESSION_QUALITY);
+  // Trim whitespace for the final image
+  const trimmedCanvas = trimCanvas(canvas);
+
+  return trimmedCanvas.toDataURL("image/png", COMPRESSION_QUALITY);
 };
 
 const dataURLToBlob = (dataUrl: string): Blob => {
