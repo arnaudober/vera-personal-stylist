@@ -6,6 +6,7 @@ import {
 } from "../models/clothing-item.ts";
 import type { Color } from "../models/color.ts";
 import { useCloset } from "../hooks/closet.ts";
+import { uploadService } from "../services/remove-bg.ts";
 
 const MAX_IMAGE_SIZE = 256;
 const COMPRESSION_QUALITY = 0.5;
@@ -69,7 +70,7 @@ const extractDominantColor = async (dataUrl: string): Promise<Color> => {
 
   return `#${componentToHexadecimal(r)}${componentToHexadecimal(g)}${componentToHexadecimal(b)}`;
 };
-const processFile = async (file: File): Promise<string> => {
+const processImageToBase64 = async (file: File): Promise<string> => {
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
   if (!ctx) {
@@ -78,17 +79,13 @@ const processFile = async (file: File): Promise<string> => {
 
   const imageElement: HTMLImageElement = await new Promise(
     (resolve, reject) => {
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = reject;
-        img.src = String(reader.result);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(img.src);
+        resolve(img);
       };
-
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
     },
   );
 
@@ -98,11 +95,24 @@ const processFile = async (file: File): Promise<string> => {
     ratio > 1 ? Math.round(imageElement.width / ratio) : imageElement.width;
   const processedHeight =
     ratio > 1 ? Math.round(imageElement.height / ratio) : imageElement.height;
+
   canvas.width = processedWidth;
   canvas.height = processedHeight;
   ctx.drawImage(imageElement, 0, 0, processedWidth, processedHeight);
 
   return canvas.toDataURL("image/png", COMPRESSION_QUALITY);
+};
+
+const dataURLToBlob = (dataUrl: string): Blob => {
+  const arr = dataUrl.split(",");
+  const mime = arr[0].match(/:(.*?);/)?.[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new Blob([u8arr], { type: mime });
 };
 
 export default function UploadClothingItemModal({
@@ -167,7 +177,25 @@ export default function UploadClothingItemModal({
         return;
       }
 
-      const imageData = await processFile(file);
+      let imageData = await processImageToBase64(file);
+
+      try {
+        const compressedBlob = dataURLToBlob(imageData);
+        const compressedFile = new File([compressedBlob], file.name, {
+          type: "image/png",
+        });
+
+        const noBgBlob = await uploadService.removeBackground(compressedFile);
+        const noBgFile = new File([noBgBlob], file.name, {
+          type: "image/png",
+        });
+
+        imageData = await processImageToBase64(noBgFile);
+      } catch {
+        setError("Failed to remove the background from the image.");
+        return;
+      }
+
       const item: CreateClothingItem = {
         name: name.trim(),
         category,

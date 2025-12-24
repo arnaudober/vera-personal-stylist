@@ -187,11 +187,22 @@ export const ClosetPage = (): React.JSX.Element => {
 
       <div className="mx-auto max-w-4xl p-4">
         <div className="rounded-2xl">
-          <div className="grid gap-5 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {filteredItems.map((item) => (
-              <ItemCard key={item.id} item={item} />
-            ))}
-          </div>
+          {filteredItems.length > 0 ? (
+            <div className="grid gap-5 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {filteredItems.map((item) => (
+                <ItemCard key={item.id} item={item} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <p className="text-gray-500 text-lg">
+                No items found in this category.
+              </p>
+              <p className="text-gray-400 text-sm">
+                Try selecting a different filter or add a new item!
+              </p>
+            </div>
+          )}
         </div>
 
         <LaundryButton />
