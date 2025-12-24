@@ -18,7 +18,10 @@ interface TouchDragState {
 
 const EmptyMessageTemplate = () => (
   <div className="relative mx-auto w-full max-w-md h-64 md:h-80 flex items-center justify-center">
-    <div className="card">No outfit right now — maybe it's laundry time?</div>
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <p className="text-gray-500 text-lg">No outfit right now.</p>
+      <p className="text-gray-400 text-sm">Maybe it's laundry time?</p>
+    </div>
   </div>
 );
 const RegenerateOutfitButton = () => {
