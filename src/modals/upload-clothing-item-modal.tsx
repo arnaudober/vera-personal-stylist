@@ -6,6 +6,7 @@ import {
 } from "../models/clothing-item.ts";
 import type { Color } from "../models/color.ts";
 import { useCloset } from "../hooks/closet.ts";
+import { uploadService } from "../services/remove-bg.ts";
 
 const MAX_IMAGE_SIZE = 256;
 const COMPRESSION_QUALITY = 0.5;
@@ -69,7 +70,7 @@ const extractDominantColor = async (dataUrl: string): Promise<Color> => {
 
   return `#${componentToHexadecimal(r)}${componentToHexadecimal(g)}${componentToHexadecimal(b)}`;
 };
-const processFile = async (file: File): Promise<string> => {
+const processImageToBase64 = async (file: File): Promise<string> => {
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
   if (!ctx) {
@@ -78,17 +79,13 @@ const processFile = async (file: File): Promise<string> => {
 
   const imageElement: HTMLImageElement = await new Promise(
     (resolve, reject) => {
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = reject;
-        img.src = String(reader.result);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(img.src);
+        resolve(img);
       };
-
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
     },
   );
 
@@ -98,6 +95,7 @@ const processFile = async (file: File): Promise<string> => {
     ratio > 1 ? Math.round(imageElement.width / ratio) : imageElement.width;
   const processedHeight =
     ratio > 1 ? Math.round(imageElement.height / ratio) : imageElement.height;
+
   canvas.width = processedWidth;
   canvas.height = processedHeight;
   ctx.drawImage(imageElement, 0, 0, processedWidth, processedHeight);
@@ -167,7 +165,16 @@ export default function UploadClothingItemModal({
         return;
       }
 
-      const imageData = await processFile(file);
+      let fileToProcess = file;
+      try {
+        const noBgBlob = await uploadService.removeBackground(file);
+        fileToProcess = new File([noBgBlob], file.name, { type: "image/png" });
+      } catch {
+        setError("Failed to remove the background from the image.");
+        return;
+      }
+
+      const imageData = await processImageToBase64(fileToProcess);
       const item: CreateClothingItem = {
         name: name.trim(),
         category,
