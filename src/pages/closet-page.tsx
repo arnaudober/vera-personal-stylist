@@ -83,7 +83,7 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
           />
         </div>
 
-        <div className="mt-2 text-lg text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden">
+        <div className="mt-2 text-sm text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden">
           {item.name}
         </div>
 
@@ -190,7 +190,7 @@ export const ClosetPage = (): React.JSX.Element => {
 
         <div className="rounded-2xl">
           {filteredItems.length > 0 ? (
-            <div className="grid gap-5 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {filteredItems.map((item) => (
                 <ItemCard key={item.id} item={item} />
               ))}
