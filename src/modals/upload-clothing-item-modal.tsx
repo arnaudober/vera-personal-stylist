@@ -103,6 +103,18 @@ const processImageToBase64 = async (file: File): Promise<string> => {
   return canvas.toDataURL("image/png", COMPRESSION_QUALITY);
 };
 
+const dataURLToBlob = (dataUrl: string): Blob => {
+  const arr = dataUrl.split(",");
+  const mime = arr[0].match(/:(.*?);/)?.[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new Blob([u8arr], { type: mime });
+};
+
 export default function UploadClothingItemModal({
   onClose,
   onSave,
@@ -165,16 +177,25 @@ export default function UploadClothingItemModal({
         return;
       }
 
-      let fileToProcess = file;
+      let imageData = await processImageToBase64(file);
+
       try {
-        const noBgBlob = await uploadService.removeBackground(file);
-        fileToProcess = new File([noBgBlob], file.name, { type: "image/png" });
+        const compressedBlob = dataURLToBlob(imageData);
+        const compressedFile = new File([compressedBlob], file.name, {
+          type: "image/png",
+        });
+
+        const noBgBlob = await uploadService.removeBackground(compressedFile);
+        const noBgFile = new File([noBgBlob], file.name, {
+          type: "image/png",
+        });
+
+        imageData = await processImageToBase64(noBgFile);
       } catch {
         setError("Failed to remove the background from the image.");
         return;
       }
 
-      const imageData = await processImageToBase64(fileToProcess);
       const item: CreateClothingItem = {
         name: name.trim(),
         category,
