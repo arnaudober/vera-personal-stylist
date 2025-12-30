@@ -83,7 +83,7 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
           />
         </div>
 
-        <div className="mt-2 text-lg text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden">
+        <div className="mt-2 text-sm text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden">
           {item.name}
         </div>
 
@@ -140,7 +140,7 @@ const LaundryButton = (): React.JSX.Element => {
 
   return (
     <button
-      className="secondary-button mt-5 w-full text-base font-medium transition-all "
+      className="secondary-button mb-5 w-full text-base font-medium transition-all "
       aria-label="Mark all worn items as clean"
       title="Mark all worn items as clean"
       onClick={() => onDoLaundry()}
@@ -185,16 +185,27 @@ export const ClosetPage = (): React.JSX.Element => {
         onCategorySelected={setSelectedCategory}
       />
 
-      <div className="mx-auto max-w-4xl p-4">
-        <div className="rounded-2xl">
-          <div className="grid gap-5 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {filteredItems.map((item) => (
-              <ItemCard key={item.id} item={item} />
-            ))}
-          </div>
-        </div>
-
+      <div className="mx-auto max-w-4xl p-4 pb-24">
         <LaundryButton />
+
+        <div className="rounded-2xl">
+          {filteredItems.length > 0 ? (
+            <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {filteredItems.map((item) => (
+                <ItemCard key={item.id} item={item} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <p className="text-gray-500 text-lg">
+                No items found in this category.
+              </p>
+              <p className="text-gray-400 text-sm">
+                Try selecting a different filter or add a new item!
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       <NavigationBar activePage="closet" />

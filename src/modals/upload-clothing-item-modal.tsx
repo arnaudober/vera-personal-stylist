@@ -6,6 +6,7 @@ import {
 } from "../models/clothing-item.ts";
 import type { Color } from "../models/color.ts";
 import { useCloset } from "../hooks/closet.ts";
+import { uploadService } from "../services/remove-bg.ts";
 
 const MAX_IMAGE_SIZE = 256;
 const COMPRESSION_QUALITY = 0.5;
@@ -17,6 +18,60 @@ interface ModalData {
 
 const componentToHexadecimal = (c: number): string =>
   c.toString(16).padStart(2, "0");
+const trimCanvas = (canvas: HTMLCanvasElement): HTMLCanvasElement => {
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return canvas;
+
+  const width = canvas.width;
+  const height = canvas.height;
+  const pixels = ctx.getImageData(0, 0, width, height);
+  const data = pixels.data;
+
+  let minX = width,
+    minY = height,
+    maxX = 0,
+    maxY = 0;
+  let found = false;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const alpha = data[(y * width + x) * 4 + 3];
+      if (alpha > 0) {
+        // If pixel is not fully transparent
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
+        found = true;
+      }
+    }
+  }
+
+  if (!found) return canvas;
+
+  const trimmedWidth = maxX - minX + 1;
+  const trimmedHeight = maxY - minY + 1;
+
+  const trimmedCanvas = document.createElement("canvas");
+  trimmedCanvas.width = trimmedWidth;
+  trimmedCanvas.height = trimmedHeight;
+
+  trimmedCanvas
+    .getContext("2d")
+    ?.drawImage(
+      canvas,
+      minX,
+      minY,
+      trimmedWidth,
+      trimmedHeight,
+      0,
+      0,
+      trimmedWidth,
+      trimmedHeight,
+    );
+
+  return trimmedCanvas;
+};
 const extractDominantColor = async (dataUrl: string): Promise<Color> => {
   const image: HTMLImageElement = await new Promise((resolve, reject) => {
     const img = new Image();
@@ -69,7 +124,7 @@ const extractDominantColor = async (dataUrl: string): Promise<Color> => {
 
   return `#${componentToHexadecimal(r)}${componentToHexadecimal(g)}${componentToHexadecimal(b)}`;
 };
-const processFile = async (file: File): Promise<string> => {
+const processImageToBase64 = async (file: File): Promise<string> => {
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
   if (!ctx) {
@@ -78,17 +133,13 @@ const processFile = async (file: File): Promise<string> => {
 
   const imageElement: HTMLImageElement = await new Promise(
     (resolve, reject) => {
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = reject;
-        img.src = String(reader.result);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(img.src);
+        resolve(img);
       };
-
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
     },
   );
 
@@ -98,11 +149,27 @@ const processFile = async (file: File): Promise<string> => {
     ratio > 1 ? Math.round(imageElement.width / ratio) : imageElement.width;
   const processedHeight =
     ratio > 1 ? Math.round(imageElement.height / ratio) : imageElement.height;
+
   canvas.width = processedWidth;
   canvas.height = processedHeight;
   ctx.drawImage(imageElement, 0, 0, processedWidth, processedHeight);
 
-  return canvas.toDataURL("image/png", COMPRESSION_QUALITY);
+  // Trim whitespace for the final image
+  const trimmedCanvas = trimCanvas(canvas);
+
+  return trimmedCanvas.toDataURL("image/png", COMPRESSION_QUALITY);
+};
+
+const dataURLToBlob = (dataUrl: string): Blob => {
+  const arr = dataUrl.split(",");
+  const mime = arr[0].match(/:(.*?);/)?.[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new Blob([u8arr], { type: mime });
 };
 
 export default function UploadClothingItemModal({
@@ -167,7 +234,25 @@ export default function UploadClothingItemModal({
         return;
       }
 
-      const imageData = await processFile(file);
+      let imageData = await processImageToBase64(file);
+
+      try {
+        const compressedBlob = dataURLToBlob(imageData);
+        const compressedFile = new File([compressedBlob], file.name, {
+          type: "image/png",
+        });
+
+        const noBgBlob = await uploadService.removeBackground(compressedFile);
+        const noBgFile = new File([noBgBlob], file.name, {
+          type: "image/png",
+        });
+
+        imageData = await processImageToBase64(noBgFile);
+      } catch {
+        setError("Failed to remove the background from the image.");
+        return;
+      }
+
       const item: CreateClothingItem = {
         name: name.trim(),
         category,

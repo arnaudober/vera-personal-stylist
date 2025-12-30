@@ -18,7 +18,10 @@ interface TouchDragState {
 
 const EmptyMessageTemplate = () => (
   <div className="relative mx-auto w-full max-w-md h-64 md:h-80 flex items-center justify-center">
-    <div className="card">No outfit right now — maybe it's laundry time?</div>
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <p className="text-gray-500 text-lg">No outfit right now.</p>
+      <p className="text-gray-400 text-sm">Maybe it's laundry time?</p>
+    </div>
   </div>
 );
 const RegenerateOutfitButton = () => {
@@ -146,7 +149,7 @@ const OutfitTemplate = ({
             }
 
             return (
-              <div className="relative mx-auto w-full flex flex-col items-center justify-center gap-2.5">
+              <div className="relative mx-auto w-full flex flex-col items-center justify-center gap-5">
                 {/* Top item */}
                 {outfit.top && isItemClean(outfit.top.id) && (
                   <div className="select-none" aria-label="Top item">
@@ -164,9 +167,12 @@ const OutfitTemplate = ({
                       <img
                         src={getImage(outfit.top.id)}
                         alt={outfit["top"].name}
-                        className="lg:w-44 lg:h-44 w-48 h-48 object-cover rounded-xl"
+                        className="w-40 h-40 object-cover rounded-xl"
                         loading="lazy"
                       />
+                      <div className="mt-2 text-sm text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden">
+                        {outfit.top.name}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -187,9 +193,12 @@ const OutfitTemplate = ({
                       <img
                         src={getImage(outfit.bottom.id)}
                         alt={outfit["bottom"].name}
-                        className="lg:w-44 lg:h-44 w-48 h-48 object-cover rounded-xl"
+                        className="w-40 h-40 object-cover rounded-xl"
                         loading="lazy"
                       />
+                      <div className="mt-2 text-sm text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden">
+                        {outfit.bottom.name}
+                      </div>
                     </div>
                   </div>
                 )}
