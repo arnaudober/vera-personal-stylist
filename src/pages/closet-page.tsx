@@ -78,7 +78,7 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
           <img
             src={getImage(item.id)}
             alt={item.name}
-            className="w-24 h-24 object-cover rounded-xl"
+            className="w-24 h-24 object-contain rounded-xl"
             loading="lazy"
           />
         </div>

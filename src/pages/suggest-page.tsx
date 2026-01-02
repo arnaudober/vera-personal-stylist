@@ -167,7 +167,7 @@ const OutfitTemplate = ({
                       <img
                         src={getImage(outfit.top.id)}
                         alt={outfit["top"].name}
-                        className="w-40 h-40 object-cover rounded-xl"
+                        className="w-40 h-40 object-contain rounded-xl"
                         loading="lazy"
                       />
                       <div className="mt-2 text-sm text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden">
@@ -193,7 +193,7 @@ const OutfitTemplate = ({
                       <img
                         src={getImage(outfit.bottom.id)}
                         alt={outfit["bottom"].name}
-                        className="w-40 h-40 object-cover rounded-xl"
+                        className="w-40 h-40 object-contain rounded-xl"
                         loading="lazy"
                       />
                       <div className="mt-2 text-sm text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden">
@@ -268,7 +268,7 @@ export const SuggestPage = (): React.JSX.Element => {
             <img
               src={getImage(outfit[touchDrag.key].id)}
               alt={outfit[touchDrag.key].name}
-              className="w-48 h-48 object-cover rounded-xl shadow-sm"
+              className="w-48 h-48 object-contain rounded-xl shadow-sm"
               loading="lazy"
             />
           </div>
