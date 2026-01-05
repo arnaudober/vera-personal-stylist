@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
-import { FaRegStar } from "react-icons/fa";
-import { PiShirtFoldedFill } from "react-icons/pi";
+import { FaRegStar, FaTshirt } from "react-icons/fa";
 import "./navigation-bar.css";
 
 type Page = "suggest" | "closet";
@@ -20,7 +19,7 @@ export default function NavigationBar({ activePage }: NavigationBarData) {
           aria-label="Open closet page"
         >
           <div className="text-xl mb-1">
-            <PiShirtFoldedFill className="text-xl" />
+            <FaTshirt className="text-xl" />
           </div>
           <span className="text-xs font-medium">Closet</span>
         </Link>
