@@ -5,7 +5,7 @@ import type { Outfit } from "../models/outfit.ts";
 import { useOutfit } from "../hooks/outfit.ts";
 import { useCloset } from "../hooks/closet.ts";
 import { useImage } from "../hooks/image.ts";
-import { RiAiGenerate } from "react-icons/ri";
+import { FiRefreshCcw } from "react-icons/fi";
 
 interface TouchDragState {
   key: keyof Outfit | null;
@@ -41,7 +41,7 @@ const RegenerateOutfitButton = () => {
       disabled={!canGenerateOutfit()}
     >
       <div className="flex items-center justify-center text-3xl">
-        <RiAiGenerate />
+        <FiRefreshCcw />
       </div>
     </button>
   );
