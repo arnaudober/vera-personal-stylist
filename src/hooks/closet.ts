@@ -16,7 +16,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase.ts";
 
-export const SESSION_ID_KEY = "closet_session_id";
+export const SESSION_ID_KEY = "session_id";
 const ITEMS_UPLOAD_LIMIT = 10;
 
 export const getSessionId = (): string => {
