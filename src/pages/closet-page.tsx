@@ -49,13 +49,18 @@ const FilterBar = ({
   );
 };
 const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
-  const { getImage } = useImage();
+  const { getImage, removeImage } = useImage();
   const { removeClothingItem } = useCloset();
   const { outfit, clearOutfit } = useOutfit();
 
   async function remove(id: string): Promise<void> {
     if (window.confirm(`Are you sure you want to delete this item?`)) {
       await removeClothingItem(id);
+
+      // Also remove the associated image
+      if (item.imageId) {
+        await removeImage(item.imageId);
+      }
 
       if (item.id === outfit?.top.id || item.id === outfit?.bottom.id) {
         await clearOutfit();
@@ -76,7 +81,7 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
 
         <div className="text-7xl flex items-center justify-center">
           <img
-            src={getImage(item.id)}
+            src={getImage(item.imageId || item.id)} // Fallback to item.id for backwards compatibility
             alt={item.name}
             className="w-24 h-24 object-contain rounded-xl"
             loading="lazy"
@@ -170,7 +175,10 @@ export const ClosetPage = (): React.JSX.Element => {
     const newItem = await addClothingItem(item);
 
     if (item.imageData) {
-      await saveImage({ id: newItem.id, imageData: item.imageData });
+      await saveImage({
+        id: newItem.imageId || newItem.id,
+        imageData: item.imageData,
+      });
     }
   }
 

@@ -1,27 +1,13 @@
 import { useState, useEffect } from "react";
-
-const DB_NAME = "images";
-const OBJECT_NAME = "images";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "../firebase.ts";
+import { getSessionId } from "./closet.ts";
 
 // Private singleton state reused through the app
 let state: Map<string, string> = new Map();
 let isInitialized = false;
 let isInitializing = false;
 const listeners = new Set<(images: Map<string, string>) => void>();
-
-const openDatabase = (): Promise<IDBDatabase> => {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME);
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(request.result);
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains(OBJECT_NAME)) {
-        db.createObjectStore(OBJECT_NAME, { keyPath: "id" });
-      }
-    };
-  });
-};
 
 const initialize = async () => {
   if (isInitialized || isInitializing) {
@@ -31,28 +17,30 @@ const initialize = async () => {
   isInitializing = true;
 
   try {
-    const db = await openDatabase();
-    const transaction = db.transaction([OBJECT_NAME], "readonly");
-    const store = transaction.objectStore(OBJECT_NAME);
+    const sessionId = getSessionId();
+    // Load the session's image collection document
+    const docRef = doc(db, "images", sessionId);
+    const docSnap = await getDoc(docRef);
 
-    const request = store.getAll();
-    await new Promise<void>((resolve, reject) => {
-      request.onsuccess = () => {
-        const results = request.result || [];
-        const newState = new Map(
-          results.map((item: { id: string; imageData: string }) => [
-            item.id,
-            item.imageData,
-          ]),
-        );
-        // Emit change to update all listeners
-        listeners.forEach((listener) => listener(newState));
-        state = newState;
-        resolve();
-      };
-      request.onerror = () => reject(request.error);
-    });
-  } catch {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const images = data.images || {};
+
+      // Type-safe conversion from Firestore data to Map<string, string>
+      const newState = new Map<string, string>();
+      for (const [key, value] of Object.entries(images)) {
+        if (typeof value === "string") {
+          newState.set(key, value);
+        }
+      }
+
+      listeners.forEach((listener) => listener(newState));
+      state = newState;
+    } else {
+      state = new Map();
+    }
+  } catch (error) {
+    console.error("Error loading images from Firestore:", error);
     state = new Map();
   } finally {
     isInitialized = true;
@@ -61,7 +49,6 @@ const initialize = async () => {
 };
 
 export function useImage() {
-  // We "subscribe" to the singleton state
   const [images, setImages] = useState(state);
 
   useEffect(() => {
@@ -84,20 +71,43 @@ export function useImage() {
     id: string;
     imageData: string;
   }): Promise<void> => {
-    const db = await openDatabase();
-    const transaction = db.transaction([OBJECT_NAME], "readwrite");
-    const store = transaction.objectStore(OBJECT_NAME);
+    const sessionId = getSessionId();
 
-    return new Promise((resolve, reject) => {
-      const request = store.put({ id, imageData });
-      request.onsuccess = () => {
-        const newState = new Map(state);
-        newState.set(id, imageData);
-        emitChange(newState);
-        resolve();
-      };
-      request.onerror = () => reject(request.error);
-    });
+    // Update the session's image collection document
+    const docRef = doc(db, "images", sessionId);
+    const newState = new Map(state);
+    newState.set(id, imageData);
+
+    await setDoc(
+      docRef,
+      {
+        images: Object.fromEntries(newState),
+        sessionId,
+        updatedAt: new Date(),
+      },
+      { merge: true },
+    );
+
+    emitChange(newState);
+  };
+
+  const removeImage = async (id: string): Promise<void> => {
+    const sessionId = getSessionId();
+    const docRef = doc(db, "images", sessionId);
+    const newState = new Map(state);
+    newState.delete(id);
+
+    await setDoc(
+      docRef,
+      {
+        images: Object.fromEntries(newState),
+        sessionId,
+        updatedAt: new Date(),
+      },
+      { merge: true },
+    );
+
+    emitChange(newState);
   };
 
   const getImage = (id: string): string | undefined => {
@@ -113,5 +123,6 @@ export function useImage() {
     images,
     getImage,
     saveImage,
+    removeImage,
   };
 }
