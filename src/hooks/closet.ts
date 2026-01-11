@@ -79,12 +79,15 @@ export function useCloset() {
     item: CreateClothingItem,
   ): Promise<ClothingItem> => {
     const sessionId = getSessionId();
+    const itemId = `${sessionId}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
     const newItem: ClothingItem = {
-      id: `${sessionId}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      id: itemId,
       name: item.name,
       category: item.category,
       color: item.color,
       isClean: true,
+      imageId: itemId, // Use the same ID for the image reference
     };
 
     await setDoc(doc(db, "clothingItems", newItem.id), {
@@ -92,7 +95,8 @@ export function useCloset() {
       category: newItem.category,
       color: newItem.color,
       isClean: newItem.isClean,
-      sessionId: sessionId, // Add session ID to isolate data
+      imageId: newItem.imageId,
+      sessionId: sessionId,
     });
 
     emitChange([newItem, ...state]);
