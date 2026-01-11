@@ -53,12 +53,12 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
   const { removeClothingItem } = useCloset();
   const { outfit, clearOutfit } = useOutfit();
 
-  function remove(id: string): void {
+  async function remove(id: string): Promise<void> {
     if (window.confirm(`Are you sure you want to delete this item?`)) {
-      removeClothingItem(id);
+      await removeClothingItem(id);
 
       if (item.id === outfit?.top.id || item.id === outfit?.bottom.id) {
-        clearOutfit();
+        await clearOutfit();
       }
     }
   }
@@ -130,11 +130,11 @@ const LaundryButton = (): React.JSX.Element => {
   const { areAllItemsClean, markLaundryDone } = useCloset();
   const { generateOutfit, outfit } = useOutfit();
 
-  function onDoLaundry(): void {
-    markLaundryDone();
+  async function onDoLaundry(): Promise<void> {
+    await markLaundryDone();
 
     if (!outfit) {
-      generateOutfit();
+      await generateOutfit();
     }
   }
 
@@ -167,7 +167,7 @@ export const ClosetPage = (): React.JSX.Element => {
   );
 
   async function addItem(item: CreateClothingItem): Promise<void> {
-    const newItem = addClothingItem(item);
+    const newItem = await addClothingItem(item);
 
     if (item.imageData) {
       await saveImage({ id: newItem.id, imageData: item.imageData });
