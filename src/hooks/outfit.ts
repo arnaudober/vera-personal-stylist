@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import type { Outfit } from "../models/outfit.ts";
-import { useCloset } from "./closet.ts";
+import { getSessionId, useCloset } from "./closet.ts";
 import type { ClothingItem } from "../models/clothing-item.ts";
 import type { Color } from "../models/color.ts";
 import { differenceCiede2000 } from "culori";
-
-const OUTFIT_LOCAL_STORAGE_KEY = "outfit";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "../firebase.ts";
 
 // Private singleton state reused through the app
 let state: Outfit | null = null;
@@ -54,25 +54,30 @@ const findBestMatch = ({
   return bestItem as ClothingItem;
 };
 
-const initialize = () => {
+const initialize = async (): Promise<void> => {
   if (isInitialized) {
     return;
   }
 
   try {
-    const raw = localStorage.getItem(OUTFIT_LOCAL_STORAGE_KEY);
-    if (raw) {
-      state = JSON.parse(raw) as Outfit | null;
+    const sessionId = getSessionId();
+    const docRef = doc(db, "outfits", sessionId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      state = data.outfit || null;
     } else {
       state = null;
     }
-  } catch {
+  } catch (error) {
+    console.error("Error loading outfit from Firestore:", error);
     state = null;
   }
 
   isInitialized = true;
 };
-initialize();
+await initialize();
 
 export const useOutfit = () => {
   // Subscribe to the singleton state
@@ -87,7 +92,7 @@ export const useOutfit = () => {
     };
   }, []);
 
-  const generateOutfit = (): Outfit | null => {
+  const generateOutfit = async (): Promise<Outfit | null> => {
     const cleanItems = items.filter((i) => i.isClean);
     if (!cleanItems || cleanItems.length === 0) {
       return null;
@@ -146,11 +151,11 @@ export const useOutfit = () => {
     }
 
     const finalOutfit = bestOutfit ?? state;
-    emitChange(finalOutfit);
+    await emitChange(finalOutfit);
     return finalOutfit;
   };
 
-  const clearOutfit = (): void => emitChange(null);
+  const clearOutfit = async (): Promise<void> => await emitChange(null);
 
   const canGenerateOutfit = (): boolean => {
     const cleanItems = items.filter((i) => i.isClean);
@@ -174,9 +179,19 @@ export const useOutfit = () => {
     );
   };
 
-  function emitChange(newOutfit: Outfit | null): void {
+  async function emitChange(newOutfit: Outfit | null): Promise<void> {
+    const sessionId = getSessionId();
+    const docRef = doc(db, "outfits", sessionId);
+
+    // Save to Firestore
+    await setDoc(docRef, {
+      outfit: newOutfit,
+      sessionId: sessionId,
+      updatedAt: new Date(),
+    });
+
+    // Update local state
     listeners.forEach((listener) => listener(newOutfit));
-    localStorage.setItem(OUTFIT_LOCAL_STORAGE_KEY, JSON.stringify(newOutfit));
     state = newOutfit;
   }
 

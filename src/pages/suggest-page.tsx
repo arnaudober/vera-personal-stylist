@@ -27,8 +27,8 @@ const EmptyMessageTemplate = () => (
 const RegenerateOutfitButton = () => {
   const { generateOutfit, canGenerateOutfit } = useOutfit();
 
-  function onRegenerate(): void {
-    generateOutfit();
+  async function onRegenerate(): Promise<void> {
+    await generateOutfit();
   }
 
   return (
@@ -59,7 +59,7 @@ const OutfitTemplate = ({
 
   useEffect(() => {
     if (!outfit) {
-      generateOutfit();
+      void generateOutfit();
     }
   }, [generateOutfit, outfit]);
 
@@ -70,15 +70,17 @@ const OutfitTemplate = ({
   ) => {
     e.dataTransfer.setData("text/plain", key as string);
   };
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>): void => {
+  const handleDrop = async (
+    e: React.DragEvent<HTMLDivElement>,
+  ): Promise<void> => {
     const key = e.dataTransfer.getData("text/plain") as keyof Outfit;
     if (!key) {
       return;
     }
 
     const item = outfit![key];
-    markWorn(item);
-    clearOutfit();
+    await markWorn(item);
+    await clearOutfit();
   };
 
   // Touch is used for mobile/tablet
@@ -108,7 +110,9 @@ const OutfitTemplate = ({
       currentY: touch.clientY,
     }));
   };
-  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+  const handleTouchEnd = async (
+    e: React.TouchEvent<HTMLDivElement>,
+  ): Promise<void> => {
     if (!touchDrag.isDragging || !touchDrag.key || !outfit) {
       setTouchDrag((prev) => ({ ...prev, isDragging: false, key: null }));
       return;
@@ -127,8 +131,8 @@ const OutfitTemplate = ({
       (basketArea.contains(elementBelow) || elementBelow === basketArea)
     ) {
       const item = outfit[touchDrag.key];
-      markWorn(item);
-      clearOutfit();
+      await markWorn(item);
+      await clearOutfit();
     }
 
     setTouchDrag((prev) => ({ ...prev, isDragging: false, key: null }));
@@ -213,9 +217,9 @@ const OutfitTemplate = ({
       {/* region Basket template */}
       <div
         onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => {
+        onDrop={async (e) => {
           e.preventDefault();
-          handleDrop(e);
+          await handleDrop(e);
         }}
         className="fixed bottom-16 left-1/2 -translate-x-1/2 p-2 w-64 md:w-80 h-44 md:h-56 flex items-center justify-center"
         aria-label="Wear basket"
