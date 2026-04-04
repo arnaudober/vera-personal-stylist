@@ -1,12 +1,18 @@
 import { useState } from "react";
 import {
-  categoryOptions,
   type ClothingItemCategory,
+  type ClothingItemSubCategory,
   type CreateClothingItem,
+  subCategoryLabels,
+  subCategoryToCategory,
 } from "../models/clothing-item.ts";
 import type { Color } from "../models/color.ts";
 import { useCloset } from "../hooks/closet.ts";
 import { uploadService } from "../services/remove-bg.ts";
+import {
+  fashionClassifier,
+  type ClassificationResult,
+} from "../services/fashion-classifier.ts";
 
 const MAX_IMAGE_SIZE = 256;
 const COMPRESSION_QUALITY = 0.5;
@@ -181,6 +187,10 @@ export default function UploadClothingItemModal({
   const [preview, setPreview] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [category, setCategory] = useState<ClothingItemCategory | "">("");
+  const [subCategory, setSubCategory] = useState<
+    ClothingItemSubCategory | ""
+  >("");
+  const [classificationFailed, setClassificationFailed] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -228,13 +238,14 @@ export default function UploadClothingItemModal({
         setIsSaving(false);
         return;
       }
-      if (!category) {
+      if (classificationFailed && !subCategory) {
         setError("Please select a category.");
         setIsSaving(false);
         return;
       }
 
       let imageData = await processImageToBase64(file);
+      let noBgBlob: Blob;
 
       try {
         const compressedBlob = dataURLToBlob(imageData);
@@ -242,7 +253,7 @@ export default function UploadClothingItemModal({
           type: "image/png",
         });
 
-        const noBgBlob = await uploadService.removeBackground(compressedFile);
+        noBgBlob = await uploadService.removeBackground(compressedFile);
         const noBgFile = new File([noBgBlob], file.name, {
           type: "image/png",
         });
@@ -253,9 +264,30 @@ export default function UploadClothingItemModal({
         return;
       }
 
+      // Classify the clothing item
+      let classification: ClassificationResult | null = null;
+      if (!classificationFailed) {
+        try {
+          classification = await fashionClassifier.classifyClothing(noBgBlob);
+        } catch {
+          // Classification failed — fall back to manual selection
+          setClassificationFailed(true);
+          setIsSaving(false);
+          return;
+        }
+      }
+
+      const resolvedSubCategory =
+        subCategory || classification?.subCategory || undefined;
+      const resolvedCategory =
+        resolvedSubCategory
+          ? subCategoryToCategory[resolvedSubCategory]
+          : (category as ClothingItemCategory);
+
       const item: CreateClothingItem = {
         name: name.trim(),
-        category,
+        category: resolvedCategory,
+        subCategory: resolvedSubCategory,
         color: await extractDominantColor(imageData),
         isClean: true,
         imageData,
@@ -329,34 +361,38 @@ export default function UploadClothingItemModal({
             />
           </div>
 
-          <div>
-            <label
-              className="block text-sm font-medium mb-1"
-              htmlFor="category-input"
-            >
-              Category
-            </label>
-            <select
-              id="category-input"
-              className={`input select w-full border text-base ${
-                !category ? "placeholder" : null
-              }`}
-              value={category}
-              onChange={(e) => {
-                setCategory(e.target.value as ClothingItemCategory);
-              }}
-              disabled={isSaving}
-            >
-              <option disabled value="">
-                Select…
-              </option>
-              {categoryOptions.map((c) => (
-                <option key={c.value} value={c.value}>
-                  {c.label}
+          {classificationFailed && (
+            <div>
+              <label
+                className="block text-sm font-medium mb-1"
+                htmlFor="subcategory-input"
+              >
+                Category (auto-detection failed)
+              </label>
+              <select
+                id="subcategory-input"
+                className={`input select w-full border text-base ${
+                  !subCategory ? "placeholder" : null
+                }`}
+                value={subCategory}
+                onChange={(e) => {
+                  const value = e.target.value as ClothingItemSubCategory;
+                  setSubCategory(value);
+                  setCategory(subCategoryToCategory[value]);
+                }}
+                disabled={isSaving}
+              >
+                <option disabled value="">
+                  Select…
                 </option>
-              ))}
-            </select>
-          </div>
+                {Object.entries(subCategoryLabels).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {error && <div className="text-sm text-red-600">{error}</div>}
         </div>
@@ -372,7 +408,12 @@ export default function UploadClothingItemModal({
           <button
             className="primary-button flex-1 text-base disabled:opacity-60"
             onClick={save}
-            disabled={!file || !name || !category || isSaving}
+            disabled={
+              !file ||
+              !name ||
+              (classificationFailed && !subCategory) ||
+              isSaving
+            }
           >
             {isSaving ? "Saving…" : "Save"}
           </button>
