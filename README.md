@@ -25,7 +25,7 @@ Snap your closet, let Vera organize your clothes, and get fresh outfit ideas —
 - [Doppler](https://www.doppler.com/) configured for environment variables
 
 ### Environment Variables
-The following `VITE_FIREBASE_*` variables must be set (managed via Doppler):
+The following `VITE_*` variables must be set (managed via Doppler):
 - `VITE_FIREBASE_API_KEY`
 - `VITE_FIREBASE_AUTH_DOMAIN`
 - `VITE_FIREBASE_PROJECT_ID`
@@ -46,7 +46,7 @@ npm run lint     # ESLint
 
 ## Roadmap
 - [x] Make available the MVP for private testing
-- [ ] Outfit history — track what was worn recently to avoid repetition
+- [x] Outfit history — track what was worn recently to avoid repetition
 - [ ] Favorite outfits — save and revisit liked combinations
 - [ ] Improved onboarding — guided tour for new users
 - [ ] More categories — shoes, accessories, jackets/coats
