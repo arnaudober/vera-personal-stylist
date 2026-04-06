@@ -5,6 +5,7 @@ import type { Outfit } from "../models/outfit.ts";
 import { useOutfit } from "../hooks/outfit.ts";
 import { useCloset } from "../hooks/closet.ts";
 import { useImage } from "../hooks/image.ts";
+import { useOutfitHistory } from "../hooks/outfit-history.ts";
 import { FiRefreshCcw } from "react-icons/fi";
 
 interface TouchDragState {
@@ -56,6 +57,7 @@ const OutfitTemplate = ({
   const { getImage } = useImage();
   const { isItemClean, areAllItemsClean, markWorn } = useCloset();
   const { outfit, clearOutfit, generateOutfit } = useOutfit();
+  const { recordOutfit } = useOutfitHistory();
 
   useEffect(() => {
     if (!outfit) {
@@ -74,11 +76,12 @@ const OutfitTemplate = ({
     e: React.DragEvent<HTMLDivElement>,
   ): Promise<void> => {
     const key = e.dataTransfer.getData("text/plain") as keyof Outfit;
-    if (!key) {
+    if (!key || !outfit) {
       return;
     }
 
-    const item = outfit![key];
+    await recordOutfit(outfit.top.id, outfit.bottom.id);
+    const item = outfit[key];
     await markWorn(item);
     await clearOutfit();
   };
@@ -130,6 +133,7 @@ const OutfitTemplate = ({
       basketArea &&
       (basketArea.contains(elementBelow) || elementBelow === basketArea)
     ) {
+      await recordOutfit(outfit.top.id, outfit.bottom.id);
       const item = outfit[touchDrag.key];
       await markWorn(item);
       await clearOutfit();
