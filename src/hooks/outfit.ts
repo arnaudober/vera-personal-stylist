@@ -6,6 +6,7 @@ import type { Color } from "../models/color.ts";
 import { differenceCiede2000 } from "culori";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../firebase.ts";
+import { useOutfitHistory } from "./outfit-history.ts";
 
 // Private singleton state reused through the app
 let state: Outfit | null = null;
@@ -83,6 +84,7 @@ export const useOutfit = () => {
   // Subscribe to the singleton state
   const [outfit, setOutfit] = useState(state);
   const { items } = useCloset();
+  const { getRecencyPenalty } = useOutfitHistory();
 
   useEffect(() => {
     const listener = (s: Outfit | null) => setOutfit(s);
@@ -144,9 +146,17 @@ export const useOutfit = () => {
         b: currentOutfit.bottom!.color,
       });
 
-      if (score !== null && score > highestScore) {
-        highestScore = score;
-        bestOutfit = currentOutfit as Outfit;
+      if (score !== null) {
+        const recencyPenalty = getRecencyPenalty(
+          currentOutfit.top!.id,
+          currentOutfit.bottom!.id,
+        );
+        const adjustedScore = score * recencyPenalty;
+
+        if (adjustedScore > highestScore) {
+          highestScore = adjustedScore;
+          bestOutfit = currentOutfit as Outfit;
+        }
       }
     }
 
