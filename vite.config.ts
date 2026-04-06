@@ -4,6 +4,15 @@ import {VitePWA} from "vite-plugin-pwa";
 
 // https://vite.dev/config/
 export default defineConfig({
+    server: {
+        proxy: {
+            '/api/huggingface': {
+                target: 'https://router.huggingface.co',
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/api\/huggingface/, ''),
+            },
+        },
+    },
     plugins: [react(), VitePWA({
         registerType: 'autoUpdate', manifest: {
             name: 'Vera, your personal stylist',

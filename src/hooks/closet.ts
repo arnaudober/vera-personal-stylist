@@ -85,6 +85,7 @@ export function useCloset() {
       id: itemId,
       name: item.name,
       category: item.category,
+      subCategory: item.subCategory,
       color: item.color,
       isClean: true,
       imageId: itemId, // Use the same ID for the image reference
@@ -93,6 +94,7 @@ export function useCloset() {
     await setDoc(doc(db, "clothingItems", newItem.id), {
       name: newItem.name,
       category: newItem.category,
+      ...(newItem.subCategory && { subCategory: newItem.subCategory }),
       color: newItem.color,
       isClean: newItem.isClean,
       imageId: newItem.imageId,
