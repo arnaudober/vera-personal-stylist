@@ -3,6 +3,7 @@ import "./firebase.ts";
 import { SuggestPage } from "./pages/suggest-page.tsx";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { ClosetPage } from "./pages/closet-page.tsx";
+import { FavouritesPage } from "./pages/favourites-page.tsx";
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
         <Routes>
           <Route path="/" element={<SuggestPage />} />
           <Route path="/closet" element={<ClosetPage />} />
+          <Route path="/favourites" element={<FavouritesPage />} />
         </Routes>
       </BrowserRouter>
     </div>

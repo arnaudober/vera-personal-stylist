@@ -47,12 +47,14 @@ npm run lint     # ESLint
 ## Roadmap
 - [x] Make available the MVP for private testing
 - [x] Outfit history — track what was worn recently to avoid repetition
-- [ ] Favorite outfits — save and revisit liked combinations
-- [ ] Improved onboarding — guided tour for new users
+- [x] Favorite outfits — save and revisit liked combinations
+- [ ] Improve suggest page design — better layout, visual consistency with other pages
+- [ ] Improve favourites page — add filters (by item, by date), sort options, and quick actions (e.g. wear this outfit)
 - [ ] More categories — shoes, accessories, jackets/coats
+- [ ] Improved onboarding — guided tour for new users
 - [ ] Multi-season — adapt suggestions to the current season
-- [ ] Improve suggestion algorithm with weather, occasions, etc.
 - [ ] Add notification for suggestion once a day, reminders for laundry to be done after a few days
+- [ ] Improve suggestion algorithm with weather, occasions, etc.
 - [ ] Social sharing — get friends' opinions on an outfit
 - [ ] Release a first version to the public
 

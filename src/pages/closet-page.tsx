@@ -193,7 +193,7 @@ export const ClosetPage = (): React.JSX.Element => {
         onCategorySelected={setSelectedCategory}
       />
 
-      <div className="mx-auto max-w-4xl p-4 pb-24">
+      <div className="w-full mx-auto max-w-4xl p-4 pb-24">
         <LaundryButton />
 
         <div className="rounded-2xl">

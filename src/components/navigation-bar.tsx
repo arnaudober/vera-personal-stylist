@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { FaRegStar, FaTshirt } from "react-icons/fa";
+import { FaHeart, FaRegStar, FaTshirt } from "react-icons/fa";
 import "./navigation-bar.css";
 
-type Page = "suggest" | "closet";
+type Page = "suggest" | "closet" | "favourites";
 
 interface NavigationBarData {
   activePage: Page;
@@ -34,6 +34,18 @@ export default function NavigationBar({ activePage }: NavigationBarData) {
             <FaRegStar className="text-xl" />
           </div>
           <span className="text-xs font-medium">Suggest</span>
+        </Link>
+
+        <Link
+          to="/favourites"
+          className={`link transition-colors ${activePage === "favourites" ? "active" : null}`}
+          aria-current={activePage === "favourites" ? "page" : undefined}
+          aria-label="Open favourite outfits page"
+        >
+          <div className="text-xl mb-1">
+            <FaHeart className="text-xl" />
+          </div>
+          <span className="text-xs font-medium">Favourites</span>
         </Link>
       </div>
     </nav>
