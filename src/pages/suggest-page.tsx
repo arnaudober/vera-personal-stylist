@@ -6,7 +6,8 @@ import { useOutfit } from "../hooks/outfit.ts";
 import { useCloset } from "../hooks/closet.ts";
 import { useImage } from "../hooks/image.ts";
 import { useOutfitHistory } from "../hooks/outfit-history.ts";
-import { FiRefreshCcw } from "react-icons/fi";
+import { useFavouriteOutfits } from "../hooks/favourite-outfits.ts";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 
 interface TouchDragState {
   key: keyof Outfit | null;
@@ -25,6 +26,40 @@ const EmptyMessageTemplate = () => (
     </div>
   </div>
 );
+const FavouriteOutfitButton = () => {
+  const { outfit } = useOutfit();
+  const { addFavourite, removeFavouriteByOutfit, isFavourite } =
+    useFavouriteOutfits();
+
+  if (!outfit) {
+    return null;
+  }
+
+  const favourited = isFavourite(outfit.top.id, outfit.bottom.id);
+
+  async function onToggle(): Promise<void> {
+    if (!outfit) return;
+    if (favourited) {
+      await removeFavouriteByOutfit(outfit.top.id, outfit.bottom.id);
+    } else {
+      await addFavourite(outfit.top.id, outfit.bottom.id);
+    }
+  }
+
+  return (
+    <button
+      onClick={() => onToggle()}
+      aria-label={favourited ? "Remove from favourites" : "Add to favourites"}
+      title={favourited ? "Remove from favourites" : "Add to favourites"}
+      className={`fixed bottom-12 right-5 z-50 shadow-lg primary-button transition-all`}
+      style={{ width: 56, height: 56 }}
+    >
+      <div className="flex items-center justify-center text-3xl">
+        {favourited ? <FaHeart /> : <FaRegHeart />}
+      </div>
+    </button>
+  );
+};
 const RegenerateOutfitButton = () => {
   const { generateOutfit, canGenerateOutfit } = useOutfit();
 
@@ -35,15 +70,12 @@ const RegenerateOutfitButton = () => {
   return (
     <button
       onClick={() => onRegenerate()}
+      className="secondary-button w-full text-base font-medium transition-all"
       aria-label="Regenerate the outfit"
       title="Regenerate the outfit"
-      className={`fixed bottom-12 right-5 z-50 shadow-lg border primary-button transition-all`}
-      style={{ width: 56, height: 56 }}
       disabled={!canGenerateOutfit()}
     >
-      <div className="flex items-center justify-center text-3xl">
-        <FiRefreshCcw />
-      </div>
+      Regenerate outfit
     </button>
   );
 };
@@ -284,20 +316,22 @@ export const SuggestPage = (): React.JSX.Element => {
       )}
 
       {/* Header */}
-      <div className="flex-shrink-0 pt-4 pb-2">
-        <div className="mx-auto max-w-4xl px-4">
-          <h2 className="page-title">Today's outfit</h2>
-        </div>
-
-        <p className="px-4 text-md text-gray-900 text-center">
-          ✨ A fresh outfit is picked for you every day.
-        </p>
+      <div className="mx-auto max-w-4xl p-4 pb-2">
+        <h2 className="page-title">Today's outfit</h2>
       </div>
 
-      <OutfitTemplate setTouchDrag={setTouchDrag} touchDrag={touchDrag} />
+      <p className="px-4 pb-2 pt-2 text-md text-gray-900 text-center">
+        ✨ A fresh outfit is picked for you every day.
+      </p>
+
+      <div className="w-full mx-auto max-w-4xl p-4 pb-24">
+        <RegenerateOutfitButton />
+
+        <OutfitTemplate setTouchDrag={setTouchDrag} touchDrag={touchDrag} />
+      </div>
 
       <NavigationBar activePage="suggest" />
-      <RegenerateOutfitButton />
+      <FavouriteOutfitButton />
     </>
   );
 };
