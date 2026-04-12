@@ -1,7 +1,6 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import NavigationBar from "../components/navigation-bar.tsx";
-import type { Outfit } from "../models/outfit.ts";
 import { useOutfit } from "../hooks/outfit.ts";
 import { useCloset } from "../hooks/closet.ts";
 import { useImage } from "../hooks/image.ts";
@@ -43,7 +42,6 @@ const FavouriteButton = () => {
 };
 
 interface TouchDragState {
-  key: keyof Outfit | null;
   isDragging: boolean;
   startX: number;
   startY: number;
@@ -100,34 +98,24 @@ const OutfitTemplate = ({
   }, [generateOutfit, outfit]);
 
   // Drag is used for desktop
-  const handleDragStart = (
-    key: keyof Outfit,
-    e: React.DragEvent<HTMLDivElement>,
-  ) => {
-    e.dataTransfer.setData("text/plain", key as string);
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    e.dataTransfer.setData("text/plain", "outfit");
   };
   const handleDrop = async (
     e: React.DragEvent<HTMLDivElement>,
   ): Promise<void> => {
-    const key = e.dataTransfer.getData("text/plain") as keyof Outfit;
-    if (!key || !outfit) {
-      return;
-    }
+    if (!outfit) return;
 
     await recordOutfit(outfit.top.id, outfit.bottom.id);
-    const item = outfit[key];
-    await markWorn(item);
+    await markWorn(outfit.top);
+    await markWorn(outfit.bottom);
     await clearOutfit();
   };
 
   // Touch is used for mobile/tablet
-  const handleTouchStart = (
-    key: keyof Outfit,
-    e: React.TouchEvent<HTMLDivElement>,
-  ) => {
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     const touch = e.touches[0];
     setTouchDrag({
-      key,
       isDragging: true,
       startX: touch.clientX,
       startY: touch.clientY,
@@ -136,9 +124,7 @@ const OutfitTemplate = ({
     });
   };
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (!touchDrag.isDragging) {
-      return;
-    }
+    if (!touchDrag.isDragging) return;
 
     const touch = e.touches[0];
     setTouchDrag((prev) => ({
@@ -150,8 +136,8 @@ const OutfitTemplate = ({
   const handleTouchEnd = async (
     e: React.TouchEvent<HTMLDivElement>,
   ): Promise<void> => {
-    if (!touchDrag.isDragging || !touchDrag.key || !outfit) {
-      setTouchDrag((prev) => ({ ...prev, isDragging: false, key: null }));
+    if (!touchDrag.isDragging || !outfit) {
+      setTouchDrag((prev) => ({ ...prev, isDragging: false }));
       return;
     }
 
@@ -168,12 +154,12 @@ const OutfitTemplate = ({
       (basketArea.contains(elementBelow) || elementBelow === basketArea)
     ) {
       await recordOutfit(outfit.top.id, outfit.bottom.id);
-      const item = outfit[touchDrag.key];
-      await markWorn(item);
+      await markWorn(outfit.top);
+      await markWorn(outfit.bottom);
       await clearOutfit();
     }
 
-    setTouchDrag((prev) => ({ ...prev, isDragging: false, key: null }));
+    setTouchDrag((prev) => ({ ...prev, isDragging: false }));
   };
 
   return (
@@ -192,30 +178,27 @@ const OutfitTemplate = ({
 
             return (
               <div className="relative mx-auto w-full max-w-sm">
-                <div className="card flex flex-col items-center gap-4 p-5 relative">
+                <div
+                  className={`card flex flex-col items-center gap-4 p-5 relative select-none cursor-grab ${touchDrag.isDragging ? "opacity-20" : ""}`}
+                  draggable
+                  onDragStart={handleDragStart}
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                  style={{ touchAction: "none" }}
+                >
                   <FavouriteButton />
                   {/* Top item */}
                   {outfit.top && isItemClean(outfit.top.id) && (
-                    <div
-                      className={`select-none cursor-grab ${touchDrag.isDragging && touchDrag.key === "top" ? "opacity-20" : ""}`}
-                      aria-label="Top item"
-                      draggable
-                      onDragStart={(e) => handleDragStart("top", e)}
-                      onTouchStart={(e) => handleTouchStart("top", e)}
-                      onTouchMove={handleTouchMove}
-                      onTouchEnd={handleTouchEnd}
-                      style={{ touchAction: "none" }}
-                    >
-                      <div className="flex flex-col items-center">
-                        <img
-                          src={getImage(outfit.top.id)}
-                          alt={outfit["top"].name}
-                          className="w-36 h-36 object-contain rounded-xl"
-                          loading="lazy"
-                        />
-                        <div className="mt-2 text-sm text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
-                          {outfit.top.name}
-                        </div>
+                    <div className="flex flex-col items-center">
+                      <img
+                        src={getImage(outfit.top.id)}
+                        alt={outfit.top.name}
+                        className="w-36 h-36 object-contain rounded-xl"
+                        loading="lazy"
+                      />
+                      <div className="mt-2 text-sm text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
+                        {outfit.top.name}
                       </div>
                     </div>
                   )}
@@ -224,32 +207,21 @@ const OutfitTemplate = ({
 
                   {/* Bottom item */}
                   {outfit.bottom && isItemClean(outfit.bottom.id) && (
-                    <div
-                      className={`select-none cursor-grab ${touchDrag.isDragging && touchDrag.key === "bottom" ? "opacity-20" : ""}`}
-                      aria-hidden="true"
-                      draggable
-                      onDragStart={(e) => handleDragStart("bottom", e)}
-                      onTouchStart={(e) => handleTouchStart("bottom", e)}
-                      onTouchMove={handleTouchMove}
-                      onTouchEnd={handleTouchEnd}
-                      style={{ touchAction: "none" }}
-                    >
-                      <div className="flex flex-col items-center">
-                        <img
-                          src={getImage(outfit.bottom.id)}
-                          alt={outfit["bottom"].name}
-                          className="w-36 h-36 object-contain rounded-xl"
-                          loading="lazy"
-                        />
-                        <div className="mt-2 text-sm text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
-                          {outfit.bottom.name}
-                        </div>
+                    <div className="flex flex-col items-center">
+                      <img
+                        src={getImage(outfit.bottom.id)}
+                        alt={outfit.bottom.name}
+                        className="w-36 h-36 object-contain rounded-xl"
+                        loading="lazy"
+                      />
+                      <div className="mt-2 text-sm text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
+                        {outfit.bottom.name}
                       </div>
                     </div>
                   )}
                 </div>
                 <p className="text-center text-xs text-gray-400 mt-2">
-                  Drag an item to the basket to mark it as worn
+                  Drag the outfit to the basket to mark it as worn
                 </p>
               </div>
             );
@@ -293,7 +265,6 @@ export const TodayPage = (): React.JSX.Element => {
   const { getImage } = useImage();
   const { outfit } = useOutfit();
   const [touchDrag, setTouchDrag] = useState<TouchDragState>({
-    key: null,
     isDragging: false,
     startX: 0,
     startY: 0,
@@ -304,20 +275,26 @@ export const TodayPage = (): React.JSX.Element => {
   return (
     <>
       {/* Floating preview while dragging an item */}
-      {touchDrag.isDragging && touchDrag.key && outfit && (
+      {touchDrag.isDragging && outfit && (
         <div
-          className="fixed pointer-events-none z-50 text-6xl"
+          className="fixed pointer-events-none z-50"
           style={{
-            left: touchDrag.currentX - 30,
-            top: touchDrag.currentY - 30,
+            left: touchDrag.currentX,
+            top: touchDrag.currentY,
             transform: "translate(-50%, -50%)",
           }}
         >
-          <div className="card opacity-80 scale-110 shadow-lg">
+          <div className="card opacity-80 scale-75 shadow-lg flex flex-col items-center gap-2 p-3">
             <img
-              src={getImage(outfit[touchDrag.key].id)}
-              alt={outfit[touchDrag.key].name}
-              className="w-36 h-36 object-contain rounded-xl shadow-sm"
+              src={getImage(outfit.top.id)}
+              alt={outfit.top.name}
+              className="w-20 h-20 object-contain rounded-xl"
+              loading="lazy"
+            />
+            <img
+              src={getImage(outfit.bottom.id)}
+              alt={outfit.bottom.name}
+              className="w-20 h-20 object-contain rounded-xl"
               loading="lazy"
             />
           </div>
