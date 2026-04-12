@@ -12,7 +12,7 @@ import * as React from "react";
 import { useImage } from "../hooks/image.ts";
 import { IoClose } from "react-icons/io5";
 import { useOutfit } from "../hooks/outfit.ts";
-import { FaPlus } from "react-icons/fa6";
+import { FaPlus } from "react-icons/fa";
 import "./closet-page.css";
 
 const FilterBar = ({

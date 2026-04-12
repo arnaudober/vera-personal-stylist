@@ -55,6 +55,8 @@ const FavouriteOutfitCard = ({
             </div>
           )}
 
+          <div className="w-full border-t border-gray-100" />
+
           {bottom ? (
             <div className="flex flex-col items-center">
               <img
@@ -87,7 +89,7 @@ export const FavouritesPage = (): React.JSX.Element => {
         <h2 className="page-title">Your favourites</h2>
       </div>
 
-      <div className="mx-auto max-w-4xl p-4 pb-24">
+      <div className="w-full mx-auto max-w-4xl p-4 pb-24">
         <div className="rounded-2xl">
           {favourites.length > 0 ? (
             <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -104,7 +106,7 @@ export const FavouritesPage = (): React.JSX.Element => {
                 No favourite outfits yet.
               </p>
               <p className="text-gray-400 text-sm">
-                Save outfits you love from the suggest page!
+                Save outfits you love from the today page!
               </p>
             </div>
           )}
