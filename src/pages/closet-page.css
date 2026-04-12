@@ -27,18 +27,3 @@
   }
 }
 
-.badge {
-  border-radius: calc(infinity * 1px);
-  padding-inline: calc(var(--spacing) * 2);
-  padding-block: calc(var(--spacing) * 0.5);
-  color: var(--color-white);
-  border-color: transparent;
-
-  &.clean {
-    background-color: var(--primary-color);
-  }
-
-  &.dirty {
-    background-color: #374151;
-  }
-}

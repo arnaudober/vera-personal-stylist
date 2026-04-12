@@ -70,10 +70,12 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
 
   return (
     <div className="flex flex-col gap-2 p-2 ">
-      <div className="card flex flex-col items-center relative">
+      <div
+        className={`card flex flex-col items-center relative ${!item.isClean ? "dirty-overlay" : ""}`}
+      >
         <button
           onClick={() => remove(item.id)}
-          className="delete-button absolute top-2 right-2 flex items-center justify-center transition-all text-sm font-bold"
+          className="delete-button absolute top-2 right-2 flex items-center justify-center transition-all text-sm font-bold opacity-100"
           aria-label="Delete item"
         >
           <IoClose size={14} />
@@ -92,10 +94,8 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
           {item.name}
         </div>
 
-        <div className="mt-1">
-          <span
-            className={`badge inline-block border text-xs ${item.isClean ? "clean" : "dirty"}`}
-          >
+        <div className="opacity-100 mt-1">
+          <span className={item.isClean ? "clean-badge" : "dirty-badge"}>
             {item.isClean ? "clean" : "dirty"}
           </span>
         </div>
