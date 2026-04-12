@@ -48,10 +48,11 @@ npm run lint     # ESLint
 - [x] Make available the MVP for private testing
 - [x] Outfit history — track what was worn recently to avoid repetition
 - [x] Favorite outfits — save and revisit liked combinations
-- [ ] Improve suggest page design — better layout, visual consistency with other pages
+- [x] Improve today page design — better layout, visual consistency with other pages, unified outfit card, FAB regenerate
 - [ ] Improve favourites page — add filters (by item, by date), sort options, and quick actions (e.g. wear this outfit)
 - [ ] More categories — shoes, accessories, jackets/coats
 - [ ] Improved onboarding — guided tour for new users
+- [ ] Cover flow — explore a carousel/cover flow view for favourites and/or today page
 - [ ] Multi-season — adapt suggestions to the current season
 - [ ] Add notification for suggestion once a day, reminders for laundry to be done after a few days
 - [ ] Improve suggestion algorithm with weather, occasions, etc.

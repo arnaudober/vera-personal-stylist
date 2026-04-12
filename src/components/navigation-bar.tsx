@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { FaHeart, FaRegStar, FaTshirt } from "react-icons/fa";
+import { FaCalendarDay, FaHeart, FaTshirt } from "react-icons/fa";
 import "./navigation-bar.css";
 
-type Page = "suggest" | "closet" | "favourites";
+type Page = "today" | "closet" | "favourites";
 
 interface NavigationBarData {
   activePage: Page;
@@ -26,14 +26,14 @@ export default function NavigationBar({ activePage }: NavigationBarData) {
 
         <Link
           to="/"
-          className={`link transition-colors ${activePage === "suggest" ? "active" : null}`}
-          aria-current={activePage === "suggest" ? "page" : undefined}
+          className={`link transition-colors ${activePage === "today" ? "active" : null}`}
+          aria-current={activePage === "today" ? "page" : undefined}
           aria-label="Open home page - Today's outfit suggestions"
         >
           <div className="text-xl mb-1">
-            <FaRegStar className="text-xl" />
+            <FaCalendarDay className="text-xl" />
           </div>
-          <span className="text-xs font-medium">Suggest</span>
+          <span className="text-xs font-medium">Today</span>
         </Link>
 
         <Link
