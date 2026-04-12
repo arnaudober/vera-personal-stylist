@@ -40,10 +40,12 @@ const FavouriteOutfitCard = ({
 
   return (
     <div className="flex flex-col gap-2 p-2">
-      <div className="card flex flex-col items-center relative overflow-hidden !pt-3 !px-0 !pb-0">
+      <div
+        className={`card flex flex-col items-center relative overflow-hidden !pt-3 !px-0 !pb-0 ${!top?.isClean || !bottom?.isClean ? "dirty-overlay" : ""}`}
+      >
         <button
           onClick={() => remove()}
-          className="unfavourite-button absolute top-2 right-2 flex items-center justify-center transition-all text-sm font-bold"
+          className="unfavourite-button absolute top-2 right-2 flex items-center justify-center transition-all text-sm font-bold opacity-100"
           aria-label="Remove favourite"
         >
           <FaHeart size={10} />
@@ -89,14 +91,19 @@ const FavouriteOutfitCard = ({
           )}
         </div>
 
-        <button
-          onClick={() => wearOutfit()}
-          disabled={!top?.isClean || !bottom?.isClean}
-          className="wear-button w-full font-medium transition-all mt-3 flex items-center justify-center gap-1.5"
-        >
-          <FaCheck size={10} />
-          Wear it
-        </button>
+        {top?.isClean && bottom?.isClean ? (
+          <button
+            onClick={() => wearOutfit()}
+            className="wear-button w-full font-medium transition-all mt-3 flex items-center justify-center gap-1.5"
+          >
+            <FaCheck size={10} />
+            Wear it
+          </button>
+        ) : (
+          <div className="opacity-100 w-full mt-3 pb-3 flex items-center justify-center">
+            <span className="dirty-badge">dirty</span>
+          </div>
+        )}
       </div>
     </div>
   );

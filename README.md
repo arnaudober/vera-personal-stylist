@@ -51,12 +51,13 @@ npm run lint     # ESLint
 - [x] Improve today page design — better layout, visual consistency with other pages, unified outfit card, FAB regenerate
 - [x] Improve favourites page — add "ready to wear" filter, "wear it" quick action, unified card design
 - [x] Outfit drag-and-drop — drag the whole outfit to the basket instead of individual items
-- [ ] Strikethrough dirty items — replace clean/dirty badges with a visual strikethrough on items in the laundry, also on the favourites page
+- [x] Strikethrough dirty items — replace clean/dirty badges with a visual strikethrough on items in the laundry, also on the favourites page
 - [ ] Replace drag-and-drop on today page — replace with a simpler interaction (e.g. a confirm button) to improve discoverability
 - [ ] Move basket to closet page — the laundry basket fits better on the closet page; rethink the today page layout so it doesn't feel empty without it
 - [ ] More categories — shoes, accessories, jackets/coats
 - [ ] Improved onboarding — guided tour for new users
 - [ ] Horizontal scroll views — closet page with one row per category (tops, bottoms) scrolling horizontally; favourites page with a single horizontal row of outfits
+- [ ] Pin item to outfit — select an item from the closet to lock it into today's outfit, then regenerate the rest around it; also remove the "clean" badge since this action replaces it as the primary CTA for clean items
 - [ ] Multi-season — adapt suggestions to the current season
 - [ ] Add notification for suggestion once a day, reminders for laundry to be done after a few days
 - [ ] Improve suggestion algorithm with weather, occasions, etc.
