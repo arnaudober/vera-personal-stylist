@@ -49,7 +49,10 @@ npm run lint     # ESLint
 - [x] Outfit history — track what was worn recently to avoid repetition
 - [x] Favorite outfits — save and revisit liked combinations
 - [x] Improve today page design — better layout, visual consistency with other pages, unified outfit card, FAB regenerate
-- [ ] Improve favourites page — add filters (by item, by date), sort options, and quick actions (e.g. wear this outfit)
+- [x] Improve favourites page — add "ready to wear" filter, "wear it" quick action, unified card design
+- [x] Outfit drag-and-drop — drag the whole outfit to the basket instead of individual items
+- [ ] Strikethrough dirty items — replace clean/dirty badges with a visual strikethrough on items in the laundry, also on the favourites page
+- [ ] Replace drag-and-drop on today page — replace with a simpler interaction (e.g. a confirm button) to improve discoverability
 - [ ] More categories — shoes, accessories, jackets/coats
 - [ ] Improved onboarding — guided tour for new users
 - [ ] Cover flow — explore a carousel/cover flow view for favourites and/or today page

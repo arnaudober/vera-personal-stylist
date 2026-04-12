@@ -96,7 +96,7 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
           <span
             className={`badge inline-block border text-xs ${item.isClean ? "clean" : "dirty"}`}
           >
-            {item.isClean ? "Clean" : "Dirty"}
+            {item.isClean ? "clean" : "dirty"}
           </span>
         </div>
       </div>
