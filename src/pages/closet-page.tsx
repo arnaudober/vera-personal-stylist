@@ -157,7 +157,7 @@ const LaundryButton = (): React.JSX.Element => {
 };
 
 export const ClosetPage = (): React.JSX.Element => {
-  const { items, addClothingItem, isUploadLimitReached } = useCloset();
+  const { items, addClothingItem, isUploadLimitReached, areAllItemsClean } = useCloset();
   const { saveImage } = useImage();
   const [selectedCategory, setSelectedCategory] =
     useState<ClothingItemCategory | null>(null);
@@ -171,6 +171,7 @@ export const ClosetPage = (): React.JSX.Element => {
     [selectedCategory, items],
   );
 
+
   async function addItem(item: CreateClothingItem): Promise<void> {
     const newItem = await addClothingItem(item);
 
@@ -183,37 +184,71 @@ export const ClosetPage = (): React.JSX.Element => {
   }
 
   return (
-    <>
-      <div className="mx-auto max-w-4xl p-4 pb-2">
+    <div className="flex flex-col h-screen overflow-hidden">
+      <div className="mx-auto max-w-4xl p-4 pb-2 w-full shrink-0">
         <h2 className="page-title">Your closet</h2>
       </div>
 
-      <FilterBar
-        selectedCategory={selectedCategory}
-        onCategorySelected={setSelectedCategory}
-      />
+      <div className="shrink-0">
+        <FilterBar
+          selectedCategory={selectedCategory}
+          onCategorySelected={setSelectedCategory}
+        />
+      </div>
 
-      <div className="w-full mx-auto max-w-4xl p-4 pb-24">
+      <div className="shrink-0 w-full mx-auto max-w-4xl px-4 pt-4">
         <LaundryButton />
+      </div>
 
-        <div className="rounded-2xl">
-          {filteredItems.length > 0 ? (
-            <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {filteredItems.map((item) => (
-                <ItemCard key={item.id} item={item} />
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <p className="text-gray-500 text-lg">
-                No items found in this category.
-              </p>
-              <p className="text-gray-400 text-sm">
-                Try selecting a different filter or add a new item!
-              </p>
-            </div>
-          )}
+      <div
+        className="flex-1 min-h-0 overflow-y-auto"
+        style={{
+          maskImage: "linear-gradient(to bottom, transparent, black 1.5rem, black calc(100% - 3rem), transparent)",
+          WebkitMaskImage: "linear-gradient(to bottom, transparent, black 1.5rem, black calc(100% - 3rem), transparent)",
+        }}
+      >
+        <div className="w-full mx-auto max-w-4xl px-4 pb-8">
+          <div className="rounded-2xl">
+            {filteredItems.length > 0 ? (
+              <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {filteredItems.map((item) => (
+                  <ItemCard key={item.id} item={item} />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <p className="text-gray-500 text-lg">
+                  No items found in this category.
+                </p>
+                <p className="text-gray-400 text-sm">
+                  Try selecting a different filter or add a new item!
+                </p>
+              </div>
+            )}
+          </div>
         </div>
+      </div>
+
+      {/* Spacer for basket overflow */}
+      <div className="shrink-0 h-8" />
+
+      {/* Basket */}
+      <div
+        className="shrink-0 mx-auto w-64 md:w-80 h-44 md:h-56 mb-16 flex items-center justify-center pointer-events-none"
+        aria-label="Wear basket"
+      >
+        <div
+          style={{
+            width: "100%",
+            aspectRatio: "1/2",
+            backgroundImage: "url(/assets/basket-grid.png)",
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "200% 100%",
+            backgroundPosition: areAllItemsClean() ? "0 0" : "94% 0",
+            imageRendering: "auto",
+          }}
+          aria-label={areAllItemsClean() ? "Empty basket" : "Full basket"}
+        />
       </div>
 
       <NavigationBar activePage="closet" />
@@ -228,6 +263,6 @@ export const ClosetPage = (): React.JSX.Element => {
           onSave={addItem}
         />
       )}
-    </>
+    </div>
   );
 };

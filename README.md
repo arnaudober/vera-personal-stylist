@@ -53,7 +53,7 @@ npm run lint     # ESLint
 - [x] Outfit drag-and-drop — drag the whole outfit to the basket instead of individual items
 - [x] Strikethrough dirty items — replace clean/dirty badges with a visual strikethrough on items in the laundry, also on the favourites page
 - [x] Replace drag-and-drop on today page — replace with a simpler interaction (e.g. a confirm button) to improve discoverability
-- [ ] Move basket to closet page — the laundry basket fits better on the closet page; rethink the today page layout so it doesn't feel empty without it
+- [x] Move basket to closet page — the laundry basket fits better on the closet page; rethink the today page layout so it doesn't feel empty without it
 - [ ] More categories — shoes, accessories, jackets/coats
 - [ ] Improved onboarding — guided tour for new users
 - [ ] Horizontal scroll views — closet page with one row per category (tops, bottoms) scrolling horizontally; favourites page with a single horizontal row of outfits
