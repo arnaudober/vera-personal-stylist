@@ -6,7 +6,8 @@ import { useCloset } from "../hooks/closet.ts";
 import { useImage } from "../hooks/image.ts";
 import { useOutfitHistory } from "../hooks/outfit-history.ts";
 import { useFavouriteOutfits } from "../hooks/favourite-outfits.ts";
-import { FaCheck, FaHeart, FaRegHeart, FaSyncAlt } from "react-icons/fa";
+import { FaCheck, FaHeart, FaRegHeart, FaSyncAlt, FaTshirt } from "react-icons/fa";
+import { useNavigate } from "react-router";
 import "../pages/today-page.css";
 
 const FavouriteButton = () => {
@@ -41,14 +42,25 @@ const FavouriteButton = () => {
   );
 };
 
-const EmptyMessageTemplate = () => (
-  <div className="relative mx-auto w-full max-w-md h-64 md:h-80 flex items-center justify-center">
-    <div className="flex flex-col items-center justify-center py-12 text-center">
-      <p className="text-gray-500 text-lg">No outfit right now.</p>
-      <p className="text-gray-400 text-sm">Maybe it's laundry time?</p>
+const EmptyMessageTemplate = () => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="relative mx-auto w-full max-w-md flex items-center justify-center">
+      <div className="flex flex-col items-center justify-center py-12 text-center gap-4">
+        <FaTshirt className="text-8xl text-gray-400" />
+        <p className="text-gray-500 text-lg">No outfit right now.</p>
+        <p className="text-gray-400 text-sm">All your clothes are in the basket — time to do laundry!</p>
+        <button
+          onClick={() => navigate("/closet")}
+          className="primary-button px-6 py-3 text-base font-semibold mt-2"
+        >
+          Go to closet
+        </button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 const RegenerateOutfitFab = () => {
   const { generateOutfit, canGenerateOutfit } = useOutfit();
 
@@ -112,8 +124,8 @@ const OutfitTemplate = (): React.JSX.Element => {
             }
 
             return (
-              <div className="relative mx-auto w-full max-w-sm">
-                <div className="card flex flex-col items-center gap-4 p-5 relative">
+              <div className="relative mx-auto w-full max-w-md">
+                <div className="card flex flex-col items-center gap-6 relative" style={{ padding: "1.5rem" }}>
                   <FavouriteButton />
                   {/* Top item */}
                   {outfit.top && isItemClean(outfit.top.id) && (
@@ -121,7 +133,7 @@ const OutfitTemplate = (): React.JSX.Element => {
                       <img
                         src={getImage(outfit.top.id)}
                         alt={outfit.top.name}
-                        className="w-36 h-36 object-contain rounded-xl"
+                        className="w-44 h-44 object-contain rounded-xl"
                         loading="lazy"
                       />
                       <div className="mt-2 text-sm text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
@@ -138,7 +150,7 @@ const OutfitTemplate = (): React.JSX.Element => {
                       <img
                         src={getImage(outfit.bottom.id)}
                         alt={outfit.bottom.name}
-                        className="w-36 h-36 object-contain rounded-xl"
+                        className="w-44 h-44 object-contain rounded-xl"
                         loading="lazy"
                       />
                       <div className="mt-2 text-sm text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
@@ -169,18 +181,18 @@ const OutfitTemplate = (): React.JSX.Element => {
 
 export const TodayPage = (): React.JSX.Element => {
   return (
-    <>
+    <div className="flex flex-col flex-1 min-h-screen">
       {/* Header */}
-      <div className="mx-auto max-w-4xl p-4 pb-2">
+      <div className="absolute top-0 left-0 right-0 mx-auto max-w-4xl p-4 pb-2">
         <h2 className="page-title">Today's outfit</h2>
       </div>
 
-      <div className="w-full mx-auto max-w-4xl p-4 pb-24">
+      <div className="w-full mx-auto max-w-4xl px-4 flex-1 flex items-center justify-center mb-16">
         <OutfitTemplate />
       </div>
 
       <NavigationBar activePage="today" />
       <RegenerateOutfitFab />
-    </>
+    </div>
   );
 };
