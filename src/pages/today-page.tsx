@@ -6,7 +6,7 @@ import { useCloset } from "../hooks/closet.ts";
 import { useImage } from "../hooks/image.ts";
 import { useOutfitHistory } from "../hooks/outfit-history.ts";
 import { useFavouriteOutfits } from "../hooks/favourite-outfits.ts";
-import { FaHeart, FaRegHeart, FaSyncAlt } from "react-icons/fa";
+import { FaCheck, FaHeart, FaRegHeart, FaSyncAlt } from "react-icons/fa";
 import "../pages/today-page.css";
 
 const FavouriteButton = () => {
@@ -41,14 +41,6 @@ const FavouriteButton = () => {
   );
 };
 
-interface TouchDragState {
-  isDragging: boolean;
-  startX: number;
-  startY: number;
-  currentX: number;
-  currentY: number;
-}
-
 const EmptyMessageTemplate = () => (
   <div className="relative mx-auto w-full max-w-md h-64 md:h-80 flex items-center justify-center">
     <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -79,17 +71,12 @@ const RegenerateOutfitFab = () => {
     </button>
   );
 };
-const OutfitTemplate = ({
-  setTouchDrag,
-  touchDrag,
-}: {
-  setTouchDrag: React.Dispatch<React.SetStateAction<TouchDragState>>;
-  touchDrag: TouchDragState;
-}): React.JSX.Element => {
+const OutfitTemplate = (): React.JSX.Element => {
   const { getImage } = useImage();
   const { isItemClean, areAllItemsClean, markWorn } = useCloset();
   const { outfit, clearOutfit, generateOutfit } = useOutfit();
   const { recordOutfit } = useOutfitHistory();
+  const [isMarking, setIsMarking] = useState(false);
 
   useEffect(() => {
     if (!outfit) {
@@ -97,69 +84,17 @@ const OutfitTemplate = ({
     }
   }, [generateOutfit, outfit]);
 
-  // Drag is used for desktop
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
-    e.dataTransfer.setData("text/plain", "outfit");
-  };
-  const handleDrop = async (
-    e: React.DragEvent<HTMLDivElement>,
-  ): Promise<void> => {
+  const handleConfirmWorn = async (): Promise<void> => {
     if (!outfit) return;
-
-    await recordOutfit(outfit.top.id, outfit.bottom.id);
-    await markWorn(outfit.top);
-    await markWorn(outfit.bottom);
-    await clearOutfit();
-  };
-
-  // Touch is used for mobile/tablet
-  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    const touch = e.touches[0];
-    setTouchDrag({
-      isDragging: true,
-      startX: touch.clientX,
-      startY: touch.clientY,
-      currentX: touch.clientX,
-      currentY: touch.clientY,
-    });
-  };
-  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (!touchDrag.isDragging) return;
-
-    const touch = e.touches[0];
-    setTouchDrag((prev) => ({
-      ...prev,
-      currentX: touch.clientX,
-      currentY: touch.clientY,
-    }));
-  };
-  const handleTouchEnd = async (
-    e: React.TouchEvent<HTMLDivElement>,
-  ): Promise<void> => {
-    if (!touchDrag.isDragging || !outfit) {
-      setTouchDrag((prev) => ({ ...prev, isDragging: false }));
-      return;
-    }
-
-    // Check if touch ended over the basket area
-    const touch = e.changedTouches[0];
-    const elementBelow = document.elementFromPoint(
-      touch.clientX,
-      touch.clientY,
-    );
-    const basketArea = document.querySelector('[aria-label="Wear basket"]');
-
-    if (
-      basketArea &&
-      (basketArea.contains(elementBelow) || elementBelow === basketArea)
-    ) {
+    setIsMarking(true);
+    try {
       await recordOutfit(outfit.top.id, outfit.bottom.id);
       await markWorn(outfit.top);
       await markWorn(outfit.bottom);
       await clearOutfit();
+    } finally {
+      setIsMarking(false);
     }
-
-    setTouchDrag((prev) => ({ ...prev, isDragging: false }));
   };
 
   return (
@@ -178,15 +113,7 @@ const OutfitTemplate = ({
 
             return (
               <div className="relative mx-auto w-full max-w-sm">
-                <div
-                  className={`card flex flex-col items-center gap-4 p-5 relative select-none cursor-grab ${touchDrag.isDragging ? "opacity-20" : ""}`}
-                  draggable
-                  onDragStart={handleDragStart}
-                  onTouchStart={handleTouchStart}
-                  onTouchMove={handleTouchMove}
-                  onTouchEnd={handleTouchEnd}
-                  style={{ touchAction: "none" }}
-                >
+                <div className="card flex flex-col items-center gap-4 p-5 relative">
                   <FavouriteButton />
                   {/* Top item */}
                   {outfit.top && isItemClean(outfit.top.id) && (
@@ -220,9 +147,14 @@ const OutfitTemplate = ({
                     </div>
                   )}
                 </div>
-                <p className="text-center text-xs text-gray-400 mt-2">
-                  Drag the outfit to the basket to mark it as worn
-                </p>
+                <button
+                  onClick={handleConfirmWorn}
+                  disabled={isMarking}
+                  className={`primary-button mt-4 w-full py-3 flex items-center justify-center gap-2 text-base font-semibold transition-all ${isMarking ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  <FaCheck />
+                  {isMarking ? "Marking as worn..." : "I'm wearing this"}
+                </button>
               </div>
             );
           })()}
@@ -231,17 +163,12 @@ const OutfitTemplate = ({
         <EmptyMessageTemplate />
       )}
 
-      {/* region Basket template */}
+      {/* Basket */}
       <div
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={async (e) => {
-          e.preventDefault();
-          await handleDrop(e);
-        }}
-        className="fixed bottom-16 left-1/2 -translate-x-1/2 p-2 w-64 md:w-80 h-44 md:h-56 flex items-center justify-center"
+        className="fixed bottom-16 left-1/2 -translate-x-1/2 p-2 w-64 md:w-80 h-44 md:h-56 flex items-center justify-center pointer-events-none"
         aria-label="Wear basket"
       >
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="absolute inset-0 flex items-center justify-center">
           <div
             style={{
               width: "100%",
@@ -256,58 +183,20 @@ const OutfitTemplate = ({
           />
         </div>
       </div>
-      {/* endregion */}
     </div>
   );
 };
 
 export const TodayPage = (): React.JSX.Element => {
-  const { getImage } = useImage();
-  const { outfit } = useOutfit();
-  const [touchDrag, setTouchDrag] = useState<TouchDragState>({
-    isDragging: false,
-    startX: 0,
-    startY: 0,
-    currentX: 0,
-    currentY: 0,
-  });
-
   return (
     <>
-      {/* Floating preview while dragging an item */}
-      {touchDrag.isDragging && outfit && (
-        <div
-          className="fixed pointer-events-none z-50"
-          style={{
-            left: touchDrag.currentX,
-            top: touchDrag.currentY,
-            transform: "translate(-50%, -50%)",
-          }}
-        >
-          <div className="card opacity-80 scale-75 shadow-lg flex flex-col items-center gap-2 p-3">
-            <img
-              src={getImage(outfit.top.id)}
-              alt={outfit.top.name}
-              className="w-20 h-20 object-contain rounded-xl"
-              loading="lazy"
-            />
-            <img
-              src={getImage(outfit.bottom.id)}
-              alt={outfit.bottom.name}
-              className="w-20 h-20 object-contain rounded-xl"
-              loading="lazy"
-            />
-          </div>
-        </div>
-      )}
-
       {/* Header */}
       <div className="mx-auto max-w-4xl p-4 pb-2">
         <h2 className="page-title">Today's outfit</h2>
       </div>
 
-      <div className="w-full mx-auto max-w-4xl p-4 pb-48">
-        <OutfitTemplate setTouchDrag={setTouchDrag} touchDrag={touchDrag} />
+      <div className="w-full mx-auto max-w-4xl p-4 pb-24">
+        <OutfitTemplate />
       </div>
 
       <NavigationBar activePage="today" />
