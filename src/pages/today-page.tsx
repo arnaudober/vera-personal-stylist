@@ -73,7 +73,7 @@ const RegenerateOutfitFab = () => {
 };
 const OutfitTemplate = (): React.JSX.Element => {
   const { getImage } = useImage();
-  const { isItemClean, areAllItemsClean, markWorn } = useCloset();
+  const { isItemClean, markWorn } = useCloset();
   const { outfit, clearOutfit, generateOutfit } = useOutfit();
   const { recordOutfit } = useOutfitHistory();
   const [isMarking, setIsMarking] = useState(false);
@@ -163,27 +163,7 @@ const OutfitTemplate = (): React.JSX.Element => {
         <EmptyMessageTemplate />
       )}
 
-      {/* Basket */}
-      <div
-        className="fixed bottom-16 left-1/2 -translate-x-1/2 p-2 w-64 md:w-80 h-44 md:h-56 flex items-center justify-center pointer-events-none"
-        aria-label="Wear basket"
-      >
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div
-            style={{
-              width: "100%",
-              aspectRatio: "1/2",
-              backgroundImage: "url(/assets/basket-grid.png)",
-              backgroundRepeat: "no-repeat",
-              backgroundSize: "200% 100%",
-              backgroundPosition: areAllItemsClean() ? "0 0" : "94% 0",
-              imageRendering: "auto",
-            }}
-            aria-label={areAllItemsClean() ? "Empty basket" : "Full basket"}
-          />
-        </div>
-      </div>
-    </div>
+</div>
   );
 };
 

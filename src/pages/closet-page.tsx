@@ -157,7 +157,7 @@ const LaundryButton = (): React.JSX.Element => {
 };
 
 export const ClosetPage = (): React.JSX.Element => {
-  const { items, addClothingItem, isUploadLimitReached } = useCloset();
+  const { items, addClothingItem, isUploadLimitReached, areAllItemsClean } = useCloset();
   const { saveImage } = useImage();
   const [selectedCategory, setSelectedCategory] =
     useState<ClothingItemCategory | null>(null);
@@ -193,7 +193,7 @@ export const ClosetPage = (): React.JSX.Element => {
         onCategorySelected={setSelectedCategory}
       />
 
-      <div className="w-full mx-auto max-w-4xl p-4 pb-24">
+      <div className="w-full mx-auto max-w-4xl p-4 pb-64">
         <LaundryButton />
 
         <div className="rounded-2xl">
@@ -213,6 +213,27 @@ export const ClosetPage = (): React.JSX.Element => {
               </p>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Basket */}
+      <div
+        className="fixed bottom-16 left-1/2 -translate-x-1/2 p-2 w-64 md:w-80 h-44 md:h-56 flex items-center justify-center pointer-events-none"
+        aria-label="Wear basket"
+      >
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div
+            style={{
+              width: "100%",
+              aspectRatio: "1/2",
+              backgroundImage: "url(/assets/basket-grid.png)",
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "200% 100%",
+              backgroundPosition: areAllItemsClean() ? "0 0" : "94% 0",
+              imageRendering: "auto",
+            }}
+            aria-label={areAllItemsClean() ? "Empty basket" : "Full basket"}
+          />
         </div>
       </div>
 
