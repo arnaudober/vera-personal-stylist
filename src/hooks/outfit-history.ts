@@ -41,6 +41,9 @@ const initialize = async (): Promise<void> => {
       id: d.id,
       topId: d.data().topId,
       bottomId: d.data().bottomId,
+      outerwearId: d.data().outerwearId,
+      shoesId: d.data().shoesId,
+      accessoriesId: d.data().accessoriesId,
       wornAt: d.data().wornAt.toDate(),
       sessionId: d.data().sessionId,
     }));
@@ -67,6 +70,9 @@ export function useOutfitHistory() {
   const recordOutfit = async (
     topId: string,
     bottomId: string,
+    outerwearId?: string,
+    shoesId?: string,
+    accessoriesId?: string,
   ): Promise<void> => {
     const sessionId = getSessionId();
     const entryId = `${sessionId}_${Date.now()}`;
@@ -75,16 +81,14 @@ export function useOutfitHistory() {
       id: entryId,
       topId,
       bottomId,
+      ...(outerwearId && { outerwearId }),
+      ...(shoesId && { shoesId }),
+      ...(accessoriesId && { accessoriesId }),
       wornAt: new Date(),
       sessionId,
     };
 
-    await setDoc(doc(db, "outfitHistory", entryId), {
-      topId: newEntry.topId,
-      bottomId: newEntry.bottomId,
-      wornAt: newEntry.wornAt,
-      sessionId: newEntry.sessionId,
-    });
+    await setDoc(doc(db, "outfitHistory", entryId), newEntry);
 
     const updated = [newEntry, ...state];
 
@@ -99,16 +103,29 @@ export function useOutfitHistory() {
     emitChange(updated);
   };
 
-  const getRecencyPenalty = (topId: string, bottomId: string): number => {
-    const match = state.find(
-      (h) => h.topId === topId && h.bottomId === bottomId,
-    );
-    if (!match) {
+  const getRecencyPenalty = (itemIds: string[]): number => {
+    const matchingEntries = state.filter((h) => {
+      const entryIds = [
+        h.topId,
+        h.bottomId,
+        h.outerwearId,
+        h.shoesId,
+        h.accessoriesId,
+      ].filter(Boolean) as string[];
+
+      // An entry matches if it contains ANY of the items in the current outfit
+      return itemIds.some((id) => entryIds.includes(id));
+    });
+
+    if (matchingEntries.length === 0) {
       return 1.0;
     }
 
+    // Find the most recent match among all matching entries
+    const mostRecentMatch = matchingEntries[0]; // State is sorted by wornAt desc
+
     const daysSince =
-      (Date.now() - match.wornAt.getTime()) / (1000 * 60 * 60 * 24);
+      (Date.now() - mostRecentMatch.wornAt.getTime()) / (1000 * 60 * 60 * 24);
     return Math.min(1, daysSince / RECENCY_RECOVERY_DAYS);
   };
 

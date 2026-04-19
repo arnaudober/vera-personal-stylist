@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import type { FavouriteOutfit } from "../models/favourite-outfit.ts";
 import { getSessionId } from "./closet.ts";
 import {
+  Timestamp,
   collection,
   deleteDoc,
   doc,
@@ -31,13 +32,24 @@ const initialize = async (): Promise<void> => {
       orderBy("savedAt", "desc"),
     );
     const querySnapshot = await getDocs(q);
-    state = querySnapshot.docs.map((d) => ({
-      id: d.id,
-      topId: d.data().topId,
-      bottomId: d.data().bottomId,
-      savedAt: d.data().savedAt.toDate(),
-      sessionId: d.data().sessionId,
-    }));
+
+    state = querySnapshot.docs.map((d) => {
+      const data = d.data();
+      const savedAtRaw = data.savedAt;
+
+      return {
+        id: d.id,
+        topId: data.topId,
+        bottomId: data.bottomId,
+        outerwearId: data.outerwearId,
+        shoesId: data.shoesId,
+        accessoriesId: data.accessoriesId,
+        savedAt:
+          savedAtRaw?.toDate?.() ??
+          (savedAtRaw instanceof Date ? savedAtRaw : new Date(savedAtRaw)),
+        sessionId: data.sessionId,
+      };
+    });
   } catch (error) {
     console.error("Error loading favourite outfits:", error);
     state = [];
@@ -58,15 +70,31 @@ export function useFavouriteOutfits() {
     };
   }, []);
 
-  const isFavourite = (topId: string, bottomId: string): boolean => {
-    return state.some((f) => f.topId === topId && f.bottomId === bottomId);
+  const isFavourite = (
+    topId: string,
+    bottomId: string,
+    outerwearId?: string,
+    shoesId?: string,
+    accessoriesId?: string,
+  ): boolean => {
+    return state.some(
+      (f) =>
+        f.topId === topId &&
+        f.bottomId === bottomId &&
+        f.outerwearId === outerwearId &&
+        f.shoesId === shoesId &&
+        f.accessoriesId === accessoriesId,
+    );
   };
 
   const addFavourite = async (
     topId: string,
     bottomId: string,
+    outerwearId?: string,
+    shoesId?: string,
+    accessoriesId?: string,
   ): Promise<void> => {
-    if (isFavourite(topId, bottomId)) {
+    if (isFavourite(topId, bottomId, outerwearId, shoesId, accessoriesId)) {
       return;
     }
 
@@ -77,16 +105,24 @@ export function useFavouriteOutfits() {
       id: entryId,
       topId,
       bottomId,
+      outerwearId,
+      shoesId,
+      accessoriesId,
       savedAt: new Date(),
       sessionId,
     };
 
-    await setDoc(doc(db, "favouriteOutfits", entryId), {
-      topId: newEntry.topId,
-      bottomId: newEntry.bottomId,
-      savedAt: newEntry.savedAt,
-      sessionId: newEntry.sessionId,
-    });
+    const dataToSave = {
+      topId,
+      bottomId,
+      outerwearId,
+      shoesId,
+      accessoriesId,
+      savedAt: Timestamp.fromDate(new Date()),
+      sessionId,
+    };
+
+    await setDoc(doc(db, "favouriteOutfits", entryId), dataToSave);
 
     emitChange([newEntry, ...state]);
   };
@@ -99,9 +135,17 @@ export function useFavouriteOutfits() {
   const removeFavouriteByOutfit = async (
     topId: string,
     bottomId: string,
+    outerwearId?: string,
+    shoesId?: string,
+    accessoriesId?: string,
   ): Promise<void> => {
     const match = state.find(
-      (f) => f.topId === topId && f.bottomId === bottomId,
+      (f) =>
+        f.topId === topId &&
+        f.bottomId === bottomId &&
+        f.outerwearId === outerwearId &&
+        f.shoesId === shoesId &&
+        f.accessoriesId === accessoriesId,
     );
     if (match) {
       await removeFavourite(match.id);

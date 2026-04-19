@@ -23,28 +23,26 @@ const FilterBar = ({
   onCategorySelected: (category: ClothingItemCategory | null) => void;
 }): React.JSX.Element => {
   return (
-    <div className={`pr-0 pb-2 pt-2 pl-4`}>
-      <div className="flex justify-center" style={{ minWidth: "max-content" }}>
-        <button
-          onClick={() => onCategorySelected(null)}
-          className={`filter-bar-item font-medium transition-all 
+    <div className={`pr-4 pb-2 pt-2 pl-4 filter-bar-container`}>
+      <button
+        onClick={() => onCategorySelected(null)}
+        className={`filter-bar-item font-medium transition-all 
                             ${selectedCategory === null ? "active" : null}
                         `}
-        >
-          All
-        </button>
-        {categoryOptions.map(({ value, label }) => (
-          <button
-            key={value}
-            onClick={() => onCategorySelected(value)}
-            className={`filter-bar-item  font-medium transition-all
+      >
+        All
+      </button>
+      {categoryOptions.map(({ value, label }) => (
+        <button
+          key={value}
+          onClick={() => onCategorySelected(value)}
+          className={`filter-bar-item  font-medium transition-all
                                 ${selectedCategory === value ? "active" : null}
                             `}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+        >
+          {label}
+        </button>
+      ))}
     </div>
   );
 };
@@ -75,7 +73,7 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
       >
         <button
           onClick={() => remove(item.id)}
-          className="delete-button absolute top-2 right-2 flex items-center justify-center transition-all text-sm font-bold opacity-100"
+          className="delete-button absolute top-2 right-2 flex items-center justify-center transition-all text-sm font-bold keep-opaque"
           aria-label="Delete item"
         >
           <IoClose size={14} />
@@ -94,7 +92,7 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
           {item.name}
         </div>
 
-        <div className="opacity-100 mt-1">
+        <div className="keep-opaque mt-1">
           <span className={item.isClean ? "clean-badge" : "dirty-badge"}>
             {item.isClean ? "clean" : "dirty"}
           </span>

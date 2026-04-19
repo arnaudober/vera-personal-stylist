@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  categoryOptions,
   type ClothingItemCategory,
   type ClothingItemSubCategory,
   type CreateClothingItem,
@@ -385,10 +386,21 @@ export default function UploadClothingItemModal({
                 <option disabled value="">
                   Select…
                 </option>
-                {Object.entries(subCategoryLabels).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
+                {categoryOptions.map((cat) => (
+                  <optgroup key={cat.value} label={cat.label}>
+                    {Object.entries(subCategoryLabels)
+                      .filter(
+                        ([subCat]) =>
+                          subCategoryToCategory[
+                            subCat as ClothingItemSubCategory
+                          ] === cat.value,
+                      )
+                      .map(([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))}
+                  </optgroup>
                 ))}
               </select>
             </div>
