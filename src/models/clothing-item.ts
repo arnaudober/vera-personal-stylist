@@ -1,17 +1,31 @@
 import type { Color } from "./color.ts";
 
-export type ClothingItemCategory = "top" | "bottom";
+export type ClothingItemCategory =
+  | "top"
+  | "bottom"
+  | "outerwear"
+  | "shoes"
+  | "accessories";
 
 export type ClothingItemSubCategory =
   | "t-shirt"
   | "shirt"
   | "sweater"
   | "jacket"
+  | "coat"
   | "hoodie"
   | "pants"
   | "jeans"
   | "shorts"
-  | "skirt";
+  | "skirt"
+  | "sneakers"
+  | "boots"
+  | "sandals"
+  | "dress_shoes"
+  | "bag"
+  | "belt"
+  | "scarf"
+  | "hat";
 
 export const subCategoryToCategory: Record<
   ClothingItemSubCategory,
@@ -20,12 +34,21 @@ export const subCategoryToCategory: Record<
   "t-shirt": "top",
   shirt: "top",
   sweater: "top",
-  jacket: "top",
+  jacket: "outerwear",
+  coat: "outerwear",
   hoodie: "top",
   pants: "bottom",
   jeans: "bottom",
   shorts: "bottom",
   skirt: "bottom",
+  sneakers: "shoes",
+  boots: "shoes",
+  sandals: "shoes",
+  dress_shoes: "shoes",
+  bag: "accessories",
+  belt: "accessories",
+  scarf: "accessories",
+  hat: "accessories",
 };
 
 export const subCategoryLabels: Record<ClothingItemSubCategory, string> = {
@@ -33,11 +56,20 @@ export const subCategoryLabels: Record<ClothingItemSubCategory, string> = {
   shirt: "Shirt",
   sweater: "Sweater",
   jacket: "Jacket",
+  coat: "Coat",
   hoodie: "Hoodie",
   pants: "Pants",
   jeans: "Jeans",
   shorts: "Shorts",
   skirt: "Skirt",
+  sneakers: "Sneakers",
+  boots: "Boots",
+  sandals: "Sandals",
+  dress_shoes: "Dress Shoes",
+  bag: "Bag",
+  belt: "Belt",
+  scarf: "Scarf",
+  hat: "Hat",
 };
 
 type ClothingCategoryOption = {
@@ -47,6 +79,9 @@ type ClothingCategoryOption = {
 export const categoryOptions: ClothingCategoryOption[] = [
   { value: "top", label: "Tops" },
   { value: "bottom", label: "Bottoms" },
+  { value: "outerwear", label: "Jackets/coats" },
+  { value: "shoes", label: "Shoes" },
+  { value: "accessories", label: "Accessories" },
 ];
 
 export type ClothingItem = {

@@ -27,3 +27,15 @@
   }
 }
 
+.filter-bar-container {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  -webkit-overflow-scrolling: touch;
+}
+
+.filter-bar-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+
