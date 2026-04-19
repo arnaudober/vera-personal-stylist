@@ -54,7 +54,10 @@ npm run lint     # ESLint
 - [x] Strikethrough dirty items — replace clean/dirty badges with a visual strikethrough on items in the laundry, also on the favourites page
 - [x] Replace drag-and-drop on today page — replace with a simpler interaction (e.g. a confirm button) to improve discoverability
 - [x] Move basket to closet page — the laundry basket fits better on the closet page; rethink the today page layout so it doesn't feel empty without it
-- [ ] More categories — shoes, accessories, jackets/coats
+- [x] More categories — shoes, accessories, jackets/coats
+- [ ] Add more accessory categories — watches, earrings, etc.
+- [ ] Improve category cleanliness rules — let some categories be excluded from clean/dirty tracking
+- [ ] Improve closet filter-bar — make horizontal scrolling more obvious so users understand they can browse categories sideways, or maybe use a dropdown instead of a bar
 - [ ] Improved onboarding — guided tour for new users
 - [ ] Horizontal scroll views — closet page with one row per category (tops, bottoms) scrolling horizontally; favourites page with a single horizontal row of outfits
 - [ ] Pin item to outfit — select an item from the closet to lock it into today's outfit, then regenerate the rest around it; also remove the "clean" badge since this action replaces it as the primary CTA for clean items
