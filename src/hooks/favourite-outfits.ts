@@ -83,7 +83,8 @@ export function useFavouriteOutfits() {
         f.bottomId === bottomId &&
         f.outerwearId === outerwearId &&
         f.shoesId === shoesId &&
-        JSON.stringify(f.accessoriesIds || []) === JSON.stringify(accessoriesIds || []),
+        JSON.stringify([...(f.accessoriesIds || [])].sort()) ===
+          JSON.stringify([...(accessoriesIds || [])].sort()),
     );
   };
 
@@ -94,7 +95,9 @@ export function useFavouriteOutfits() {
     shoesId?: string,
     accessoriesIds?: string[],
   ): Promise<void> => {
-    if (isFavourite(topId, bottomId, outerwearId, shoesId, accessoriesIds)) {
+    const sortedAccessories = accessoriesIds ? [...accessoriesIds].sort() : undefined;
+
+    if (isFavourite(topId, bottomId, outerwearId, shoesId, sortedAccessories)) {
       return;
     }
 
@@ -107,7 +110,7 @@ export function useFavouriteOutfits() {
       bottomId,
       outerwearId,
       shoesId,
-      accessoriesIds,
+      accessoriesIds: sortedAccessories,
       savedAt: new Date(),
       sessionId,
     };
@@ -117,7 +120,7 @@ export function useFavouriteOutfits() {
       bottomId,
       ...(outerwearId && { outerwearId }),
       ...(shoesId && { shoesId }),
-      ...(accessoriesIds && accessoriesIds.length > 0 && { accessoriesIds }),
+      ...(sortedAccessories && sortedAccessories.length > 0 && { accessoriesIds: sortedAccessories }),
       savedAt: Timestamp.fromDate(new Date()),
       sessionId,
     };
@@ -145,7 +148,8 @@ export function useFavouriteOutfits() {
         f.bottomId === bottomId &&
         f.outerwearId === outerwearId &&
         f.shoesId === shoesId &&
-        JSON.stringify(f.accessoriesIds || []) === JSON.stringify(accessoriesIds || []),
+        JSON.stringify([...(f.accessoriesIds || [])].sort()) ===
+          JSON.stringify([...(accessoriesIds || [])].sort()),
     );
     if (match) {
       await removeFavourite(match.id);

@@ -110,57 +110,78 @@ const FavouriteOutfitCard = ({
               </div>
             </div>
           ) : (
-            <div className="w-20 h-20 flex items-center justify-center bg-gray-100 rounded-xl">
-              <span className="text-gray-400 text-[10px]">Item removed</span>
+            <div className="flex flex-col items-center w-full min-w-0">
+              <div
+                className="w-20 flex items-center justify-center bg-gray-100 rounded-xl"
+                style={{ height: 99 }}
+              >
+                <span className="text-gray-400 text-[10px]">Item removed</span>
+              </div>
             </div>
           )}
 
           <div className="w-full border-t border-gray-100" />
-          <div className="flex flex-nowrap justify-center gap-1 py-1 h-12 items-center w-full px-2 overflow-hidden">
-            {outerwear && (
-              <div className="flex flex-col items-center flex-1 min-w-0 max-w-[2.5rem]">
-                <img
-                  src={getImage(outerwear.imageId || outerwear.id)}
-                  alt={outerwear.name}
-                  className="w-full h-auto max-h-8 object-contain rounded-lg"
-                  loading="lazy"
-                />
-              </div>
-            )}
-            {shoes && (
-              <div className="flex flex-col items-center flex-1 min-w-0 max-w-[2.5rem]">
-                <img
-                  src={getImage(shoes.imageId || shoes.id)}
-                  alt={shoes.name}
-                  className="w-full h-auto max-h-8 object-contain rounded-lg"
-                  loading="lazy"
-                />
-              </div>
-            )}
-            {accessories.map((accessory, index) => accessory && (
-              <div key={accessory.id || index} className="flex flex-col items-center flex-1 min-w-0 max-w-[2.5rem]">
-                <img
-                  src={getImage(accessory.imageId || accessory.id)}
-                  alt={accessory.name}
-                  className="w-full h-auto max-h-8 object-contain rounded-lg"
-                  loading="lazy"
-                />
-              </div>
-            ))}
+          <div className="flex flex-nowrap justify-center gap-2 h-10 items-center w-full px-2 mb-2 overflow-hidden">
+            <div className="flex items-center justify-center gap-2 h-full">
+              {outerwear && (
+                <div className="flex flex-col items-center justify-center min-w-0 max-w-[2.5rem] h-full">
+                  <img
+                    src={getImage(outerwear.imageId || outerwear.id)}
+                    alt={outerwear.name}
+                    className="w-full h-auto max-h-8 object-contain rounded-lg"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+              {shoes && (
+                <div className="flex flex-col items-center justify-center min-w-0 max-w-[2.5rem] h-full">
+                  <img
+                    src={getImage(shoes.imageId || shoes.id)}
+                    alt={shoes.name}
+                    className="w-full h-auto max-h-8 object-contain rounded-lg"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+              {accessories.filter((a) => !!a).length > 0 ? (
+                accessories.map(
+                  (accessory, index) =>
+                    accessory && (
+                      <div
+                        key={accessory.id || index}
+                        className="flex flex-col items-center justify-center min-w-0 max-w-[2.5rem] h-full"
+                      >
+                        <img
+                          src={getImage(accessory.imageId || accessory.id)}
+                          alt={accessory.name}
+                          className="w-full h-auto max-h-8 object-contain rounded-lg"
+                          loading="lazy"
+                        />
+                      </div>
+                    ),
+                )
+              ) : (
+                <span className="inline-block leading-none p-0 m-0 text-black font-semibold text-center text-xs whitespace-nowrap">
+                  Pas d'accessoire
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className={`w-full h-12 flex items-stretch ${
-          !(
-            top?.isClean &&
-            bottom?.isClean &&
-            (!outerwear || outerwear.isClean) &&
-            (!shoes || shoes.isClean) &&
-            accessories.every((a) => !a || a.isClean)
-          )
-            ? "keep-opaque"
-            : ""
-        }`}>
+        <div
+          className={`w-full h-12 flex items-stretch ${
+            !(
+              top?.isClean &&
+              bottom?.isClean &&
+              (!outerwear || outerwear.isClean) &&
+              (!shoes || shoes.isClean) &&
+              accessories.every((a) => !a || a.isClean)
+            )
+              ? "keep-opaque"
+              : ""
+          }`}
+        >
           {top?.isClean &&
           bottom?.isClean &&
           (!outerwear || outerwear.isClean) &&
