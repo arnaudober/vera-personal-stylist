@@ -4,7 +4,7 @@ export interface OutfitHistoryEntry {
   bottomId: string;
   outerwearId?: string;
   shoesId?: string;
-  accessoriesId?: string;
+  accessoriesIds?: string[];
   wornAt: Date;
   sessionId: string;
 }

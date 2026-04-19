@@ -43,7 +43,7 @@ const initialize = async (): Promise<void> => {
         bottomId: data.bottomId,
         outerwearId: data.outerwearId,
         shoesId: data.shoesId,
-        accessoriesId: data.accessoriesId,
+        accessoriesIds: data.accessoriesIds || (data.accessoriesId ? [data.accessoriesId] : []),
         savedAt:
           savedAtRaw?.toDate?.() ??
           (savedAtRaw instanceof Date ? savedAtRaw : new Date(savedAtRaw)),
@@ -75,7 +75,7 @@ export function useFavouriteOutfits() {
     bottomId: string,
     outerwearId?: string,
     shoesId?: string,
-    accessoriesId?: string,
+    accessoriesIds?: string[],
   ): boolean => {
     return state.some(
       (f) =>
@@ -83,7 +83,7 @@ export function useFavouriteOutfits() {
         f.bottomId === bottomId &&
         f.outerwearId === outerwearId &&
         f.shoesId === shoesId &&
-        f.accessoriesId === accessoriesId,
+        JSON.stringify(f.accessoriesIds || []) === JSON.stringify(accessoriesIds || []),
     );
   };
 
@@ -92,9 +92,9 @@ export function useFavouriteOutfits() {
     bottomId: string,
     outerwearId?: string,
     shoesId?: string,
-    accessoriesId?: string,
+    accessoriesIds?: string[],
   ): Promise<void> => {
-    if (isFavourite(topId, bottomId, outerwearId, shoesId, accessoriesId)) {
+    if (isFavourite(topId, bottomId, outerwearId, shoesId, accessoriesIds)) {
       return;
     }
 
@@ -107,7 +107,7 @@ export function useFavouriteOutfits() {
       bottomId,
       outerwearId,
       shoesId,
-      accessoriesId,
+      accessoriesIds,
       savedAt: new Date(),
       sessionId,
     };
@@ -115,9 +115,9 @@ export function useFavouriteOutfits() {
     const dataToSave = {
       topId,
       bottomId,
-      outerwearId,
-      shoesId,
-      accessoriesId,
+      ...(outerwearId && { outerwearId }),
+      ...(shoesId && { shoesId }),
+      ...(accessoriesIds && accessoriesIds.length > 0 && { accessoriesIds }),
       savedAt: Timestamp.fromDate(new Date()),
       sessionId,
     };
@@ -137,7 +137,7 @@ export function useFavouriteOutfits() {
     bottomId: string,
     outerwearId?: string,
     shoesId?: string,
-    accessoriesId?: string,
+    accessoriesIds?: string[],
   ): Promise<void> => {
     const match = state.find(
       (f) =>
@@ -145,7 +145,7 @@ export function useFavouriteOutfits() {
         f.bottomId === bottomId &&
         f.outerwearId === outerwearId &&
         f.shoesId === shoesId &&
-        f.accessoriesId === accessoriesId,
+        JSON.stringify(f.accessoriesIds || []) === JSON.stringify(accessoriesIds || []),
     );
     if (match) {
       await removeFavourite(match.id);
