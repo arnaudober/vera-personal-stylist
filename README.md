@@ -55,7 +55,7 @@ npm run lint     # ESLint
 - [x] Replace drag-and-drop on today page — replace with a simpler interaction (e.g. a confirm button) to improve discoverability
 - [x] Move basket to closet page — the laundry basket fits better on the closet page; rethink the today page layout so it doesn't feel empty without it
 - [x] More categories — shoes, accessories, jackets/coats
-- [ ] Add more accessory categories — watches, earrings, etc.
+- [x] Add more accessory categories — watches, earrings, etc.
 - [ ] Improve category cleanliness rules — let some categories be excluded from clean/dirty tracking
 - [ ] Improve closet filter-bar — make horizontal scrolling more obvious so users understand they can browse categories sideways, or maybe use a dropdown instead of a bar
 - [ ] Improved onboarding — guided tour for new users
