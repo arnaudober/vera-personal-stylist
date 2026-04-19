@@ -90,6 +90,12 @@ const OutfitTemplate = (): React.JSX.Element => {
   const { recordOutfit } = useOutfitHistory();
   const [isMarking, setIsMarking] = useState(false);
 
+  const hasExtras = !!(
+    outfit?.outerwear && isItemClean(outfit.outerwear.id) ||
+    outfit?.shoes && isItemClean(outfit.shoes.id) ||
+    outfit?.accessories && isItemClean(outfit.accessories.id)
+  );
+
   useEffect(() => {
     if (!outfit) {
       void generateOutfit();
@@ -119,7 +125,7 @@ const OutfitTemplate = (): React.JSX.Element => {
   };
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center justify-center h-full w-full">
       {outfit ? (
         <>
           {(() => {
@@ -133,82 +139,82 @@ const OutfitTemplate = (): React.JSX.Element => {
             }
 
             return (
-              <div className="relative mx-auto w-full max-w-md">
-                <div className="card flex flex-col items-center gap-6 relative" style={{ padding: "1.5rem" }}>
+              <div className="relative mx-auto w-full max-w-md flex flex-col h-full min-h-0 overflow-hidden">
+                <div className={`card flex flex-col items-center relative min-h-0 ${hasExtras ? "gap-3 p-4" : "gap-6 p-6"}`}>
                   <FavouriteButton />
                   {/* Top item */}
                   {outfit.top && isItemClean(outfit.top.id) && (
-                    <div className="flex flex-col items-center">
+                    <div className="flex flex-col items-center flex-1 min-h-0 w-full justify-center overflow-hidden">
                       <img
                         src={getImage(outfit.top.id)}
                         alt={outfit.top.name}
-                        className="w-44 h-44 object-contain rounded-xl"
+                        className="max-h-full w-auto object-contain rounded-xl shrink min-h-0"
                         loading="lazy"
                       />
-                      <div className="mt-2 text-sm text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
+                      <div className="mt-1 text-sm text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center shrink-0">
                         {outfit.top.name}
                       </div>
                     </div>
                   )}
 
-                  <div className="w-full border-t border-gray-100" />
+                  <div className="w-full border-t border-gray-100 shrink-0" />
 
                   {/* Bottom item */}
                   {outfit.bottom && isItemClean(outfit.bottom.id) && (
-                    <div className="flex flex-col items-center">
+                    <div className="flex flex-col items-center flex-1 min-h-0 w-full justify-center overflow-hidden">
                       <img
                         src={getImage(outfit.bottom.id)}
                         alt={outfit.bottom.name}
-                        className="w-44 h-44 object-contain rounded-xl"
+                        className="max-h-full w-auto object-contain rounded-xl shrink min-h-0"
                         loading="lazy"
                       />
-                      <div className="mt-2 text-sm text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
+                      <div className="mt-1 text-sm text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center shrink-0">
                         {outfit.bottom.name}
                       </div>
                     </div>
                   )}
 
                   {/* Optional items */}
-                  {(outfit.outerwear || outfit.shoes || outfit.accessories) && (
-                    <div className="w-full border-t border-gray-100" />
+                  {hasExtras && (
+                    <div className="w-full border-t border-gray-100 shrink-0" />
                   )}
 
-                  <div className="flex flex-wrap justify-center gap-4">
+                  <div className="flex flex-wrap justify-center gap-4 shrink-0">
                     {outfit.outerwear && isItemClean(outfit.outerwear.id) && (
-                      <div className="flex flex-col items-center w-24">
+                      <div className="flex flex-col items-center w-20">
                         <img
                           src={getImage(outfit.outerwear.id)}
                           alt={outfit.outerwear.name}
-                          className="w-20 h-20 object-contain rounded-lg"
+                          className="w-16 h-16 object-contain rounded-lg"
                           loading="lazy"
                         />
-                        <div className="mt-1 text-xs text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
+                        <div className="mt-1 text-[10px] leading-tight text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
                           {outfit.outerwear.name}
                         </div>
                       </div>
                     )}
                     {outfit.shoes && isItemClean(outfit.shoes.id) && (
-                      <div className="flex flex-col items-center w-24">
+                      <div className="flex flex-col items-center w-20">
                         <img
                           src={getImage(outfit.shoes.id)}
                           alt={outfit.shoes.name}
-                          className="w-20 h-20 object-contain rounded-lg"
+                          className="w-16 h-16 object-contain rounded-lg"
                           loading="lazy"
                         />
-                        <div className="mt-1 text-xs text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
+                        <div className="mt-1 text-[10px] leading-tight text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
                           {outfit.shoes.name}
                         </div>
                       </div>
                     )}
                     {outfit.accessories && isItemClean(outfit.accessories.id) && (
-                      <div className="flex flex-col items-center w-24">
+                      <div className="flex flex-col items-center w-20">
                         <img
                           src={getImage(outfit.accessories.id)}
                           alt={outfit.accessories.name}
-                          className="w-20 h-20 object-contain rounded-lg"
+                          className="w-16 h-16 object-contain rounded-lg"
                           loading="lazy"
                         />
-                        <div className="mt-1 text-xs text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
+                        <div className="mt-1 text-[10px] leading-tight text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
                           {outfit.accessories.name}
                         </div>
                       </div>
@@ -218,7 +224,7 @@ const OutfitTemplate = (): React.JSX.Element => {
                 <button
                   onClick={handleConfirmWorn}
                   disabled={isMarking}
-                  className={`primary-button mt-4 w-full py-3 flex items-center justify-center gap-2 text-base font-semibold transition-all ${isMarking ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`primary-button mt-4 mb-2 w-full py-3 flex items-center justify-center gap-2 text-base font-semibold shrink-0 transition-all ${isMarking ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   <FaCheck />
                   {isMarking ? "Marking as worn..." : "I'm wearing this"}
@@ -237,13 +243,13 @@ const OutfitTemplate = (): React.JSX.Element => {
 
 export const TodayPage = (): React.JSX.Element => {
   return (
-    <div className="flex flex-col flex-1 min-h-screen">
+    <div className="flex flex-col flex-1 min-h-screen relative overflow-hidden">
       {/* Header */}
-      <div className="absolute top-0 left-0 right-0 mx-auto max-w-4xl p-4 pb-2">
+      <div className="w-full mx-auto max-w-4xl px-4 pt-4 shrink-0">
         <h2 className="page-title">Today's outfit</h2>
       </div>
 
-      <div className="w-full mx-auto max-w-4xl px-4 flex-1 flex items-center justify-center mb-16">
+      <div className="w-full mx-auto max-w-4xl px-4 flex-1 flex flex-col items-center justify-center mb-20 overflow-hidden">
         <OutfitTemplate />
       </div>
 
