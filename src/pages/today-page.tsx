@@ -19,14 +19,32 @@ const FavouriteButton = () => {
     return null;
   }
 
-  const favourited = isFavourite(outfit.top.id, outfit.bottom.id);
+  const favourited = isFavourite(
+    outfit.top.id,
+    outfit.bottom.id,
+    outfit.outerwear?.id,
+    outfit.shoes?.id,
+    outfit.accessories?.id,
+  );
 
   async function onToggle(): Promise<void> {
     if (!outfit) return;
     if (favourited) {
-      await removeFavouriteByOutfit(outfit.top.id, outfit.bottom.id);
+      await removeFavouriteByOutfit(
+        outfit.top.id,
+        outfit.bottom.id,
+        outfit.outerwear?.id,
+        outfit.shoes?.id,
+        outfit.accessories?.id,
+      );
     } else {
-      await addFavourite(outfit.top.id, outfit.bottom.id);
+      await addFavourite(
+        outfit.top.id,
+        outfit.bottom.id,
+        outfit.outerwear?.id,
+        outfit.shoes?.id,
+        outfit.accessories?.id,
+      );
     }
   }
 

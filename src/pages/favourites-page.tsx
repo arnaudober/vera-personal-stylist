@@ -15,10 +15,16 @@ const FavouriteOutfitCard = ({
   favourite,
   top,
   bottom,
+  outerwear,
+  shoes,
+  accessories,
 }: {
   favourite: FavouriteOutfit;
   top: ClothingItem | undefined;
   bottom: ClothingItem | undefined;
+  outerwear: ClothingItem | undefined;
+  shoes: ClothingItem | undefined;
+  accessories: ClothingItem | undefined;
 }): React.JSX.Element => {
   const { getImage } = useImage();
   const { removeFavourite } = useFavouriteOutfits();
@@ -33,15 +39,32 @@ const FavouriteOutfitCard = ({
 
   async function wearOutfit(): Promise<void> {
     if (!top || !bottom) return;
-    await recordOutfit(top.id, bottom.id);
+    await recordOutfit(
+      top.id,
+      bottom.id,
+      outerwear?.id,
+      shoes?.id,
+      accessories?.id,
+    );
     await markWorn(top);
     await markWorn(bottom);
+    if (outerwear) await markWorn(outerwear);
+    if (shoes) await markWorn(shoes);
+    if (accessories) await markWorn(accessories);
   }
 
   return (
     <div className="flex flex-col gap-2 p-2">
       <div
-        className={`card flex flex-col items-center relative overflow-hidden !pt-3 !px-0 !pb-0 ${!top?.isClean || !bottom?.isClean ? "dirty-overlay" : ""}`}
+        className={`card flex flex-col items-center relative overflow-hidden !pt-3 !px-0 !pb-0 ${
+          !top?.isClean ||
+          !bottom?.isClean ||
+          (outerwear && !outerwear.isClean) ||
+          (shoes && !shoes.isClean) ||
+          (accessories && !accessories.isClean)
+            ? "dirty-overlay"
+            : ""
+        }`}
       >
         <button
           onClick={() => remove()}
@@ -57,16 +80,16 @@ const FavouriteOutfitCard = ({
               <img
                 src={getImage(top.imageId || top.id)}
                 alt={top.name}
-                className="w-24 h-24 object-contain rounded-xl"
+                className="w-20 h-20 object-contain rounded-xl"
                 loading="lazy"
               />
-              <div className="mt-1 text-sm text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
+              <div className="mt-1 text-xs text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
                 {top.name}
               </div>
             </div>
           ) : (
-            <div className="w-24 h-24 flex items-center justify-center bg-gray-100 rounded-xl">
-              <span className="text-gray-400 text-xs">Item removed</span>
+            <div className="w-20 h-20 flex items-center justify-center bg-gray-100 rounded-xl">
+              <span className="text-gray-400 text-[10px]">Item removed</span>
             </div>
           )}
 
@@ -77,33 +100,73 @@ const FavouriteOutfitCard = ({
               <img
                 src={getImage(bottom.imageId || bottom.id)}
                 alt={bottom.name}
-                className="w-24 h-24 object-contain rounded-xl"
+                className="w-20 h-20 object-contain rounded-xl"
                 loading="lazy"
               />
-              <div className="mt-1 text-sm text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
+              <div className="mt-1 text-xs text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
                 {bottom.name}
               </div>
             </div>
           ) : (
-            <div className="w-24 h-24 flex items-center justify-center bg-gray-100 rounded-xl">
-              <span className="text-gray-400 text-xs">Item removed</span>
+            <div className="w-20 h-20 flex items-center justify-center bg-gray-100 rounded-xl">
+              <span className="text-gray-400 text-[10px]">Item removed</span>
+            </div>
+          )}
+
+          <div className="w-full border-t border-gray-100" />
+          <div className="flex flex-wrap justify-center gap-2 py-1 h-12 items-center">
+            {outerwear && (
+              <div className="flex flex-col items-center w-10">
+                <img
+                  src={getImage(outerwear.imageId || outerwear.id)}
+                  alt={outerwear.name}
+                  className="w-8 h-8 object-contain rounded-lg"
+                  loading="lazy"
+                />
+              </div>
+            )}
+            {shoes && (
+              <div className="flex flex-col items-center w-10">
+                <img
+                  src={getImage(shoes.imageId || shoes.id)}
+                  alt={shoes.name}
+                  className="w-8 h-8 object-contain rounded-lg"
+                  loading="lazy"
+                />
+              </div>
+            )}
+            {accessories && (
+              <div className="flex flex-col items-center w-10">
+                <img
+                  src={getImage(accessories.imageId || accessories.id)}
+                  alt={accessories.name}
+                  className="w-8 h-8 object-contain rounded-lg"
+                  loading="lazy"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="w-full h-12 flex items-stretch">
+          {top?.isClean &&
+          bottom?.isClean &&
+          (!outerwear || outerwear.isClean) &&
+          (!shoes || shoes.isClean) &&
+          (!accessories || accessories.isClean) ? (
+            <button
+              onClick={() => wearOutfit()}
+              className="wear-button w-full font-medium transition-all flex items-center justify-center gap-1.5"
+            >
+              <FaCheck size={10} />
+              Wear it
+            </button>
+          ) : (
+            <div className="w-full flex items-center justify-center opacity-100 z-10">
+              <span className="dirty-badge">dirty</span>
             </div>
           )}
         </div>
-
-        {top?.isClean && bottom?.isClean ? (
-          <button
-            onClick={() => wearOutfit()}
-            className="wear-button w-full font-medium transition-all mt-3 flex items-center justify-center gap-1.5"
-          >
-            <FaCheck size={10} />
-            Wear it
-          </button>
-        ) : (
-          <div className="opacity-100 w-full mt-3 pb-3 flex items-center justify-center">
-            <span className="dirty-badge">dirty</span>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -147,13 +210,21 @@ export const FavouritesPage = (): React.JSX.Element => {
       favourite: fav,
       top: items.find((i) => i.id === fav.topId),
       bottom: items.find((i) => i.id === fav.bottomId),
+      outerwear: items.find((i) => i.id === fav.outerwearId),
+      shoes: items.find((i) => i.id === fav.shoesId),
+      accessories: items.find((i) => i.id === fav.accessoriesId),
     }));
   }, [favourites, items]);
 
   const filteredFavourites = useMemo(() => {
     if (!readyToWearOnly) return resolvedFavourites;
     return resolvedFavourites.filter(
-      ({ top, bottom }) => top?.isClean && bottom?.isClean,
+      ({ top, bottom, outerwear, shoes, accessories }) =>
+        top?.isClean &&
+        bottom?.isClean &&
+        (!outerwear || outerwear.isClean) &&
+        (!shoes || shoes.isClean) &&
+        (!accessories || accessories.isClean),
     );
   }, [resolvedFavourites, readyToWearOnly]);
 
@@ -177,14 +248,26 @@ export const FavouritesPage = (): React.JSX.Element => {
           {favourites.length > 0 ? (
             filteredFavourites.length > 0 ? (
               <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {filteredFavourites.map(({ favourite, top, bottom }) => (
-                  <FavouriteOutfitCard
-                    key={favourite.id}
-                    favourite={favourite}
-                    top={top}
-                    bottom={bottom}
-                  />
-                ))}
+                {filteredFavourites.map(
+                  ({
+                    favourite,
+                    top,
+                    bottom,
+                    outerwear,
+                    shoes,
+                    accessories,
+                  }) => (
+                    <FavouriteOutfitCard
+                      key={favourite.id}
+                      favourite={favourite}
+                      top={top}
+                      bottom={bottom}
+                      outerwear={outerwear}
+                      shoes={shoes}
+                      accessories={accessories}
+                    />
+                  ),
+                )}
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">

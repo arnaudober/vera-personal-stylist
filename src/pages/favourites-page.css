@@ -13,7 +13,7 @@
 }
 
 .wear-button {
-  padding-block: calc(var(--spacing) * 2);
+  height: 100%;
   border-radius: 0;
   background-color: var(--primary-color);
   color: var(--color-white);
