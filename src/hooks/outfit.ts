@@ -152,7 +152,6 @@ export const useOutfit = () => {
       }[] = [
         { key: "outerwear", candidates: availableOuterwear },
         { key: "shoes", candidates: availableShoes },
-        { key: "accessories", candidates: availableAccessories },
       ];
 
       for (const { key, candidates } of optionalCategories) {
@@ -163,8 +162,26 @@ export const useOutfit = () => {
             b: bestMatch.color,
           });
           if (matchScore !== null && matchScore >= COLOR_MATCH_THRESHOLD) {
-            currentOutfit[key] = bestMatch;
+            (currentOutfit[key] as ClothingItem) = bestMatch;
           }
+        }
+      }
+
+      // Add accessories (can be multiple)
+      if (availableAccessories.length > 0) {
+        const matchingAccessories = availableAccessories.filter((acc) => {
+          const matchScore = scoreColors({
+            a: pivot.color,
+            b: acc.color,
+          });
+          return matchScore !== null && matchScore >= COLOR_MATCH_THRESHOLD;
+        });
+
+        if (matchingAccessories.length > 0) {
+          // Take up to 3 random matching accessories for variety
+          currentOutfit.accessories = matchingAccessories
+            .sort(() => 0.5 - Math.random())
+            .slice(0, 3);
         }
       }
 
@@ -174,7 +191,7 @@ export const useOutfit = () => {
         currentOutfit.bottom,
         currentOutfit.outerwear,
         currentOutfit.shoes,
-        currentOutfit.accessories,
+        ...(currentOutfit.accessories || []),
       ].filter(Boolean) as ClothingItem[];
 
       let totalScore = 0;

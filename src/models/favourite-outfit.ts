@@ -4,7 +4,7 @@ export interface FavouriteOutfit {
   bottomId: string;
   outerwearId?: string;
   shoesId?: string;
-  accessoriesId?: string;
+  accessoriesIds?: string[];
   savedAt: Date;
   sessionId: string;
 }

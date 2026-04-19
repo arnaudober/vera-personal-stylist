@@ -5,5 +5,5 @@ export interface Outfit {
   bottom: ClothingItem;
   outerwear?: ClothingItem;
   shoes?: ClothingItem;
-  accessories?: ClothingItem;
+  accessories?: ClothingItem[];
 }

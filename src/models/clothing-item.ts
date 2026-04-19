@@ -25,7 +25,10 @@ export type ClothingItemSubCategory =
   | "bag"
   | "belt"
   | "scarf"
-  | "hat";
+  | "hat"
+  | "watch"
+  | "ring"
+  | "earring";
 
 export const subCategoryToCategory: Record<
   ClothingItemSubCategory,
@@ -49,6 +52,9 @@ export const subCategoryToCategory: Record<
   belt: "accessories",
   scarf: "accessories",
   hat: "accessories",
+  watch: "accessories",
+  ring: "accessories",
+  earring: "accessories",
 };
 
 export const subCategoryLabels: Record<ClothingItemSubCategory, string> = {
@@ -70,6 +76,9 @@ export const subCategoryLabels: Record<ClothingItemSubCategory, string> = {
   belt: "Belt",
   scarf: "Scarf",
   hat: "Hat",
+  watch: "Watch",
+  ring: "Ring",
+  earring: "Earrings",
 };
 
 type ClothingCategoryOption = {

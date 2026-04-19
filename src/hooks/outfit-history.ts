@@ -43,7 +43,7 @@ const initialize = async (): Promise<void> => {
       bottomId: d.data().bottomId,
       outerwearId: d.data().outerwearId,
       shoesId: d.data().shoesId,
-      accessoriesId: d.data().accessoriesId,
+      accessoriesIds: d.data().accessoriesIds || (d.data().accessoriesId ? [d.data().accessoriesId] : []),
       wornAt: d.data().wornAt.toDate(),
       sessionId: d.data().sessionId,
     }));
@@ -72,7 +72,7 @@ export function useOutfitHistory() {
     bottomId: string,
     outerwearId?: string,
     shoesId?: string,
-    accessoriesId?: string,
+    accessoriesIds?: string[],
   ): Promise<void> => {
     const sessionId = getSessionId();
     const entryId = `${sessionId}_${Date.now()}`;
@@ -83,7 +83,7 @@ export function useOutfitHistory() {
       bottomId,
       ...(outerwearId && { outerwearId }),
       ...(shoesId && { shoesId }),
-      ...(accessoriesId && { accessoriesId }),
+      ...(accessoriesIds && { accessoriesIds }),
       wornAt: new Date(),
       sessionId,
     };
@@ -110,7 +110,7 @@ export function useOutfitHistory() {
         h.bottomId,
         h.outerwearId,
         h.shoesId,
-        h.accessoriesId,
+        ...(h.accessoriesIds || []),
       ].filter(Boolean) as string[];
 
       // An entry matches if it contains ANY of the items in the current outfit
