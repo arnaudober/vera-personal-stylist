@@ -108,11 +108,6 @@ const OutfitTemplate = (): React.JSX.Element => {
   const { recordOutfit } = useOutfitHistory();
   const [isMarking, setIsMarking] = useState(false);
 
-  const hasExtras = !!(
-    outfit?.outerwear && isItemClean(outfit.outerwear.id) ||
-    outfit?.shoes && isItemClean(outfit.shoes.id) ||
-    outfit?.accessories && outfit.accessories.some(a => isItemClean(a.id))
-  );
 
   useEffect(() => {
     if (!outfit) {
@@ -162,7 +157,7 @@ const OutfitTemplate = (): React.JSX.Element => {
 
             return (
               <div className="relative mx-auto w-full max-w-md flex flex-col h-full min-h-0 overflow-hidden">
-                <div className={`card flex flex-col items-center relative min-h-0 ${hasExtras ? "gap-3 p-4" : "gap-6 p-6"}`}>
+                <div className="card flex flex-col items-center relative min-h-0 gap-3 p-4">
                   <FavouriteButton />
                   {/* Top item */}
                   {outfit.top && isItemClean(outfit.top.id) && (
@@ -197,9 +192,7 @@ const OutfitTemplate = (): React.JSX.Element => {
                   )}
 
                   {/* Optional items */}
-                  {hasExtras && (
-                    <div className="w-full border-t border-gray-100 shrink-0" />
-                  )}
+                  <div className="w-full border-t border-gray-100 shrink-0" />
 
                   <div className="flex flex-nowrap justify-center gap-2 shrink-0 w-full px-2 overflow-hidden items-end h-24">
                     {outfit.outerwear && isItemClean(outfit.outerwear.id) && (
@@ -232,21 +225,29 @@ const OutfitTemplate = (): React.JSX.Element => {
                         </div>
                       </div>
                     )}
-                    {outfit.accessories && outfit.accessories.filter(a => isItemClean(a.id)).map((accessory) => (
-                      <div key={accessory.id} className="flex flex-col items-center flex-1 min-w-0 max-w-[5rem] h-full">
-                        <div className="flex-1 flex items-center justify-center w-full min-h-0">
-                          <img
-                            src={getImage(accessory.id)}
-                            alt={accessory.name}
-                            className="w-full h-auto max-h-16 object-contain rounded-lg"
-                            loading="lazy"
-                          />
+                    {outfit.accessories && outfit.accessories.filter(a => isItemClean(a.id)).length > 0 ? (
+                      outfit.accessories.filter(a => isItemClean(a.id)).map((accessory) => (
+                        <div key={accessory.id} className="flex flex-col items-center flex-1 min-w-0 max-w-[5rem] h-full">
+                          <div className="flex-1 flex items-center justify-center w-full min-h-0">
+                            <img
+                              src={getImage(accessory.id)}
+                              alt={accessory.name}
+                              className="w-full h-auto max-h-16 object-contain rounded-lg"
+                              loading="lazy"
+                            />
+                          </div>
+                          <div className="mt-1 text-[10px] leading-tight text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center shrink-0">
+                            {accessory.name}
+                          </div>
                         </div>
-                        <div className="mt-1 text-[10px] leading-tight text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center shrink-0">
-                          {accessory.name}
-                        </div>
+                      ))
+                    ) : (
+                      <div className="flex flex-col items-center justify-center flex-1 h-full">
+                        <span className="leading-tight text-black font-semibold text-center mt-1 text-sm">
+                          Pas d'accessoire
+                        </span>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
                 <button
