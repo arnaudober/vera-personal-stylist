@@ -13,6 +13,8 @@ let state: Outfit | null = null;
 let isInitialized = false;
 const listeners = new Set<(s: Outfit | null) => void>();
 
+const COLOR_MATCH_THRESHOLD = 0.75;
+
 const scoreColors = ({ a, b }: { a: Color; b: Color }): number | null => {
   if (!a || !b) {
     return null;
@@ -102,6 +104,14 @@ export const useOutfit = () => {
 
     const availableTops = cleanItems.filter((i) => i.category === "top");
     const availableBottoms = cleanItems.filter((i) => i.category === "bottom");
+    const availableOuterwear = cleanItems.filter(
+      (i) => i.category === "outerwear",
+    );
+    const availableShoes = cleanItems.filter((i) => i.category === "shoes");
+    const availableAccessories = cleanItems.filter(
+      (i) => i.category === "accessories",
+    );
+
     if (availableTops.length === 0 || availableBottoms.length === 0) {
       return null;
     }
@@ -112,51 +122,82 @@ export const useOutfit = () => {
 
     // Try to find the best scoring outfit, but ensure it's different if possible
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const item = cleanItems[Math.floor(Math.random() * cleanItems.length)];
-      const currentOutfit: Partial<Outfit> = {
-        top: item.category === "top" ? item : undefined,
-        bottom: item.category === "bottom" ? item : undefined,
+      const pivots = [...availableTops, ...availableBottoms];
+      const pivot = pivots[Math.floor(Math.random() * pivots.length)];
+
+      const currentOutfit: Outfit = {
+        top:
+          pivot.category === "top"
+            ? pivot
+            : findBestMatch({ candidates: availableTops, anchor: pivot }),
+        bottom:
+          pivot.category === "bottom"
+            ? pivot
+            : findBestMatch({ candidates: availableBottoms, anchor: pivot }),
       };
 
-      if (!currentOutfit.bottom) {
-        currentOutfit.bottom = findBestMatch({
-          candidates: availableBottoms,
-          anchor: currentOutfit.top!,
-        });
-      }
-
-      if (!currentOutfit.top) {
-        currentOutfit.top = findBestMatch({
-          candidates: availableTops,
-          anchor: currentOutfit.bottom!,
-        });
-      }
-
-      // If we have an existing outfit, skip this candidate if it's the exact same
+      // If we have an existing outfit, skip this candidate if it's the exact same duo
       if (
         outfit &&
-        currentOutfit.top?.id === outfit.top.id &&
-        currentOutfit.bottom?.id === outfit.bottom.id
+        currentOutfit.top.id === outfit.top.id &&
+        currentOutfit.bottom.id === outfit.bottom.id
       ) {
         continue;
       }
 
-      const score = scoreColors({
-        a: currentOutfit.top!.color,
-        b: currentOutfit.bottom!.color,
-      });
+      // Add optional layers based on threshold
+      const optionalCategories: {
+        key: keyof Outfit;
+        candidates: ClothingItem[];
+      }[] = [
+        { key: "outerwear", candidates: availableOuterwear },
+        { key: "shoes", candidates: availableShoes },
+        { key: "accessories", candidates: availableAccessories },
+      ];
 
-      if (score !== null) {
-        const recencyPenalty = getRecencyPenalty(
-          currentOutfit.top!.id,
-          currentOutfit.bottom!.id,
-        );
-        const adjustedScore = score * recencyPenalty;
-
-        if (adjustedScore > highestScore) {
-          highestScore = adjustedScore;
-          bestOutfit = currentOutfit as Outfit;
+      for (const { key, candidates } of optionalCategories) {
+        if (candidates.length > 0) {
+          const bestMatch = findBestMatch({ candidates, anchor: pivot });
+          const matchScore = scoreColors({
+            a: pivot.color,
+            b: bestMatch.color,
+          });
+          if (matchScore !== null && matchScore >= COLOR_MATCH_THRESHOLD) {
+            currentOutfit[key] = bestMatch;
+          }
         }
+      }
+
+      // Calculate average score of all items in outfit relative to pivot
+      const itemsInOutfit = [
+        currentOutfit.top,
+        currentOutfit.bottom,
+        currentOutfit.outerwear,
+        currentOutfit.shoes,
+        currentOutfit.accessories,
+      ].filter(Boolean) as ClothingItem[];
+
+      let totalScore = 0;
+      let scoreCount = 0;
+
+      for (const item of itemsInOutfit) {
+        if (item.id !== pivot.id) {
+          const s = scoreColors({ a: pivot.color, b: item.color });
+          if (s !== null) {
+            totalScore += s;
+            scoreCount++;
+          }
+        }
+      }
+
+      const avgScore = scoreCount > 0 ? totalScore / scoreCount : 0;
+      const itemIds = itemsInOutfit.map((i) => i.id);
+      const recencyPenalty = getRecencyPenalty(itemIds);
+      const adjustedScore = avgScore * recencyPenalty;
+
+      if (adjustedScore > highestScore) {
+        highestScore = adjustedScore;
+        bestOutfit = currentOutfit;
       }
     }
 
@@ -193,9 +234,13 @@ export const useOutfit = () => {
     const sessionId = getSessionId();
     const docRef = doc(db, "outfits", sessionId);
 
-    // Save to Firestore
+    // Save to Firestore, removing undefined properties
+    const outfitToSave = newOutfit
+      ? JSON.parse(JSON.stringify(newOutfit))
+      : null;
+
     await setDoc(docRef, {
-      outfit: newOutfit,
+      outfit: outfitToSave,
       sessionId: sessionId,
       updatedAt: new Date(),
     });

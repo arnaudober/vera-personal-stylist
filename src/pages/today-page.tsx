@@ -100,9 +100,18 @@ const OutfitTemplate = (): React.JSX.Element => {
     if (!outfit) return;
     setIsMarking(true);
     try {
-      await recordOutfit(outfit.top.id, outfit.bottom.id);
+      await recordOutfit(
+        outfit.top.id,
+        outfit.bottom.id,
+        outfit.outerwear?.id,
+        outfit.shoes?.id,
+        outfit.accessories?.id,
+      );
       await markWorn(outfit.top);
       await markWorn(outfit.bottom);
+      if (outfit.outerwear) await markWorn(outfit.outerwear);
+      if (outfit.shoes) await markWorn(outfit.shoes);
+      if (outfit.accessories) await markWorn(outfit.accessories);
       await clearOutfit();
     } finally {
       setIsMarking(false);
@@ -158,6 +167,53 @@ const OutfitTemplate = (): React.JSX.Element => {
                       </div>
                     </div>
                   )}
+
+                  {/* Optional items */}
+                  {(outfit.outerwear || outfit.shoes || outfit.accessories) && (
+                    <div className="w-full border-t border-gray-100" />
+                  )}
+
+                  <div className="flex flex-wrap justify-center gap-4">
+                    {outfit.outerwear && isItemClean(outfit.outerwear.id) && (
+                      <div className="flex flex-col items-center w-24">
+                        <img
+                          src={getImage(outfit.outerwear.id)}
+                          alt={outfit.outerwear.name}
+                          className="w-20 h-20 object-contain rounded-lg"
+                          loading="lazy"
+                        />
+                        <div className="mt-1 text-xs text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
+                          {outfit.outerwear.name}
+                        </div>
+                      </div>
+                    )}
+                    {outfit.shoes && isItemClean(outfit.shoes.id) && (
+                      <div className="flex flex-col items-center w-24">
+                        <img
+                          src={getImage(outfit.shoes.id)}
+                          alt={outfit.shoes.name}
+                          className="w-20 h-20 object-contain rounded-lg"
+                          loading="lazy"
+                        />
+                        <div className="mt-1 text-xs text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
+                          {outfit.shoes.name}
+                        </div>
+                      </div>
+                    )}
+                    {outfit.accessories && isItemClean(outfit.accessories.id) && (
+                      <div className="flex flex-col items-center w-24">
+                        <img
+                          src={getImage(outfit.accessories.id)}
+                          alt={outfit.accessories.name}
+                          className="w-20 h-20 object-contain rounded-lg"
+                          loading="lazy"
+                        />
+                        <div className="mt-1 text-xs text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
+                          {outfit.accessories.name}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <button
                   onClick={handleConfirmWorn}
