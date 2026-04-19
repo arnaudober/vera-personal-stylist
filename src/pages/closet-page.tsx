@@ -73,7 +73,7 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
       >
         <button
           onClick={() => remove(item.id)}
-          className="delete-button absolute top-2 right-2 flex items-center justify-center transition-all text-sm font-bold opacity-100"
+          className="delete-button absolute top-2 right-2 flex items-center justify-center transition-all text-sm font-bold keep-opaque"
           aria-label="Delete item"
         >
           <IoClose size={14} />
@@ -92,7 +92,7 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
           {item.name}
         </div>
 
-        <div className="opacity-100 mt-1">
+        <div className="keep-opaque mt-1">
           <span className={item.isClean ? "clean-badge" : "dirty-badge"}>
             {item.isClean ? "clean" : "dirty"}
           </span>

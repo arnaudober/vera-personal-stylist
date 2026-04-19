@@ -102,8 +102,12 @@
   overflow: hidden;
 }
 
-.dirty-overlay > *:not(.opacity-100) {
+.dirty-overlay *:not(.keep-opaque):not(.keep-opaque *) {
   opacity: 0.45;
+}
+
+.keep-opaque {
+  opacity: 1 !important;
 }
 
 .dirty-overlay::after {

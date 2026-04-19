@@ -68,7 +68,7 @@ const FavouriteOutfitCard = ({
       >
         <button
           onClick={() => remove()}
-          className="unfavourite-button absolute top-2 right-2 flex items-center justify-center transition-all text-sm font-bold opacity-100"
+          className="unfavourite-button absolute top-2 right-2 flex items-center justify-center transition-all text-sm font-bold keep-opaque"
           aria-label="Remove favourite"
         >
           <FaHeart size={10} />
@@ -148,7 +148,17 @@ const FavouriteOutfitCard = ({
           </div>
         </div>
 
-        <div className="w-full h-12 flex items-stretch">
+        <div className={`w-full h-12 flex items-stretch ${
+          !(
+            top?.isClean &&
+            bottom?.isClean &&
+            (!outerwear || outerwear.isClean) &&
+            (!shoes || shoes.isClean) &&
+            (!accessories || accessories.isClean)
+          )
+            ? "keep-opaque"
+            : ""
+        }`}>
           {top?.isClean &&
           bottom?.isClean &&
           (!outerwear || outerwear.isClean) &&
@@ -162,8 +172,8 @@ const FavouriteOutfitCard = ({
               Wear it
             </button>
           ) : (
-            <div className="w-full flex items-center justify-center opacity-100 z-10">
-              <span className="dirty-badge">dirty</span>
+            <div className="w-full flex items-center justify-center z-10">
+              <span className="dirty-badge keep-opaque">dirty</span>
             </div>
           )}
         </div>
