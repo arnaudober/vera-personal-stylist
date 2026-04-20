@@ -1,4 +1,3 @@
-import * as React from "react";
 import { FaTshirt } from "react-icons/fa";
 import type { IconType } from "react-icons";
 
