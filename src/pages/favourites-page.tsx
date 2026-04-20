@@ -264,13 +264,13 @@ export const FavouritesPage = (): React.JSX.Element => {
   }, [resolvedFavourites, readyToWearOnly]);
 
   return (
-    <>
-      <div className="mx-auto max-w-4xl p-4 pb-2">
+    <div className="flex flex-col h-screen overflow-hidden">
+      <div className="mx-auto max-w-4xl p-4 pb-2 w-full shrink-0">
         <h2 className="page-title">Your favourites</h2>
       </div>
 
       {favourites.length > 0 && (
-        <div className="mx-auto max-w-4xl px-4">
+        <div className="mx-auto max-w-4xl px-4 shrink-0">
           <FavouritesFilterBar
             readyToWearOnly={readyToWearOnly}
             onFilterChange={setReadyToWearOnly}
@@ -278,54 +278,66 @@ export const FavouritesPage = (): React.JSX.Element => {
         </div>
       )}
 
-      <div className="w-full mx-auto max-w-4xl p-4 pb-24">
-        <div className="rounded-2xl">
-          {favourites.length > 0 ? (
-            filteredFavourites.length > 0 ? (
-              <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {filteredFavourites.map(
-                  ({
-                    favourite,
-                    top,
-                    bottom,
-                    outerwear,
-                    shoes,
-                    accessories,
-                  }) => (
-                    <FavouriteOutfitCard
-                      key={favourite.id}
-                      favourite={favourite}
-                      top={top}
-                      bottom={bottom}
-                      outerwear={outerwear}
-                      shoes={shoes}
-                      accessories={accessories}
-                    />
-                  ),
-                )}
-              </div>
+      <div
+        className="flex-1 min-h-0 overflow-y-auto"
+        style={{
+          maskImage:
+            "linear-gradient(to bottom, transparent, black 1.5rem, black calc(100% - 3rem), transparent)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, transparent, black 1.5rem, black calc(100% - 3rem), transparent)",
+        }}
+      >
+        <div className="w-full mx-auto max-w-4xl p-4">
+          <div className="rounded-2xl">
+            {favourites.length > 0 ? (
+              filteredFavourites.length > 0 ? (
+                <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                  {filteredFavourites.map(
+                    ({
+                      favourite,
+                      top,
+                      bottom,
+                      outerwear,
+                      shoes,
+                      accessories,
+                    }) => (
+                      <FavouriteOutfitCard
+                        key={favourite.id}
+                        favourite={favourite}
+                        top={top}
+                        bottom={bottom}
+                        outerwear={outerwear}
+                        shoes={shoes}
+                        accessories={accessories}
+                      />
+                    ),
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <p className="text-gray-500 text-lg">
+                    No outfits match your filters.
+                  </p>
+                  <p className="text-gray-400 text-sm">
+                    Try adjusting your filters above.
+                  </p>
+                </div>
+              )
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <p className="text-gray-500 text-lg">
-                  No outfits match your filters.
-                </p>
+                <p className="text-gray-500 text-lg">No favourite outfits yet.</p>
                 <p className="text-gray-400 text-sm">
-                  Try adjusting your filters above.
+                  Save outfits you love from the today page!
                 </p>
               </div>
-            )
-          ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <p className="text-gray-500 text-lg">No favourite outfits yet.</p>
-              <p className="text-gray-400 text-sm">
-                Save outfits you love from the today page!
-              </p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
+      <div className="shrink-0 h-20" />
+
       <NavigationBar activePage="favourites" />
-    </>
+    </div>
   );
 };
