@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useFavouriteOutfits } from "./favourite-outfits.ts";
+import { useOutfitHistory } from "./outfit-history.ts";
 import {
   isWashable,
   type ClothingItem,
@@ -81,6 +83,9 @@ export function useCloset() {
   // We "subscribe" to the singleton state
   const [items, setItems] = useState(state);
 
+  const { removeFavouritesWithItem } = useFavouriteOutfits();
+  const { removeHistoryEntriesWithItem } = useOutfitHistory();
+
   useEffect(() => {
     const listener = (newItems: ClothingItem[]) => setItems(newItems);
     listeners.add(listener);
@@ -122,6 +127,8 @@ export function useCloset() {
   };
   const removeClothingItem = async (id: string): Promise<string> => {
     await deleteDoc(doc(db, "clothingItems", id));
+    await removeFavouritesWithItem(id);
+    await removeHistoryEntriesWithItem(id);
     emitChange(state.filter((i) => i.id !== id));
     return id;
   };

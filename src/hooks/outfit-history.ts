@@ -138,10 +138,40 @@ export function useOutfitHistory() {
     emitChange([]);
   };
 
+  const removeHistoryEntriesWithItem = async (itemId: string): Promise<void> => {
+    const entriesToDelete = state.filter(
+      (h) =>
+        h.topId === itemId ||
+        h.bottomId === itemId ||
+        h.outerwearId === itemId ||
+        h.shoesId === itemId ||
+        h.accessoriesIds?.includes(itemId),
+    );
+
+    if (entriesToDelete.length === 0) return;
+
+    const batch = writeBatch(db);
+    entriesToDelete.forEach((entry) => {
+      batch.delete(doc(db, "outfitHistory", entry.id));
+    });
+    await batch.commit();
+
+    const newState = state.filter(
+      (h) => !entriesToDelete.some((td) => td.id === h.id),
+    );
+    emitChange(newState);
+  };
+
   function emitChange(newEntries: OutfitHistoryEntry[]): void {
     listeners.forEach((listener) => listener(newEntries));
     state = newEntries;
   }
 
-  return { history, recordOutfit, getRecencyPenalty, clearHistory };
+  return {
+    history,
+    recordOutfit,
+    getRecencyPenalty,
+    clearHistory,
+    removeHistoryEntriesWithItem,
+  };
 }

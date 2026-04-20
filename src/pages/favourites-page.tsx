@@ -20,8 +20,8 @@ const FavouriteOutfitCard = ({
   accessories,
 }: {
   favourite: FavouriteOutfit;
-  top: ClothingItem | undefined;
-  bottom: ClothingItem | undefined;
+  top: ClothingItem;
+  bottom: ClothingItem;
   outerwear: ClothingItem | undefined;
   shoes: ClothingItem | undefined;
   accessories: (ClothingItem | undefined)[];
@@ -77,48 +77,31 @@ const FavouriteOutfitCard = ({
         </button>
 
         <div className="flex flex-col items-center gap-3 w-full min-w-0 px-3">
-          {top ? (
-            <div className="flex flex-col items-center w-full min-w-0">
-              <img
-                src={getImage(top.imageId || top.id)}
-                alt={top.name}
-                className="w-20 h-20 object-contain rounded-xl"
-                loading="lazy"
-              />
-              <div className="mt-1 text-xs text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
-                {top.name}
-              </div>
+          <div className="flex flex-col items-center w-full min-w-0">
+            <img
+              src={getImage(top.imageId || top.id)}
+              alt={top.name}
+              className="w-20 h-20 object-contain rounded-xl"
+              loading="lazy"
+            />
+            <div className="mt-1 text-xs text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
+              {top.name}
             </div>
-          ) : (
-            <div className="w-20 h-20 flex items-center justify-center bg-gray-100 rounded-xl">
-              <span className="text-gray-400 text-[10px]">Item removed</span>
-            </div>
-          )}
+          </div>
 
           <div className="w-full border-t border-gray-100" />
 
-          {bottom ? (
-            <div className="flex flex-col items-center w-full min-w-0">
-              <img
-                src={getImage(bottom.imageId || bottom.id)}
-                alt={bottom.name}
-                className="w-20 h-20 object-contain rounded-xl"
-                loading="lazy"
-              />
-              <div className="mt-1 text-xs text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
-                {bottom.name}
-              </div>
+          <div className="flex flex-col items-center w-full min-w-0">
+            <img
+              src={getImage(bottom.imageId || bottom.id)}
+              alt={bottom.name}
+              className="w-20 h-20 object-contain rounded-xl"
+              loading="lazy"
+            />
+            <div className="mt-1 text-xs text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
+              {bottom.name}
             </div>
-          ) : (
-            <div className="flex flex-col items-center w-full min-w-0">
-              <div
-                className="w-20 flex items-center justify-center bg-gray-100 rounded-xl"
-                style={{ height: 99 }}
-              >
-                <span className="text-gray-400 text-[10px]">Item removed</span>
-              </div>
-            </div>
-          )}
+          </div>
 
           <div className="w-full border-t border-gray-100" />
           <div className="flex flex-nowrap justify-center gap-2 h-10 items-center w-full px-2 mb-2 overflow-hidden">
@@ -239,16 +222,21 @@ export const FavouritesPage = (): React.JSX.Element => {
   const [readyToWearOnly, setReadyToWearOnly] = useState(false);
 
   const resolvedFavourites = useMemo(() => {
-    return favourites.map((fav) => ({
-      favourite: fav,
-      top: items.find((i) => i.id === fav.topId),
-      bottom: items.find((i) => i.id === fav.bottomId),
-      outerwear: items.find((i) => i.id === fav.outerwearId),
-      shoes: items.find((i) => i.id === fav.shoesId),
-      accessories: (fav.accessoriesIds || []).map((id) =>
-        items.find((i) => i.id === id),
-      ),
-    }));
+    return favourites
+      .map((fav) => ({
+        favourite: fav,
+        top: items.find((i) => i.id === fav.topId),
+        bottom: items.find((i) => i.id === fav.bottomId),
+        outerwear: items.find((i) => i.id === fav.outerwearId),
+        shoes: items.find((i) => i.id === fav.shoesId),
+        accessories: (fav.accessoriesIds || []).map((id) =>
+          items.find((i) => i.id === id),
+        ),
+      }))
+      .filter(
+        (res): res is typeof res & { top: ClothingItem; bottom: ClothingItem } =>
+          !!res.top && !!res.bottom,
+      );
   }, [favourites, items]);
 
   const filteredFavourites = useMemo(() => {
