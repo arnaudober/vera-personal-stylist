@@ -126,7 +126,7 @@ const AddItemButton = ({
             ? "The limit of uploaded items has been reached"
             : "Add a new item to your closet"
         }
-        className={`fixed bottom-12 right-5 z-50 shadow-lg primary-button transition-all ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+        className={`fixed bottom-12 right-5 z-200 shadow-lg primary-button transition-all ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
         style={{ width: 56, height: 56 }}
       >
         <div className="flex items-center justify-center text-3xl">
