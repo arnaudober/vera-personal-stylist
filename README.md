@@ -57,7 +57,7 @@ npm run lint     # ESLint
 - [x] More categories — shoes, accessories, jackets/coats
 - [x] Add more accessory categories — watches, earrings, etc.
 - [x] Improve category cleanliness rules — let some categories be excluded from clean/dirty tracking
-- [ ] Improve closet filter-bar — make horizontal scrolling more obvious so users understand they can browse categories sideways, or maybe use a dropdown instead of a bar
+- [x] Improve closet filter-bar — make horizontal scrolling more obvious so users understand they can browse categories sideways, or maybe use a dropdown instead of a bar
 - [ ] Improved onboarding — guided tour for new users
 - [ ] Horizontal scroll views — closet page with one row per category (tops, bottoms) scrolling horizontally; favourites page with a single horizontal row of outfits
 - [ ] Pin item to outfit — select an item from the closet to lock it into today's outfit, then regenerate the rest around it; also remove the "clean" badge since this action replaces it as the primary CTA for clean items
