@@ -34,7 +34,7 @@ const CategoryDropdown = ({
         }
         className="category-select select w-full text-base font-medium"
       >
-        <option value="">Toutes les catégories</option>
+        <option value="">All categories</option>
         {categoryOptions.map(({ value, label }) => (
           <option key={value} value={value}>
             {label}
