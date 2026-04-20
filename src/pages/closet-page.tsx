@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useCloset } from "../hooks/closet.ts";
 import NavigationBar from "../components/navigation-bar.tsx";
+import EmptyMessageTemplate from "../components/empty-message-template.tsx";
 import {
   categoryOptions,
   isWashable,
@@ -203,14 +204,14 @@ export const ClosetPage = (): React.JSX.Element => {
       </div>
 
       <div
-        className="flex-1 min-h-0 overflow-y-auto"
+        className="flex-1 min-h-0 overflow-y-auto flex flex-col relative"
         style={{
           maskImage: "linear-gradient(to bottom, transparent, black 1.5rem, black calc(100% - 3rem), transparent)",
           WebkitMaskImage: "linear-gradient(to bottom, transparent, black 1.5rem, black calc(100% - 3rem), transparent)",
         }}
       >
-        <div className="w-full mx-auto max-w-4xl px-4 pb-8">
-          <div className="rounded-2xl">
+        <div className={`w-full mx-auto max-w-4xl px-4 ${filteredItems.length === 0 ? "flex-1 flex flex-col justify-center" : "pb-8"}`}>
+          <div className={`rounded-2xl ${filteredItems.length === 0 ? "flex-1 flex flex-col justify-center" : ""}`}>
             {filteredItems.length > 0 ? (
               <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-fr">
                 {filteredItems.map((item) => (
@@ -218,13 +219,13 @@ export const ClosetPage = (): React.JSX.Element => {
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <p className="text-gray-500 text-lg">
-                  No items found in this category.
-                </p>
-                <p className="text-gray-400 text-sm">
-                  Try selecting a different filter or add a new item!
-                </p>
+              <div className="flex-1 flex items-center justify-center">
+                <EmptyMessageTemplate
+                  title="No items found."
+                  subtitle="Try selecting a different filter or add a new item!"
+                  buttonText="Add an item"
+                  onButtonClick={() => setShowUploadModal(true)}
+                />
               </div>
             )}
           </div>
