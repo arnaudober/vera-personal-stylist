@@ -6,7 +6,7 @@ import { useImage } from "../hooks/image.ts";
 import { useFavouriteOutfits } from "../hooks/favourite-outfits.ts";
 import { useOutfitHistory } from "../hooks/outfit-history.ts";
 import type { FavouriteOutfit } from "../models/favourite-outfit.ts";
-import type { ClothingItem } from "../models/clothing-item.ts";
+import { isWashable, type ClothingItem } from "../models/clothing-item.ts";
 import { FaHeart, FaCheck } from "react-icons/fa";
 import "./favourites-page.css";
 import "../pages/closet-page.css";
@@ -46,12 +46,12 @@ const FavouriteOutfitCard = ({
       shoes?.id,
       accessories.filter((a): a is ClothingItem => !!a).map((a) => a.id),
     );
-    await markWorn(top);
-    await markWorn(bottom);
-    if (outerwear) await markWorn(outerwear);
-    if (shoes) await markWorn(shoes);
+    if (isWashable(top.category)) await markWorn(top);
+    if (isWashable(bottom.category)) await markWorn(bottom);
+    if (outerwear && isWashable(outerwear.category)) await markWorn(outerwear);
+    if (shoes && isWashable(shoes.category)) await markWorn(shoes);
     for (const accessory of accessories) {
-      if (accessory) await markWorn(accessory);
+      if (accessory && isWashable(accessory.category)) await markWorn(accessory);
     }
   }
 
@@ -59,11 +59,11 @@ const FavouriteOutfitCard = ({
     <div className="flex flex-col gap-2 p-2">
       <div
         className={`card flex flex-col items-center relative overflow-hidden !pt-3 !px-0 !pb-0 ${
-          !top?.isClean ||
-          !bottom?.isClean ||
-          (outerwear && !outerwear.isClean) ||
-          (shoes && !shoes.isClean) ||
-          accessories.some((a) => a && !a.isClean)
+          (top && !top.isClean && isWashable(top.category)) ||
+          (bottom && !bottom.isClean && isWashable(bottom.category)) ||
+          (outerwear && !outerwear.isClean && isWashable(outerwear.category)) ||
+          (shoes && !shoes.isClean && isWashable(shoes.category)) ||
+          accessories.some((a) => a && !a.isClean && isWashable(a.category))
             ? "dirty-overlay"
             : ""
         }`}

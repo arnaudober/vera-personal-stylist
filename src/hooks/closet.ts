@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import {
+  isWashable,
   type ClothingItem,
   type CreateClothingItem,
 } from "../models/clothing-item";
@@ -59,6 +60,20 @@ const initialize = async () => {
   }
 
   isInitialized = true;
+
+  // Cleanup: ensure non-washable items are marked as clean
+  const nonWashableDirtyItems = state.filter(
+    (item) => !isWashable(item.category) && !item.isClean,
+  );
+  if (nonWashableDirtyItems.length > 0) {
+    const batch = writeBatch(db);
+    nonWashableDirtyItems.forEach((item) => {
+      const itemRef = doc(db, "clothingItems", item.id);
+      batch.update(itemRef, { isClean: true });
+      item.isClean = true;
+    });
+    await batch.commit();
+  }
 };
 await initialize();
 
@@ -123,6 +138,10 @@ export function useCloset() {
     emitChange(state.map((i) => ({ ...i, isClean: true })));
   };
   const markWorn = async (item: ClothingItem): Promise<ClothingItem> => {
+    if (!isWashable(item.category)) {
+      return item;
+    }
+
     const itemRef = doc(db, "clothingItems", item.id);
     await updateDoc(itemRef, { isClean: false });
 
@@ -133,10 +152,12 @@ export function useCloset() {
     return { ...item, isClean: false };
   };
   const isItemClean = (id: string): boolean => {
-    return state.find((i) => i.id === id)?.isClean ?? false;
+    const item = state.find((i) => i.id === id);
+    if (!item) return false;
+    return !isWashable(item.category) || item.isClean;
   };
   const areAllItemsClean = (): boolean => {
-    return state.every((i) => i.isClean);
+    return state.every((i) => !isWashable(i.category) || i.isClean);
   };
   const isUploadLimitReached = (): boolean => {
     return state.length >= ITEMS_UPLOAD_LIMIT;
