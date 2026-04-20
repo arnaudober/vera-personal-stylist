@@ -106,48 +106,56 @@ const FavouriteOutfitCard = ({
           <div className="w-full border-t border-gray-100" />
           <div className="flex flex-nowrap justify-center gap-2 h-10 items-center w-full px-2 mb-2 overflow-hidden">
             <div className="flex items-center justify-center gap-2 h-full">
-              {outerwear && (
-                <div className="flex flex-col items-center justify-center min-w-0 max-w-[2.5rem] h-full">
-                  <img
-                    src={getImage(outerwear.imageId || outerwear.id)}
-                    alt={outerwear.name}
-                    className="w-full h-auto max-h-8 object-contain rounded-lg"
-                    loading="lazy"
-                  />
-                </div>
-              )}
-              {shoes && (
-                <div className="flex flex-col items-center justify-center min-w-0 max-w-[2.5rem] h-full">
-                  <img
-                    src={getImage(shoes.imageId || shoes.id)}
-                    alt={shoes.name}
-                    className="w-full h-auto max-h-8 object-contain rounded-lg"
-                    loading="lazy"
-                  />
-                </div>
-              )}
-              {accessories.filter((a) => !!a).length > 0 ? (
-                accessories.map(
-                  (accessory, index) =>
-                    accessory && (
-                      <div
-                        key={accessory.id || index}
-                        className="flex flex-col items-center justify-center min-w-0 max-w-[2.5rem] h-full"
-                      >
+              {(() => {
+                const hasAnyOptionalItems = !!(outerwear || shoes || accessories.filter(a => !!a).length > 0);
+                if (!hasAnyOptionalItems) {
+                  return (
+                    <span className="inline-block leading-none p-0 m-0 text-black font-semibold text-center text-xs whitespace-nowrap">
+                      Pas d'accessoire
+                    </span>
+                  );
+                }
+                return (
+                  <>
+                    {outerwear && (
+                      <div className="flex flex-col items-center justify-center min-w-0 max-w-[2.5rem] h-full">
                         <img
-                          src={getImage(accessory.imageId || accessory.id)}
-                          alt={accessory.name}
+                          src={getImage(outerwear.imageId || outerwear.id)}
+                          alt={outerwear.name}
                           className="w-full h-auto max-h-8 object-contain rounded-lg"
                           loading="lazy"
                         />
                       </div>
-                    ),
-                )
-              ) : (
-                <span className="inline-block leading-none p-0 m-0 text-black font-semibold text-center text-xs whitespace-nowrap">
-                  Pas d'accessoire
-                </span>
-              )}
+                    )}
+                    {shoes && (
+                      <div className="flex flex-col items-center justify-center min-w-0 max-w-[2.5rem] h-full">
+                        <img
+                          src={getImage(shoes.imageId || shoes.id)}
+                          alt={shoes.name}
+                          className="w-full h-auto max-h-8 object-contain rounded-lg"
+                          loading="lazy"
+                        />
+                      </div>
+                    )}
+                    {accessories.map(
+                      (accessory, index) =>
+                        accessory && (
+                          <div
+                            key={accessory.id || index}
+                            className="flex flex-col items-center justify-center min-w-0 max-w-[2.5rem] h-full"
+                          >
+                            <img
+                              src={getImage(accessory.imageId || accessory.id)}
+                              alt={accessory.name}
+                              className="w-full h-auto max-h-8 object-contain rounded-lg"
+                              loading="lazy"
+                            />
+                          </div>
+                        ),
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </div>
         </div>
