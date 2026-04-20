@@ -92,7 +92,7 @@ const RegenerateOutfitFab = () => {
       aria-label="Regenerate the outfit"
       title="Regenerate the outfit"
       disabled={!canGenerateOutfit()}
-      className={`fixed bottom-12 right-5 z-50 shadow-lg primary-button transition-all ${!canGenerateOutfit() ? "opacity-50 cursor-not-allowed" : ""}`}
+      className={`fixed bottom-12 right-5 z-200 shadow-lg primary-button transition-all ${!canGenerateOutfit() ? "opacity-50 cursor-not-allowed" : ""}`}
       style={{ width: 56, height: 56 }}
     >
       <div className="flex items-center justify-center text-2xl">
@@ -195,59 +195,72 @@ const OutfitTemplate = (): React.JSX.Element => {
                   <div className="w-full border-t border-gray-100 shrink-0" />
 
                   <div className="flex flex-nowrap justify-center gap-2 shrink-0 w-full px-2 overflow-hidden items-end h-24">
-                    {outfit.outerwear && isItemClean(outfit.outerwear.id) && (
-                      <div className="flex flex-col items-center flex-1 min-w-0 max-w-[5rem] h-full">
-                        <div className="flex-1 flex items-center justify-center w-full min-h-0">
-                          <img
-                            src={getImage(outfit.outerwear.id)}
-                            alt={outfit.outerwear.name}
-                            className="w-full h-auto max-h-16 object-contain rounded-lg"
-                            loading="lazy"
-                          />
-                        </div>
-                        <div className="mt-1 text-[10px] leading-tight text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center shrink-0">
-                          {outfit.outerwear.name}
-                        </div>
-                      </div>
-                    )}
-                    {outfit.shoes && isItemClean(outfit.shoes.id) && (
-                      <div className="flex flex-col items-center flex-1 min-w-0 max-w-[5rem] h-full">
-                        <div className="flex-1 flex items-center justify-center w-full min-h-0">
-                          <img
-                            src={getImage(outfit.shoes.id)}
-                            alt={outfit.shoes.name}
-                            className="w-full h-auto max-h-16 object-contain rounded-lg"
-                            loading="lazy"
-                          />
-                        </div>
-                        <div className="mt-1 text-[10px] leading-tight text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center shrink-0">
-                          {outfit.shoes.name}
-                        </div>
-                      </div>
-                    )}
-                    {outfit.accessories && outfit.accessories.filter(a => isItemClean(a.id)).length > 0 ? (
-                      outfit.accessories.filter(a => isItemClean(a.id)).map((accessory) => (
-                        <div key={accessory.id} className="flex flex-col items-center flex-1 min-w-0 max-w-[5rem] h-full">
-                          <div className="flex-1 flex items-center justify-center w-full min-h-0">
-                            <img
-                              src={getImage(accessory.id)}
-                              alt={accessory.name}
-                              className="w-full h-auto max-h-16 object-contain rounded-lg"
-                              loading="lazy"
-                            />
+                    {(() => {
+                      const visibleOuterwear = outfit.outerwear && isItemClean(outfit.outerwear.id) ? outfit.outerwear : null;
+                      const visibleShoes = outfit.shoes && isItemClean(outfit.shoes.id) ? outfit.shoes : null;
+                      const visibleAccessories = outfit.accessories?.filter(a => isItemClean(a.id)) || [];
+                      const hasAnyOptionalItems = !!(visibleOuterwear || visibleShoes || visibleAccessories.length > 0);
+
+                      if (!hasAnyOptionalItems) {
+                        return (
+                          <div className="flex flex-col items-center justify-center flex-1 h-full">
+                            <span className="leading-tight text-black font-semibold text-center mt-1 text-sm">
+                              Pas d'accessoire
+                            </span>
                           </div>
-                          <div className="mt-1 text-[10px] leading-tight text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center shrink-0">
-                            {accessory.name}
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="flex flex-col items-center justify-center flex-1 h-full">
-                        <span className="leading-tight text-black font-semibold text-center mt-1 text-sm">
-                          Pas d'accessoire
-                        </span>
-                      </div>
-                    )}
+                        );
+                      }
+
+                      return (
+                        <>
+                          {visibleOuterwear && (
+                            <div className="flex flex-col items-center flex-1 min-w-0 max-w-[5rem] h-full">
+                              <div className="flex-1 flex items-center justify-center w-full min-h-0">
+                                <img
+                                  src={getImage(visibleOuterwear.id)}
+                                  alt={visibleOuterwear.name}
+                                  className="w-full h-auto max-h-16 object-contain rounded-lg"
+                                  loading="lazy"
+                                />
+                              </div>
+                              <div className="mt-1 text-[10px] leading-tight text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center shrink-0">
+                                {visibleOuterwear.name}
+                              </div>
+                            </div>
+                          )}
+                          {visibleShoes && (
+                            <div className="flex flex-col items-center flex-1 min-w-0 max-w-[5rem] h-full">
+                              <div className="flex-1 flex items-center justify-center w-full min-h-0">
+                                <img
+                                  src={getImage(visibleShoes.id)}
+                                  alt={visibleShoes.name}
+                                  className="w-full h-auto max-h-16 object-contain rounded-lg"
+                                  loading="lazy"
+                                />
+                              </div>
+                              <div className="mt-1 text-[10px] leading-tight text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center shrink-0">
+                                {visibleShoes.name}
+                              </div>
+                            </div>
+                          )}
+                          {visibleAccessories.map((accessory) => (
+                            <div key={accessory.id} className="flex flex-col items-center flex-1 min-w-0 max-w-[5rem] h-full">
+                              <div className="flex-1 flex items-center justify-center w-full min-h-0">
+                                <img
+                                  src={getImage(accessory.id)}
+                                  alt={accessory.name}
+                                  className="w-full h-auto max-h-16 object-contain rounded-lg"
+                                  loading="lazy"
+                                />
+                              </div>
+                              <div className="mt-1 text-[10px] leading-tight text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center shrink-0">
+                                {accessory.name}
+                              </div>
+                            </div>
+                          ))}
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
                 <button

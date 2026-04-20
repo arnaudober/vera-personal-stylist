@@ -6,7 +6,7 @@ import { useImage } from "../hooks/image.ts";
 import { useFavouriteOutfits } from "../hooks/favourite-outfits.ts";
 import { useOutfitHistory } from "../hooks/outfit-history.ts";
 import type { FavouriteOutfit } from "../models/favourite-outfit.ts";
-import type { ClothingItem } from "../models/clothing-item.ts";
+import { isWashable, type ClothingItem } from "../models/clothing-item.ts";
 import { FaHeart, FaCheck } from "react-icons/fa";
 import "./favourites-page.css";
 import "../pages/closet-page.css";
@@ -20,8 +20,8 @@ const FavouriteOutfitCard = ({
   accessories,
 }: {
   favourite: FavouriteOutfit;
-  top: ClothingItem | undefined;
-  bottom: ClothingItem | undefined;
+  top: ClothingItem;
+  bottom: ClothingItem;
   outerwear: ClothingItem | undefined;
   shoes: ClothingItem | undefined;
   accessories: (ClothingItem | undefined)[];
@@ -46,12 +46,12 @@ const FavouriteOutfitCard = ({
       shoes?.id,
       accessories.filter((a): a is ClothingItem => !!a).map((a) => a.id),
     );
-    await markWorn(top);
-    await markWorn(bottom);
-    if (outerwear) await markWorn(outerwear);
-    if (shoes) await markWorn(shoes);
+    if (isWashable(top.category)) await markWorn(top);
+    if (isWashable(bottom.category)) await markWorn(bottom);
+    if (outerwear && isWashable(outerwear.category)) await markWorn(outerwear);
+    if (shoes && isWashable(shoes.category)) await markWorn(shoes);
     for (const accessory of accessories) {
-      if (accessory) await markWorn(accessory);
+      if (accessory && isWashable(accessory.category)) await markWorn(accessory);
     }
   }
 
@@ -59,11 +59,11 @@ const FavouriteOutfitCard = ({
     <div className="flex flex-col gap-2 p-2">
       <div
         className={`card flex flex-col items-center relative overflow-hidden !pt-3 !px-0 !pb-0 ${
-          !top?.isClean ||
-          !bottom?.isClean ||
-          (outerwear && !outerwear.isClean) ||
-          (shoes && !shoes.isClean) ||
-          accessories.some((a) => a && !a.isClean)
+          (top && !top.isClean && isWashable(top.category)) ||
+          (bottom && !bottom.isClean && isWashable(bottom.category)) ||
+          (outerwear && !outerwear.isClean && isWashable(outerwear.category)) ||
+          (shoes && !shoes.isClean && isWashable(shoes.category)) ||
+          accessories.some((a) => a && !a.isClean && isWashable(a.category))
             ? "dirty-overlay"
             : ""
         }`}
@@ -77,94 +77,85 @@ const FavouriteOutfitCard = ({
         </button>
 
         <div className="flex flex-col items-center gap-3 w-full min-w-0 px-3">
-          {top ? (
-            <div className="flex flex-col items-center w-full min-w-0">
-              <img
-                src={getImage(top.imageId || top.id)}
-                alt={top.name}
-                className="w-20 h-20 object-contain rounded-xl"
-                loading="lazy"
-              />
-              <div className="mt-1 text-xs text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
-                {top.name}
-              </div>
+          <div className="flex flex-col items-center w-full min-w-0">
+            <img
+              src={getImage(top.imageId || top.id)}
+              alt={top.name}
+              className="w-20 h-20 object-contain rounded-xl"
+              loading="lazy"
+            />
+            <div className="mt-1 text-xs text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
+              {top.name}
             </div>
-          ) : (
-            <div className="w-20 h-20 flex items-center justify-center bg-gray-100 rounded-xl">
-              <span className="text-gray-400 text-[10px]">Item removed</span>
-            </div>
-          )}
+          </div>
 
           <div className="w-full border-t border-gray-100" />
 
-          {bottom ? (
-            <div className="flex flex-col items-center w-full min-w-0">
-              <img
-                src={getImage(bottom.imageId || bottom.id)}
-                alt={bottom.name}
-                className="w-20 h-20 object-contain rounded-xl"
-                loading="lazy"
-              />
-              <div className="mt-1 text-xs text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
-                {bottom.name}
-              </div>
+          <div className="flex flex-col items-center w-full min-w-0">
+            <img
+              src={getImage(bottom.imageId || bottom.id)}
+              alt={bottom.name}
+              className="w-20 h-20 object-contain rounded-xl"
+              loading="lazy"
+            />
+            <div className="mt-1 text-xs text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden text-center">
+              {bottom.name}
             </div>
-          ) : (
-            <div className="flex flex-col items-center w-full min-w-0">
-              <div
-                className="w-20 flex items-center justify-center bg-gray-100 rounded-xl"
-                style={{ height: 99 }}
-              >
-                <span className="text-gray-400 text-[10px]">Item removed</span>
-              </div>
-            </div>
-          )}
+          </div>
 
           <div className="w-full border-t border-gray-100" />
           <div className="flex flex-nowrap justify-center gap-2 h-10 items-center w-full px-2 mb-2 overflow-hidden">
             <div className="flex items-center justify-center gap-2 h-full">
-              {outerwear && (
-                <div className="flex flex-col items-center justify-center min-w-0 max-w-[2.5rem] h-full">
-                  <img
-                    src={getImage(outerwear.imageId || outerwear.id)}
-                    alt={outerwear.name}
-                    className="w-full h-auto max-h-8 object-contain rounded-lg"
-                    loading="lazy"
-                  />
-                </div>
-              )}
-              {shoes && (
-                <div className="flex flex-col items-center justify-center min-w-0 max-w-[2.5rem] h-full">
-                  <img
-                    src={getImage(shoes.imageId || shoes.id)}
-                    alt={shoes.name}
-                    className="w-full h-auto max-h-8 object-contain rounded-lg"
-                    loading="lazy"
-                  />
-                </div>
-              )}
-              {accessories.filter((a) => !!a).length > 0 ? (
-                accessories.map(
-                  (accessory, index) =>
-                    accessory && (
-                      <div
-                        key={accessory.id || index}
-                        className="flex flex-col items-center justify-center min-w-0 max-w-[2.5rem] h-full"
-                      >
+              {(() => {
+                const hasAnyOptionalItems = !!(outerwear || shoes || accessories.filter(a => !!a).length > 0);
+                if (!hasAnyOptionalItems) {
+                  return (
+                    <span className="inline-block leading-none p-0 m-0 text-black font-semibold text-center text-xs whitespace-nowrap">
+                      Pas d'accessoire
+                    </span>
+                  );
+                }
+                return (
+                  <>
+                    {outerwear && (
+                      <div className="flex flex-col items-center justify-center min-w-0 max-w-[2.5rem] h-full">
                         <img
-                          src={getImage(accessory.imageId || accessory.id)}
-                          alt={accessory.name}
+                          src={getImage(outerwear.imageId || outerwear.id)}
+                          alt={outerwear.name}
                           className="w-full h-auto max-h-8 object-contain rounded-lg"
                           loading="lazy"
                         />
                       </div>
-                    ),
-                )
-              ) : (
-                <span className="inline-block leading-none p-0 m-0 text-black font-semibold text-center text-xs whitespace-nowrap">
-                  Pas d'accessoire
-                </span>
-              )}
+                    )}
+                    {shoes && (
+                      <div className="flex flex-col items-center justify-center min-w-0 max-w-[2.5rem] h-full">
+                        <img
+                          src={getImage(shoes.imageId || shoes.id)}
+                          alt={shoes.name}
+                          className="w-full h-auto max-h-8 object-contain rounded-lg"
+                          loading="lazy"
+                        />
+                      </div>
+                    )}
+                    {accessories.map(
+                      (accessory, index) =>
+                        accessory && (
+                          <div
+                            key={accessory.id || index}
+                            className="flex flex-col items-center justify-center min-w-0 max-w-[2.5rem] h-full"
+                          >
+                            <img
+                              src={getImage(accessory.imageId || accessory.id)}
+                              alt={accessory.name}
+                              className="w-full h-auto max-h-8 object-contain rounded-lg"
+                              loading="lazy"
+                            />
+                          </div>
+                        ),
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </div>
         </div>
@@ -239,16 +230,21 @@ export const FavouritesPage = (): React.JSX.Element => {
   const [readyToWearOnly, setReadyToWearOnly] = useState(false);
 
   const resolvedFavourites = useMemo(() => {
-    return favourites.map((fav) => ({
-      favourite: fav,
-      top: items.find((i) => i.id === fav.topId),
-      bottom: items.find((i) => i.id === fav.bottomId),
-      outerwear: items.find((i) => i.id === fav.outerwearId),
-      shoes: items.find((i) => i.id === fav.shoesId),
-      accessories: (fav.accessoriesIds || []).map((id) =>
-        items.find((i) => i.id === id),
-      ),
-    }));
+    return favourites
+      .map((fav) => ({
+        favourite: fav,
+        top: items.find((i) => i.id === fav.topId),
+        bottom: items.find((i) => i.id === fav.bottomId),
+        outerwear: items.find((i) => i.id === fav.outerwearId),
+        shoes: items.find((i) => i.id === fav.shoesId),
+        accessories: (fav.accessoriesIds || []).map((id) =>
+          items.find((i) => i.id === id),
+        ),
+      }))
+      .filter(
+        (res): res is typeof res & { top: ClothingItem; bottom: ClothingItem } =>
+          !!res.top && !!res.bottom,
+      );
   }, [favourites, items]);
 
   const filteredFavourites = useMemo(() => {
@@ -264,13 +260,13 @@ export const FavouritesPage = (): React.JSX.Element => {
   }, [resolvedFavourites, readyToWearOnly]);
 
   return (
-    <>
-      <div className="mx-auto max-w-4xl p-4 pb-2">
+    <div className="flex flex-col h-screen overflow-hidden">
+      <div className="mx-auto max-w-4xl p-4 pb-2 w-full shrink-0">
         <h2 className="page-title">Your favourites</h2>
       </div>
 
       {favourites.length > 0 && (
-        <div className="mx-auto max-w-4xl px-4">
+        <div className="mx-auto max-w-4xl px-4 shrink-0">
           <FavouritesFilterBar
             readyToWearOnly={readyToWearOnly}
             onFilterChange={setReadyToWearOnly}
@@ -278,54 +274,66 @@ export const FavouritesPage = (): React.JSX.Element => {
         </div>
       )}
 
-      <div className="w-full mx-auto max-w-4xl p-4 pb-24">
-        <div className="rounded-2xl">
-          {favourites.length > 0 ? (
-            filteredFavourites.length > 0 ? (
-              <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {filteredFavourites.map(
-                  ({
-                    favourite,
-                    top,
-                    bottom,
-                    outerwear,
-                    shoes,
-                    accessories,
-                  }) => (
-                    <FavouriteOutfitCard
-                      key={favourite.id}
-                      favourite={favourite}
-                      top={top}
-                      bottom={bottom}
-                      outerwear={outerwear}
-                      shoes={shoes}
-                      accessories={accessories}
-                    />
-                  ),
-                )}
-              </div>
+      <div
+        className="flex-1 min-h-0 overflow-y-auto"
+        style={{
+          maskImage:
+            "linear-gradient(to bottom, transparent, black 1.5rem, black calc(100% - 3rem), transparent)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, transparent, black 1.5rem, black calc(100% - 3rem), transparent)",
+        }}
+      >
+        <div className="w-full mx-auto max-w-4xl p-4">
+          <div className="rounded-2xl">
+            {favourites.length > 0 ? (
+              filteredFavourites.length > 0 ? (
+                <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                  {filteredFavourites.map(
+                    ({
+                      favourite,
+                      top,
+                      bottom,
+                      outerwear,
+                      shoes,
+                      accessories,
+                    }) => (
+                      <FavouriteOutfitCard
+                        key={favourite.id}
+                        favourite={favourite}
+                        top={top}
+                        bottom={bottom}
+                        outerwear={outerwear}
+                        shoes={shoes}
+                        accessories={accessories}
+                      />
+                    ),
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <p className="text-gray-500 text-lg">
+                    No outfits match your filters.
+                  </p>
+                  <p className="text-gray-400 text-sm">
+                    Try adjusting your filters above.
+                  </p>
+                </div>
+              )
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <p className="text-gray-500 text-lg">
-                  No outfits match your filters.
-                </p>
+                <p className="text-gray-500 text-lg">No favourite outfits yet.</p>
                 <p className="text-gray-400 text-sm">
-                  Try adjusting your filters above.
+                  Save outfits you love from the today page!
                 </p>
               </div>
-            )
-          ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <p className="text-gray-500 text-lg">No favourite outfits yet.</p>
-              <p className="text-gray-400 text-sm">
-                Save outfits you love from the today page!
-              </p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
+      <div className="shrink-0 h-20" />
+
       <NavigationBar activePage="favourites" />
-    </>
+    </div>
   );
 };

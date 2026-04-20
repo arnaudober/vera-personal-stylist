@@ -3,6 +3,7 @@ import { useCloset } from "../hooks/closet.ts";
 import NavigationBar from "../components/navigation-bar.tsx";
 import {
   categoryOptions,
+  isWashable,
   type ClothingItem,
   type ClothingItemCategory,
   type CreateClothingItem,
@@ -67,9 +68,9 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
   }
 
   return (
-    <div className="flex flex-col gap-2 p-2 ">
+    <div className="flex flex-col gap-2 p-2 h-full">
       <div
-        className={`card flex flex-col items-center relative ${!item.isClean ? "dirty-overlay" : ""}`}
+        className={`card flex flex-col items-center relative h-full ${!item.isClean && isWashable(item.category) ? "dirty-overlay" : ""}`}
       >
         <button
           onClick={() => remove(item.id)}
@@ -79,24 +80,30 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
           <IoClose size={14} />
         </button>
 
-        <div className="text-7xl flex items-center justify-center">
-          <img
-            src={getImage(item.imageId || item.id)} // Fallback to item.id for backwards compatibility
-            alt={item.name}
-            className="w-24 h-24 object-contain rounded-xl"
-            loading="lazy"
-          />
+        <div className="flex-grow flex items-center justify-center w-full min-w-0">
+          <div className="flex flex-col items-center w-full min-w-0">
+            <div className="text-7xl flex items-center justify-center">
+              <img
+                src={getImage(item.imageId || item.id)} // Fallback to item.id for backwards compatibility
+                alt={item.name}
+                className="w-24 h-24 object-contain rounded-xl"
+                loading="lazy"
+              />
+            </div>
+
+            <div className="mt-2 text-sm text-black font-semibold whitespace-nowrap text-ellipsis overflow-hidden w-full text-center">
+              {item.name}
+            </div>
+          </div>
         </div>
 
-        <div className="mt-2 text-sm text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden">
-          {item.name}
-        </div>
-
-        <div className="keep-opaque mt-1">
-          <span className={item.isClean ? "clean-badge" : "dirty-badge"}>
-            {item.isClean ? "clean" : "dirty"}
-          </span>
-        </div>
+        {isWashable(item.category) && (
+          <div className="keep-opaque mt-1 flex-shrink-0">
+            <span className={item.isClean ? "clean-badge" : "dirty-badge"}>
+              {item.isClean ? "clean" : "dirty"}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -119,7 +126,7 @@ const AddItemButton = ({
             ? "The limit of uploaded items has been reached"
             : "Add a new item to your closet"
         }
-        className={`fixed bottom-12 right-5 z-50 shadow-lg primary-button transition-all ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+        className={`fixed bottom-12 right-5 z-200 shadow-lg primary-button transition-all ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
         style={{ width: 56, height: 56 }}
       >
         <div className="flex items-center justify-center text-3xl">
@@ -208,7 +215,7 @@ export const ClosetPage = (): React.JSX.Element => {
         <div className="w-full mx-auto max-w-4xl px-4 pb-8">
           <div className="rounded-2xl">
             {filteredItems.length > 0 ? (
-              <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-fr">
                 {filteredItems.map((item) => (
                   <ItemCard key={item.id} item={item} />
                 ))}

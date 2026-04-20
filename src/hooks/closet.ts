@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
+import { useFavouriteOutfits } from "./favourite-outfits.ts";
+import { useOutfitHistory } from "./outfit-history.ts";
 import {
+  isWashable,
   type ClothingItem,
   type CreateClothingItem,
 } from "../models/clothing-item";
@@ -59,12 +62,29 @@ const initialize = async () => {
   }
 
   isInitialized = true;
+
+  // Cleanup: ensure non-washable items are marked as clean
+  const nonWashableDirtyItems = state.filter(
+    (item) => !isWashable(item.category) && !item.isClean,
+  );
+  if (nonWashableDirtyItems.length > 0) {
+    const batch = writeBatch(db);
+    nonWashableDirtyItems.forEach((item) => {
+      const itemRef = doc(db, "clothingItems", item.id);
+      batch.update(itemRef, { isClean: true });
+      item.isClean = true;
+    });
+    await batch.commit();
+  }
 };
 await initialize();
 
 export function useCloset() {
   // We "subscribe" to the singleton state
   const [items, setItems] = useState(state);
+
+  const { removeFavouritesWithItem } = useFavouriteOutfits();
+  const { removeHistoryEntriesWithItem } = useOutfitHistory();
 
   useEffect(() => {
     const listener = (newItems: ClothingItem[]) => setItems(newItems);
@@ -107,6 +127,8 @@ export function useCloset() {
   };
   const removeClothingItem = async (id: string): Promise<string> => {
     await deleteDoc(doc(db, "clothingItems", id));
+    await removeFavouritesWithItem(id);
+    await removeHistoryEntriesWithItem(id);
     emitChange(state.filter((i) => i.id !== id));
     return id;
   };
@@ -123,6 +145,10 @@ export function useCloset() {
     emitChange(state.map((i) => ({ ...i, isClean: true })));
   };
   const markWorn = async (item: ClothingItem): Promise<ClothingItem> => {
+    if (!isWashable(item.category)) {
+      return item;
+    }
+
     const itemRef = doc(db, "clothingItems", item.id);
     await updateDoc(itemRef, { isClean: false });
 
@@ -133,10 +159,12 @@ export function useCloset() {
     return { ...item, isClean: false };
   };
   const isItemClean = (id: string): boolean => {
-    return state.find((i) => i.id === id)?.isClean ?? false;
+    const item = state.find((i) => i.id === id);
+    if (!item) return false;
+    return !isWashable(item.category) || item.isClean;
   };
   const areAllItemsClean = (): boolean => {
-    return state.every((i) => i.isClean);
+    return state.every((i) => !isWashable(i.category) || i.isClean);
   };
   const isUploadLimitReached = (): boolean => {
     return state.length >= ITEMS_UPLOAD_LIMIT;

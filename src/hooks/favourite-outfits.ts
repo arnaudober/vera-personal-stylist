@@ -156,6 +156,21 @@ export function useFavouriteOutfits() {
     }
   };
 
+  const removeFavouritesWithItem = async (itemId: string): Promise<void> => {
+    const toDelete = state.filter(
+      (f) =>
+        f.topId === itemId ||
+        f.bottomId === itemId ||
+        f.outerwearId === itemId ||
+        f.shoesId === itemId ||
+        f.accessoriesIds?.includes(itemId),
+    );
+
+    for (const fav of toDelete) {
+      await removeFavourite(fav.id);
+    }
+  };
+
   function emitChange(newEntries: FavouriteOutfit[]): void {
     listeners.forEach((listener) => listener(newEntries));
     state = newEntries;
@@ -166,6 +181,7 @@ export function useFavouriteOutfits() {
     addFavourite,
     removeFavourite,
     removeFavouriteByOutfit,
+    removeFavouritesWithItem,
     isFavourite,
   };
 }

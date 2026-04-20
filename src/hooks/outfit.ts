@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import type { Outfit } from "../models/outfit.ts";
 import { getSessionId, useCloset } from "./closet.ts";
-import type { ClothingItem } from "../models/clothing-item.ts";
+import {
+  isWashable,
+  type ClothingItem,
+} from "../models/clothing-item.ts";
 import type { Color } from "../models/color.ts";
 import { differenceCiede2000 } from "culori";
 import { doc, getDoc, setDoc } from "firebase/firestore";
@@ -97,18 +100,18 @@ export const useOutfit = () => {
   }, []);
 
   const generateOutfit = async (): Promise<Outfit | null> => {
-    const cleanItems = items.filter((i) => i.isClean);
-    if (!cleanItems || cleanItems.length === 0) {
+    const availableItems = items.filter((i) => i.isClean || !isWashable(i.category));
+    if (!availableItems || availableItems.length === 0) {
       return null;
     }
 
-    const availableTops = cleanItems.filter((i) => i.category === "top");
-    const availableBottoms = cleanItems.filter((i) => i.category === "bottom");
-    const availableOuterwear = cleanItems.filter(
+    const availableTops = availableItems.filter((i) => i.category === "top");
+    const availableBottoms = availableItems.filter((i) => i.category === "bottom");
+    const availableOuterwear = availableItems.filter(
       (i) => i.category === "outerwear",
     );
-    const availableShoes = cleanItems.filter((i) => i.category === "shoes");
-    const availableAccessories = cleanItems.filter(
+    const availableShoes = availableItems.filter((i) => i.category === "shoes");
+    const availableAccessories = availableItems.filter(
       (i) => i.category === "accessories",
     );
 
@@ -116,7 +119,7 @@ export const useOutfit = () => {
       return null;
     }
 
-    const maxAttempts = cleanItems.length;
+    const maxAttempts = availableItems.length;
     let bestOutfit: Outfit | null = null;
     let highestScore = -1;
 
@@ -226,9 +229,9 @@ export const useOutfit = () => {
   const clearOutfit = async (): Promise<void> => await emitChange(null);
 
   const canGenerateOutfit = (): boolean => {
-    const cleanItems = items.filter((i) => i.isClean);
-    const availableTops = cleanItems.filter((i) => i.category === "top");
-    const availableBottoms = cleanItems.filter((i) => i.category === "bottom");
+    const availableItems = items.filter((i) => i.isClean || !isWashable(i.category));
+    const availableTops = availableItems.filter((i) => i.category === "top");
+    const availableBottoms = availableItems.filter((i) => i.category === "bottom");
 
     if (availableTops.length === 0 || availableBottoms.length === 0) {
       return false;
