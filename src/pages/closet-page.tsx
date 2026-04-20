@@ -14,9 +14,10 @@ import { useImage } from "../hooks/image.ts";
 import { IoClose } from "react-icons/io5";
 import { useOutfit } from "../hooks/outfit.ts";
 import { FaPlus } from "react-icons/fa";
+import { MdLocalLaundryService } from "react-icons/md";
 import "./closet-page.css";
 
-const FilterBar = ({
+const CategoryDropdown = ({
   selectedCategory,
   onCategorySelected,
 }: {
@@ -24,26 +25,21 @@ const FilterBar = ({
   onCategorySelected: (category: ClothingItemCategory | null) => void;
 }): React.JSX.Element => {
   return (
-    <div className={`pr-4 pb-2 pt-2 pl-4 filter-bar-container`}>
-      <button
-        onClick={() => onCategorySelected(null)}
-        className={`filter-bar-item font-medium transition-all 
-                            ${selectedCategory === null ? "active" : null}
-                        `}
+    <div className="mx-auto max-w-4xl px-4 py-1 flex justify-center w-full">
+      <select
+        value={selectedCategory || ""}
+        onChange={(e) =>
+          onCategorySelected((e.target.value as ClothingItemCategory) || null)
+        }
+        className="category-select select w-full text-base font-medium"
       >
-        All
-      </button>
-      {categoryOptions.map(({ value, label }) => (
-        <button
-          key={value}
-          onClick={() => onCategorySelected(value)}
-          className={`filter-bar-item  font-medium transition-all
-                                ${selectedCategory === value ? "active" : null}
-                            `}
-        >
-          {label}
-        </button>
-      ))}
+        <option value="">Toutes les catégories</option>
+        {categoryOptions.map(({ value, label }) => (
+          <option key={value} value={value}>
+            {label}
+          </option>
+        ))}
+      </select>
     </div>
   );
 };
@@ -150,12 +146,13 @@ const LaundryButton = (): React.JSX.Element => {
 
   return (
     <button
-      className="secondary-button mb-5 w-full text-base font-medium transition-all "
+      className="primary-button mb-4 w-full py-3 flex items-center justify-center gap-2 text-base font-semibold transition-all "
       aria-label="Mark all worn items as clean"
       title="Mark all worn items as clean"
       onClick={() => onDoLaundry()}
       disabled={areAllItemsClean()}
     >
+      <MdLocalLaundryService size={20} />
       Wash all items
     </button>
   );
@@ -190,18 +187,18 @@ export const ClosetPage = (): React.JSX.Element => {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
-      <div className="mx-auto max-w-4xl p-4 pb-2 w-full shrink-0">
+      <div className="mx-auto max-w-4xl px-4 pt-4 pb-1 w-full shrink-0">
         <h2 className="page-title">Your closet</h2>
       </div>
 
       <div className="shrink-0">
-        <FilterBar
+        <CategoryDropdown
           selectedCategory={selectedCategory}
           onCategorySelected={setSelectedCategory}
         />
       </div>
 
-      <div className="shrink-0 w-full mx-auto max-w-4xl px-4 pt-4">
+      <div className="shrink-0 w-full mx-auto max-w-4xl px-4 pt-2">
         <LaundryButton />
       </div>
 

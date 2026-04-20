@@ -1,15 +1,13 @@
-.filter-bar-item {
+.category-select {
+  background-color: var(--secondary-color);
+  border: 1px solid var(--secondary-border-color);
+  border-radius: var(--radius-2xl);
   padding-inline: calc(var(--spacing) * 4);
-  padding-block: calc(var(--spacing) * 1);
-  margin-right: calc(var(--spacing) * 2);
+  padding-block: 0.75rem;
   cursor: pointer;
-  border-radius: var(--radius-xl);
-  white-space: nowrap;
-  background-color: unset;
-  color: var(--color-gray-700);
 
-  &.active {
-    background-color: var(--color-gray-100);
+  &:hover {
+    opacity: 0.8;
   }
 }
 
@@ -25,17 +23,5 @@
   &:hover {
     background-color: var(--color-red-600);
   }
-}
-
-.filter-bar-container {
-  display: flex;
-  overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
-  -webkit-overflow-scrolling: touch;
-}
-
-.filter-bar-container::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
 }
 
