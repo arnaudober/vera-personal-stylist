@@ -1,12 +1,13 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import NavigationBar from "../components/navigation-bar.tsx";
+import EmptyMessageTemplate from "../components/empty-message-template.tsx";
 import { useOutfit } from "../hooks/outfit.ts";
 import { useCloset } from "../hooks/closet.ts";
 import { useImage } from "../hooks/image.ts";
 import { useOutfitHistory } from "../hooks/outfit-history.ts";
 import { useFavouriteOutfits } from "../hooks/favourite-outfits.ts";
-import { FaCheck, FaHeart, FaRegHeart, FaSyncAlt, FaTshirt } from "react-icons/fa";
+import { FaCheck, FaHeart, FaRegHeart, FaSyncAlt } from "react-icons/fa";
 import { useNavigate } from "react-router";
 import "../pages/today-page.css";
 
@@ -60,25 +61,6 @@ const FavouriteButton = () => {
   );
 };
 
-const EmptyMessageTemplate = () => {
-  const navigate = useNavigate();
-
-  return (
-    <div className="relative mx-auto w-full max-w-md flex items-center justify-center">
-      <div className="flex flex-col items-center justify-center py-12 text-center gap-4">
-        <FaTshirt className="text-8xl text-gray-400" />
-        <p className="text-gray-500 text-lg">No outfit right now.</p>
-        <p className="text-gray-400 text-sm">All your clothes are in the basket — time to do laundry!</p>
-        <button
-          onClick={() => navigate("/closet")}
-          className="primary-button px-6 py-3 text-base font-semibold mt-2"
-        >
-          Go to closet
-        </button>
-      </div>
-    </div>
-  );
-};
 const RegenerateOutfitFab = () => {
   const { generateOutfit, canGenerateOutfit } = useOutfit();
 
@@ -107,7 +89,7 @@ const OutfitTemplate = (): React.JSX.Element => {
   const { outfit, clearOutfit, generateOutfit } = useOutfit();
   const { recordOutfit } = useOutfitHistory();
   const [isMarking, setIsMarking] = useState(false);
-
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!outfit) {
@@ -152,7 +134,14 @@ const OutfitTemplate = (): React.JSX.Element => {
               outfit.bottom &&
               isItemClean(outfit.bottom.id);
             if (!hasVisibleItems) {
-              return <EmptyMessageTemplate />;
+              return (
+                <EmptyMessageTemplate
+                  title="No outfit right now."
+                  subtitle="All your clothes are in the basket — time to do laundry!"
+                  buttonText="Go to closet"
+                  onButtonClick={() => navigate("/closet")}
+                />
+              );
             }
 
             return (
@@ -161,7 +150,10 @@ const OutfitTemplate = (): React.JSX.Element => {
                   <FavouriteButton />
                   {/* Top item */}
                   {outfit.top && isItemClean(outfit.top.id) && (
-                    <div className="flex flex-col items-center w-full justify-center overflow-hidden" style={{ height: 200 }}>
+                    <div
+                      className="flex flex-col items-center w-full justify-center overflow-hidden"
+                      style={{ height: 200 }}
+                    >
                       <img
                         src={getImage(outfit.top.id)}
                         alt={outfit.top.name}
@@ -178,7 +170,10 @@ const OutfitTemplate = (): React.JSX.Element => {
 
                   {/* Bottom item */}
                   {outfit.bottom && isItemClean(outfit.bottom.id) && (
-                    <div className="flex flex-col items-center w-full justify-center overflow-hidden" style={{ height: 200 }}>
+                    <div
+                      className="flex flex-col items-center w-full justify-center overflow-hidden"
+                      style={{ height: 200 }}
+                    >
                       <img
                         src={getImage(outfit.bottom.id)}
                         alt={outfit.bottom.name}
@@ -196,10 +191,22 @@ const OutfitTemplate = (): React.JSX.Element => {
 
                   <div className="flex flex-nowrap justify-center gap-2 shrink-0 w-full px-2 overflow-hidden items-end h-24">
                     {(() => {
-                      const visibleOuterwear = outfit.outerwear && isItemClean(outfit.outerwear.id) ? outfit.outerwear : null;
-                      const visibleShoes = outfit.shoes && isItemClean(outfit.shoes.id) ? outfit.shoes : null;
-                      const visibleAccessories = outfit.accessories?.filter(a => isItemClean(a.id)) || [];
-                      const hasAnyOptionalItems = !!(visibleOuterwear || visibleShoes || visibleAccessories.length > 0);
+                      const visibleOuterwear =
+                        outfit.outerwear && isItemClean(outfit.outerwear.id)
+                          ? outfit.outerwear
+                          : null;
+                      const visibleShoes =
+                        outfit.shoes && isItemClean(outfit.shoes.id)
+                          ? outfit.shoes
+                          : null;
+                      const visibleAccessories =
+                        outfit.accessories?.filter((a) => isItemClean(a.id)) ||
+                        [];
+                      const hasAnyOptionalItems = !!(
+                        visibleOuterwear ||
+                        visibleShoes ||
+                        visibleAccessories.length > 0
+                      );
 
                       if (!hasAnyOptionalItems) {
                         return (
@@ -244,7 +251,10 @@ const OutfitTemplate = (): React.JSX.Element => {
                             </div>
                           )}
                           {visibleAccessories.map((accessory) => (
-                            <div key={accessory.id} className="flex flex-col items-center flex-1 min-w-0 max-w-[5rem] h-full">
+                            <div
+                              key={accessory.id}
+                              className="flex flex-col items-center flex-1 min-w-0 max-w-[5rem] h-full"
+                            >
                               <div className="flex-1 flex items-center justify-center w-full min-h-0">
                                 <img
                                   src={getImage(accessory.id)}
@@ -276,10 +286,14 @@ const OutfitTemplate = (): React.JSX.Element => {
           })()}
         </>
       ) : (
-        <EmptyMessageTemplate />
+        <EmptyMessageTemplate
+          title="No outfit right now."
+          subtitle="All your clothes are in the basket — time to do laundry!"
+          buttonText="Go to closet"
+          onButtonClick={() => navigate("/closet")}
+        />
       )}
-
-</div>
+    </div>
   );
 };
 

@@ -301,7 +301,7 @@ export default function UploadClothingItemModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+    <div className="fixed inset-0 z-300 flex items-end sm:items-center justify-center">
       <div
         className="absolute inset-0 bg-black/40"
         onClick={() => !isSaving && onClose()}

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { useMemo, useState } from "react";
 import NavigationBar from "../components/navigation-bar.tsx";
+import EmptyMessageTemplate from "../components/empty-message-template.tsx";
 import { useCloset } from "../hooks/closet.ts";
 import { useImage } from "../hooks/image.ts";
 import { useFavouriteOutfits } from "../hooks/favourite-outfits.ts";
@@ -8,6 +9,7 @@ import { useOutfitHistory } from "../hooks/outfit-history.ts";
 import type { FavouriteOutfit } from "../models/favourite-outfit.ts";
 import { isWashable, type ClothingItem } from "../models/clothing-item.ts";
 import { FaHeart, FaCheck } from "react-icons/fa";
+import { useNavigate } from "react-router";
 import "./favourites-page.css";
 import "../pages/closet-page.css";
 
@@ -226,6 +228,7 @@ const FavouritesFilterBar = ({
 export const FavouritesPage = (): React.JSX.Element => {
   const { favourites } = useFavouriteOutfits();
   const { items } = useCloset();
+  const navigate = useNavigate();
 
   const [readyToWearOnly, setReadyToWearOnly] = useState(false);
 
@@ -275,7 +278,7 @@ export const FavouritesPage = (): React.JSX.Element => {
       )}
 
       <div
-        className="flex-1 min-h-0 overflow-y-auto"
+        className="flex-1 min-h-0 overflow-y-auto flex flex-col"
         style={{
           maskImage:
             "linear-gradient(to bottom, transparent, black 1.5rem, black calc(100% - 3rem), transparent)",
@@ -283,8 +286,8 @@ export const FavouritesPage = (): React.JSX.Element => {
             "linear-gradient(to bottom, transparent, black 1.5rem, black calc(100% - 3rem), transparent)",
         }}
       >
-        <div className="w-full mx-auto max-w-4xl p-4">
-          <div className="rounded-2xl">
+        <div className={`w-full mx-auto max-w-4xl px-4 ${favourites.length === 0 ? "flex-1 flex flex-col justify-center" : "p-4"}`}>
+          <div className={`rounded-2xl ${favourites.length === 0 ? "flex-1 flex flex-col justify-center" : ""}`}>
             {favourites.length > 0 ? (
               filteredFavourites.length > 0 ? (
                 <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -320,11 +323,13 @@ export const FavouritesPage = (): React.JSX.Element => {
                 </div>
               )
             ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <p className="text-gray-500 text-lg">No favourite outfits yet.</p>
-                <p className="text-gray-400 text-sm">
-                  Save outfits you love from the today page!
-                </p>
+              <div className="flex-1 flex items-center justify-center">
+                <EmptyMessageTemplate
+                  title="No favourites yet."
+                  subtitle="Save outfits you love from the today page!"
+                  buttonText="My today's outfit"
+                  onButtonClick={() => navigate("/")}
+                />
               </div>
             )}
           </div>
