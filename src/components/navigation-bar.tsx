@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { FaRegStar, FaTshirt } from "react-icons/fa";
+import { FaCalendarDay, FaHeart, FaTshirt } from "react-icons/fa";
 import "./navigation-bar.css";
 
-type Page = "suggest" | "closet";
+type Page = "today" | "closet" | "favourites";
 
 interface NavigationBarData {
   activePage: Page;
@@ -10,7 +10,7 @@ interface NavigationBarData {
 
 export default function NavigationBar({ activePage }: NavigationBarData) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 shadow-lg">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 shadow-lg z-100">
       <div className="flex items-center justify-center max-w-sm mx-auto">
         <Link
           to="/closet"
@@ -26,14 +26,26 @@ export default function NavigationBar({ activePage }: NavigationBarData) {
 
         <Link
           to="/"
-          className={`link transition-colors ${activePage === "suggest" ? "active" : null}`}
-          aria-current={activePage === "suggest" ? "page" : undefined}
+          className={`link transition-colors ${activePage === "today" ? "active" : null}`}
+          aria-current={activePage === "today" ? "page" : undefined}
           aria-label="Open home page - Today's outfit suggestions"
         >
           <div className="text-xl mb-1">
-            <FaRegStar className="text-xl" />
+            <FaCalendarDay className="text-xl" />
           </div>
-          <span className="text-xs font-medium">Suggest</span>
+          <span className="text-xs font-medium">Today</span>
+        </Link>
+
+        <Link
+          to="/favourites"
+          className={`link transition-colors ${activePage === "favourites" ? "active" : null}`}
+          aria-current={activePage === "favourites" ? "page" : undefined}
+          aria-label="Open favourite outfits page"
+        >
+          <div className="text-xl mb-1">
+            <FaHeart className="text-xl" />
+          </div>
+          <span className="text-xs font-medium">Favourites</span>
         </Link>
       </div>
     </nav>

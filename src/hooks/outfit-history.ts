@@ -41,6 +41,9 @@ const initialize = async (): Promise<void> => {
       id: d.id,
       topId: d.data().topId,
       bottomId: d.data().bottomId,
+      outerwearId: d.data().outerwearId,
+      shoesId: d.data().shoesId,
+      accessoriesIds: d.data().accessoriesIds || (d.data().accessoriesId ? [d.data().accessoriesId] : []),
       wornAt: d.data().wornAt.toDate(),
       sessionId: d.data().sessionId,
     }));
@@ -67,6 +70,9 @@ export function useOutfitHistory() {
   const recordOutfit = async (
     topId: string,
     bottomId: string,
+    outerwearId?: string,
+    shoesId?: string,
+    accessoriesIds?: string[],
   ): Promise<void> => {
     const sessionId = getSessionId();
     const entryId = `${sessionId}_${Date.now()}`;
@@ -75,16 +81,14 @@ export function useOutfitHistory() {
       id: entryId,
       topId,
       bottomId,
+      ...(outerwearId && { outerwearId }),
+      ...(shoesId && { shoesId }),
+      ...(accessoriesIds && { accessoriesIds }),
       wornAt: new Date(),
       sessionId,
     };
 
-    await setDoc(doc(db, "outfitHistory", entryId), {
-      topId: newEntry.topId,
-      bottomId: newEntry.bottomId,
-      wornAt: newEntry.wornAt,
-      sessionId: newEntry.sessionId,
-    });
+    await setDoc(doc(db, "outfitHistory", entryId), newEntry);
 
     const updated = [newEntry, ...state];
 
@@ -99,16 +103,29 @@ export function useOutfitHistory() {
     emitChange(updated);
   };
 
-  const getRecencyPenalty = (topId: string, bottomId: string): number => {
-    const match = state.find(
-      (h) => h.topId === topId && h.bottomId === bottomId,
-    );
-    if (!match) {
+  const getRecencyPenalty = (itemIds: string[]): number => {
+    const matchingEntries = state.filter((h) => {
+      const entryIds = [
+        h.topId,
+        h.bottomId,
+        h.outerwearId,
+        h.shoesId,
+        ...(h.accessoriesIds || []),
+      ].filter(Boolean) as string[];
+
+      // An entry matches if it contains ANY of the items in the current outfit
+      return itemIds.some((id) => entryIds.includes(id));
+    });
+
+    if (matchingEntries.length === 0) {
       return 1.0;
     }
 
+    // Find the most recent match among all matching entries
+    const mostRecentMatch = matchingEntries[0]; // State is sorted by wornAt desc
+
     const daysSince =
-      (Date.now() - match.wornAt.getTime()) / (1000 * 60 * 60 * 24);
+      (Date.now() - mostRecentMatch.wornAt.getTime()) / (1000 * 60 * 60 * 24);
     return Math.min(1, daysSince / RECENCY_RECOVERY_DAYS);
   };
 
@@ -121,10 +138,40 @@ export function useOutfitHistory() {
     emitChange([]);
   };
 
+  const removeHistoryEntriesWithItem = async (itemId: string): Promise<void> => {
+    const entriesToDelete = state.filter(
+      (h) =>
+        h.topId === itemId ||
+        h.bottomId === itemId ||
+        h.outerwearId === itemId ||
+        h.shoesId === itemId ||
+        h.accessoriesIds?.includes(itemId),
+    );
+
+    if (entriesToDelete.length === 0) return;
+
+    const batch = writeBatch(db);
+    entriesToDelete.forEach((entry) => {
+      batch.delete(doc(db, "outfitHistory", entry.id));
+    });
+    await batch.commit();
+
+    const newState = state.filter(
+      (h) => !entriesToDelete.some((td) => td.id === h.id),
+    );
+    emitChange(newState);
+  };
+
   function emitChange(newEntries: OutfitHistoryEntry[]): void {
     listeners.forEach((listener) => listener(newEntries));
     state = newEntries;
   }
 
-  return { history, recordOutfit, getRecencyPenalty, clearHistory };
+  return {
+    history,
+    recordOutfit,
+    getRecencyPenalty,
+    clearHistory,
+    removeHistoryEntriesWithItem,
+  };
 }

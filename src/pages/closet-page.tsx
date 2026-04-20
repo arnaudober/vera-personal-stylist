@@ -3,6 +3,7 @@ import { useCloset } from "../hooks/closet.ts";
 import NavigationBar from "../components/navigation-bar.tsx";
 import {
   categoryOptions,
+  isWashable,
   type ClothingItem,
   type ClothingItemCategory,
   type CreateClothingItem,
@@ -12,10 +13,11 @@ import * as React from "react";
 import { useImage } from "../hooks/image.ts";
 import { IoClose } from "react-icons/io5";
 import { useOutfit } from "../hooks/outfit.ts";
-import { FaPlus } from "react-icons/fa6";
+import { FaPlus } from "react-icons/fa";
+import { MdLocalLaundryService } from "react-icons/md";
 import "./closet-page.css";
 
-const FilterBar = ({
+const CategoryDropdown = ({
   selectedCategory,
   onCategorySelected,
 }: {
@@ -23,28 +25,21 @@ const FilterBar = ({
   onCategorySelected: (category: ClothingItemCategory | null) => void;
 }): React.JSX.Element => {
   return (
-    <div className={`pr-0 pb-2 pt-2 pl-4`}>
-      <div className="flex justify-center" style={{ minWidth: "max-content" }}>
-        <button
-          onClick={() => onCategorySelected(null)}
-          className={`filter-bar-item font-medium transition-all 
-                            ${selectedCategory === null ? "active" : null}
-                        `}
-        >
-          All
-        </button>
+    <div className="mx-auto max-w-4xl px-4 py-1 flex justify-center w-full">
+      <select
+        value={selectedCategory || ""}
+        onChange={(e) =>
+          onCategorySelected((e.target.value as ClothingItemCategory) || null)
+        }
+        className="category-select select w-full text-base font-medium"
+      >
+        <option value="">Toutes les catégories</option>
         {categoryOptions.map(({ value, label }) => (
-          <button
-            key={value}
-            onClick={() => onCategorySelected(value)}
-            className={`filter-bar-item  font-medium transition-all
-                                ${selectedCategory === value ? "active" : null}
-                            `}
-          >
+          <option key={value} value={value}>
             {label}
-          </button>
+          </option>
         ))}
-      </div>
+      </select>
     </div>
   );
 };
@@ -69,36 +64,42 @@ const ItemCard = ({ item }: { item: ClothingItem }): React.JSX.Element => {
   }
 
   return (
-    <div className="flex flex-col gap-2 p-2 ">
-      <div className="card flex flex-col items-center relative">
+    <div className="flex flex-col gap-2 p-2 h-full">
+      <div
+        className={`card flex flex-col items-center relative h-full ${!item.isClean && isWashable(item.category) ? "dirty-overlay" : ""}`}
+      >
         <button
           onClick={() => remove(item.id)}
-          className="delete-button absolute top-2 right-2 flex items-center justify-center transition-all text-sm font-bold"
+          className="delete-button absolute top-2 right-2 flex items-center justify-center transition-all text-sm font-bold keep-opaque"
           aria-label="Delete item"
         >
           <IoClose size={14} />
         </button>
 
-        <div className="text-7xl flex items-center justify-center">
-          <img
-            src={getImage(item.imageId || item.id)} // Fallback to item.id for backwards compatibility
-            alt={item.name}
-            className="w-24 h-24 object-contain rounded-xl"
-            loading="lazy"
-          />
+        <div className="flex-grow flex items-center justify-center w-full min-w-0">
+          <div className="flex flex-col items-center w-full min-w-0">
+            <div className="text-7xl flex items-center justify-center">
+              <img
+                src={getImage(item.imageId || item.id)} // Fallback to item.id for backwards compatibility
+                alt={item.name}
+                className="w-24 h-24 object-contain rounded-xl"
+                loading="lazy"
+              />
+            </div>
+
+            <div className="mt-2 text-sm text-black font-semibold whitespace-nowrap text-ellipsis overflow-hidden w-full text-center">
+              {item.name}
+            </div>
+          </div>
         </div>
 
-        <div className="mt-2 text-sm text-black font-semibold whitespace-nowrap text-ellipsis w-full overflow-hidden">
-          {item.name}
-        </div>
-
-        <div className="mt-1">
-          <span
-            className={`badge inline-block border text-xs ${item.isClean ? "clean" : "dirty"}`}
-          >
-            {item.isClean ? "Clean" : "Dirty"}
-          </span>
-        </div>
+        {isWashable(item.category) && (
+          <div className="keep-opaque mt-1 flex-shrink-0">
+            <span className={item.isClean ? "clean-badge" : "dirty-badge"}>
+              {item.isClean ? "clean" : "dirty"}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -121,7 +122,7 @@ const AddItemButton = ({
             ? "The limit of uploaded items has been reached"
             : "Add a new item to your closet"
         }
-        className={`fixed bottom-12 right-5 z-50 shadow-lg primary-button transition-all ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+        className={`fixed bottom-12 right-5 z-200 shadow-lg primary-button transition-all ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
         style={{ width: 56, height: 56 }}
       >
         <div className="flex items-center justify-center text-3xl">
@@ -145,19 +146,20 @@ const LaundryButton = (): React.JSX.Element => {
 
   return (
     <button
-      className="secondary-button mb-5 w-full text-base font-medium transition-all "
+      className="primary-button mb-4 w-full py-3 flex items-center justify-center gap-2 text-base font-semibold transition-all "
       aria-label="Mark all worn items as clean"
       title="Mark all worn items as clean"
       onClick={() => onDoLaundry()}
       disabled={areAllItemsClean()}
     >
+      <MdLocalLaundryService size={20} />
       Wash all items
     </button>
   );
 };
 
 export const ClosetPage = (): React.JSX.Element => {
-  const { items, addClothingItem, isUploadLimitReached } = useCloset();
+  const { items, addClothingItem, isUploadLimitReached, areAllItemsClean } = useCloset();
   const { saveImage } = useImage();
   const [selectedCategory, setSelectedCategory] =
     useState<ClothingItemCategory | null>(null);
@@ -171,6 +173,7 @@ export const ClosetPage = (): React.JSX.Element => {
     [selectedCategory, items],
   );
 
+
   async function addItem(item: CreateClothingItem): Promise<void> {
     const newItem = await addClothingItem(item);
 
@@ -183,37 +186,71 @@ export const ClosetPage = (): React.JSX.Element => {
   }
 
   return (
-    <>
-      <div className="mx-auto max-w-4xl p-4 pb-2">
+    <div className="flex flex-col h-screen overflow-hidden">
+      <div className="mx-auto max-w-4xl px-4 pt-4 pb-1 w-full shrink-0">
         <h2 className="page-title">Your closet</h2>
       </div>
 
-      <FilterBar
-        selectedCategory={selectedCategory}
-        onCategorySelected={setSelectedCategory}
-      />
+      <div className="shrink-0">
+        <CategoryDropdown
+          selectedCategory={selectedCategory}
+          onCategorySelected={setSelectedCategory}
+        />
+      </div>
 
-      <div className="mx-auto max-w-4xl p-4 pb-24">
+      <div className="shrink-0 w-full mx-auto max-w-4xl px-4 pt-2">
         <LaundryButton />
+      </div>
 
-        <div className="rounded-2xl">
-          {filteredItems.length > 0 ? (
-            <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {filteredItems.map((item) => (
-                <ItemCard key={item.id} item={item} />
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <p className="text-gray-500 text-lg">
-                No items found in this category.
-              </p>
-              <p className="text-gray-400 text-sm">
-                Try selecting a different filter or add a new item!
-              </p>
-            </div>
-          )}
+      <div
+        className="flex-1 min-h-0 overflow-y-auto"
+        style={{
+          maskImage: "linear-gradient(to bottom, transparent, black 1.5rem, black calc(100% - 3rem), transparent)",
+          WebkitMaskImage: "linear-gradient(to bottom, transparent, black 1.5rem, black calc(100% - 3rem), transparent)",
+        }}
+      >
+        <div className="w-full mx-auto max-w-4xl px-4 pb-8">
+          <div className="rounded-2xl">
+            {filteredItems.length > 0 ? (
+              <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-fr">
+                {filteredItems.map((item) => (
+                  <ItemCard key={item.id} item={item} />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <p className="text-gray-500 text-lg">
+                  No items found in this category.
+                </p>
+                <p className="text-gray-400 text-sm">
+                  Try selecting a different filter or add a new item!
+                </p>
+              </div>
+            )}
+          </div>
         </div>
+      </div>
+
+      {/* Spacer for basket overflow */}
+      <div className="shrink-0 h-8" />
+
+      {/* Basket */}
+      <div
+        className="shrink-0 mx-auto w-64 md:w-80 h-44 md:h-56 mb-16 flex items-center justify-center pointer-events-none"
+        aria-label="Wear basket"
+      >
+        <div
+          style={{
+            width: "100%",
+            aspectRatio: "1/2",
+            backgroundImage: "url(/assets/basket-grid.png)",
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "200% 100%",
+            backgroundPosition: areAllItemsClean() ? "0 0" : "94% 0",
+            imageRendering: "auto",
+          }}
+          aria-label={areAllItemsClean() ? "Empty basket" : "Full basket"}
+        />
       </div>
 
       <NavigationBar activePage="closet" />
@@ -228,6 +265,6 @@ export const ClosetPage = (): React.JSX.Element => {
           onSave={addItem}
         />
       )}
-    </>
+    </div>
   );
 };
